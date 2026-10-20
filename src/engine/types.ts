@@ -234,6 +234,7 @@ export interface ClubPlayerEntry {
   teamID: number;
   signedYear: number;
   signedMatchday: number;
+  source: "free-agent" | "regen" | "god-mode";
 }
 
 export interface FreeAgentState {

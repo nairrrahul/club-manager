@@ -1,10 +1,11 @@
-import { createFreeAgentPlayer, calculateTeamOverall } from "./playerSquad";
+import { createFreeAgentPlayer, calculateTeamOverall, createRegenPlayer } from "./playerSquad";
 import { applyPlayerGrowth } from "./playerGrowth";
 import { europeanTeamPool } from "./europeanCompetitions";
 import { nationInfo } from "./nations";
 import { seasonDisplay } from "./constants";
 import { transferPlayer } from "./playerHistory";
 import { refreshClubOverall } from "./squadStrength";
+import { nextPlayerID, assertUniquePlayerID } from "./playerIds";
 import type { Season } from "./season";
 import type { Team } from "./team";
 import type { FreeAgentEntry, FreeAgentState, Player } from "./types";
@@ -13,18 +14,73 @@ import type { FreeAgentEntry, FreeAgentState, Player } from "./types";
 export const RESIGN_BLOCK_SEASONS = 2;
 /** Free agents develop as if training at a 1-star facility. */
 export const FREE_AGENT_FACILITY_RATING = 1;
+/** Each non-managed club gets an independent 70% chance to create one regen per season. */
+export const REGEN_CLUB_CHANCE = 0.7;
+/** Facility and scouting experience shift the regen potential distribution by two points per star from 3. */
+export const REGEN_RATING_SHIFT = 2;
+/** When eligible, a player's primary-nation clubs receive 80% of signing choices. */
+export const HOME_NATION_PRIORITY = 0.8;
 
 export function createFreeAgentState(): FreeAgentState {
   return { available: [], clubPlayers: {}, nextSeq: 1, autoSendUnsignedScouts: false };
 }
 
 /** Generates 3-5 new free agents at the start of a season. */
-export function generateFreeAgents(state: FreeAgentState, year: number): Player[] {
+export function generateFreeAgents(season: Season, year = season.year): Player[] {
+  const state = season.freeAgents;
   const count = 3 + Math.floor(Math.random() * 3);
   const created: Player[] = [];
   for (let i = 0; i < count; i++) {
-    const player = createFreeAgentPlayer(`FA${year}-${state.nextSeq++}`, year);
+    const player = createFreeAgentPlayer(nextPlayerID(season, "FA", year), year);
     state.available.push({ player, addedYear: year, releasedBy: null, resignBlockedUntilYear: null });
+    created.push(player);
+  }
+  return created;
+}
+
+/** Rolls once per club other than the managed club, including clubs outside this season's competitions. */
+export function generateClubRegens(season: Season, year = season.year): Player[] {
+  const liveTeams = new Map<number, Team>();
+  for (const league of Object.values(season.leagueStates)) {
+    for (const team of league.teams) liveTeams.set(team.ID, team);
+  }
+  for (const competition of Object.values(season.europeanCompetitions ?? {})) {
+    for (const team of competition.teams) liveTeams.set(team.ID, team);
+  }
+
+  const englishTeams = Object.values(season.leagueStates).flatMap(league => league.teams);
+  const clubs = [
+    ...englishTeams
+      .map(team => ({
+        id: team.ID,
+        name: team.Team,
+        countryCode: "ENG",
+        scoutingRating: team.scoutingRating,
+        potentialShift: REGEN_RATING_SHIFT * (team.facilityRating - 3 + team.scoutingExperience - 3)
+      })),
+    ...Object.values(europeanTeamPool).flatMap(teams => teams.map(team => {
+      const live = liveTeams.get(team.id);
+      return {
+        id: team.id,
+        name: team.team,
+        countryCode: team.countrycode,
+        scoutingRating: live?.scoutingRating ?? 3,
+        potentialShift: REGEN_RATING_SHIFT *
+          ((live?.facilityRating ?? 3) - 3 + (live?.scoutingExperience ?? 3) - 3)
+      };
+    }))
+  ];
+  const created: Player[] = [];
+  for (const club of clubs) {
+    if (club.id === season.managerTeam?.ID || Math.random() >= REGEN_CLUB_CHANCE) continue;
+    const player = createRegenPlayer(nextPlayerID(season, "RG", year), year, club);
+    (season.freeAgents.clubPlayers[club.id] ??= []).push({
+      player,
+      teamID: club.id,
+      signedYear: year,
+      signedMatchday: 0,
+      source: "regen"
+    });
     created.push(player);
   }
   return created;
@@ -174,7 +230,7 @@ export function dailySigningChance(player: Player): number {
   return chance;
 }
 
-export const HOME_COUNTRY_WEIGHT = 5.5;        // club in the player's primary nationality
+export const HOME_COUNTRY_WEIGHT = 5.5;        // British-nationality preference for English clubs
 export const SECONDARY_COUNTRY_WEIGHT = 3.5; // club in the player's secondary nationality
 export const SAME_CONFEDERATION_WEIGHT = 1.5;
 
@@ -229,10 +285,21 @@ export function processFreeAgentSigning(season: Season): void {
     const value = playerValue(player);
     const weights = eligible.map(suitor => {
       const closeness = Math.exp(-Math.abs(suitor.overall - 3 - value) / 6);
-      const alreadySigned = state.clubPlayers[suitor.id]?.length ?? 0;
+      const alreadySigned = (state.clubPlayers[suitor.id] ?? [])
+        .filter(signed => signed.source === "free-agent").length;
       return nationalityWeight(player, suitor) * closeness / (1 + alreadySigned);
     });
-    const chosen = weightedPick(eligible, weights);
+    const home = eligible.filter(suitor => suitor.country === player.primaryNationality);
+    const others = eligible.filter(suitor => suitor.country !== player.primaryNationality);
+    const chosen = home.length > 0 &&
+      (others.length === 0 || Math.random() < HOME_NATION_PRIORITY)
+      ? home[Math.floor(Math.random() * home.length)]
+      : weightedPick(others.length > 0 ? others : eligible, others.length > 0
+        ? others.map(suitor => {
+          const index = eligible.indexOf(suitor);
+          return weights[index];
+        })
+        : weights);
     if (!chosen) continue;
 
     state.available.splice(state.available.indexOf(entry), 1);
@@ -242,7 +309,8 @@ export function processFreeAgentSigning(season: Season): void {
       player,
       teamID: chosen.id,
       signedYear: season.year,
-      signedMatchday: season.matchday
+      signedMatchday: season.matchday,
+      source: "free-agent"
     });
     // A star signing raises the club's overall straight away.
     refreshClubOverall(season, chosen.id);
@@ -256,6 +324,7 @@ export function processFreeAgentSigning(season: Season): void {
 export function sendUnsignedScoutsToFreeAgents(season: Season, players: Player[]): void {
   if (!season.freeAgents.autoSendUnsignedScouts) return;
   for (const player of players) {
+    assertUniquePlayerID(season, player.id, player);
     player.isShortlisted = false;
     transferPlayer(player, null, season.year, season.matchday);
     season.freeAgents.available.push({

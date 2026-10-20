@@ -43,7 +43,7 @@ export function getRandomNationCode(): string {
   return codes[Math.floor(Math.random() * codes.length)];
 }
 
-function getSecondaryNationality(primaryCode: string): string | null {
+export function getSecondaryNationality(primaryCode: string): string | null {
   const probabilities = DUAL_NATIONALITIES[primaryCode];
 
   if (!probabilities) {
@@ -90,6 +90,23 @@ function getSecondaryNationality(primaryCode: string): string | null {
   }
 
   return secondary;
+}
+
+/** Generates a name using exactly the supplied nationalities, without selecting another secondary nationality. */
+export function generateNameForNationalities(
+  primaryCode: string,
+  secondaryCode: string | null = null
+): { firstName: string; lastName: string } {
+  const primary = primaryCode.toUpperCase();
+  if (!getNationByCode(primary)) throw new Error(`Unknown nationality code: ${primary}.`);
+  const secondary = secondaryCode?.toUpperCase() ?? null;
+  if (secondary && (!getNationByCode(secondary) || secondary === primary)) {
+    throw new Error(`Invalid secondary nationality code: ${secondary}.`);
+  }
+  const generated = secondary
+    ? generateNameSplit(primary, secondary)
+    : generateNameSplit(primary);
+  return { firstName: generated.firstName, lastName: generated.lastName };
 }
 
 export interface GeneratedName {

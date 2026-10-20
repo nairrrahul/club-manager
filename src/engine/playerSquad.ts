@@ -2,7 +2,7 @@ import tierPlayerInfoRaw from "./data/tier_player_info.json";
 import tierPlayerAgesRaw from "./data/tier_player_ages.json";
 import confederationPlayerInfoRaw from "./data/confederation_player_info.json";
 import nationInfoRaw from "./data/name_info/nation_info.json";
-import { generatePlayerName, getRandomNationCode } from "./nameGenerator";
+import { generatePlayerName, getRandomNationCode, getSecondaryNationality } from "./nameGenerator";
 import { FORMATIONS, POSITION_ORDER, canPlayPosition, getFormationRequirements } from "./formation";
 import type { Team } from "./team";
 import { openStint } from "./playerHistory";
@@ -40,6 +40,10 @@ const POSITION_DISTRIBUTION: Position[] = [
   "RW", "LW", "ST", "ST"
 ];
 
+export const YOUTH_SCOUT_POTENTIAL_RANGES: Record<number, [number, number]> = {
+  1: [67, 83], 2: [70, 87], 3: [73, 90], 4: [76, 93], 5: [79, 95]
+};
+
 function weightedRandom<T>(entries: [T, number][]): T | null {
   const total = entries.reduce((sum, [, weight]) => sum + weight, 0);
   if (total <= 0) return null;
@@ -58,6 +62,13 @@ function randomNormal(): number {
   while (u === 0) u = Math.random();
   while (v === 0) v = Math.random();
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+/** Samples the potential distribution shared by youth scouting and club regens. */
+export function sampleYouthPotential(scoutingRating: number, ratingShift = 0): number {
+  const [low, high] = YOUTH_SCOUT_POTENTIAL_RANGES[scoutingRating] ?? YOUTH_SCOUT_POTENTIAL_RANGES[3];
+  const standardDeviation = (high - low) / 2;
+  return Math.max(50, Math.min(95, Math.round(low + randomNormal() * standardDeviation + ratingShift)));
 }
 
 function getCodesByConfederation(confederation: string): string[] {
@@ -189,6 +200,43 @@ export function createFreeAgentPlayer(id: string, year: number): Player {
   };
   recordInitialProgression(player, year);
   openStint(player, null, year, 0);
+  return player;
+}
+
+export function createRegenPlayer(
+  id: string,
+  year: number,
+  club: { id: number; name: string; countryCode: string; scoutingRating: number; potentialShift: number }
+): Player {
+  const age = 17 + Math.floor(Math.random() * 4);
+  const nationality = Math.random() < 0.1
+    ? getSecondaryNationality(club.countryCode) ?? club.countryCode
+    : club.countryCode;
+  const generated = generatePlayerName(nationality);
+  const potential = sampleYouthPotential(club.scoutingRating, club.potentialShift);
+  const overall = Math.min(potential, Math.round(potential * getAgeMultiplier(age)));
+  const position = POSITION_DISTRIBUTION[Math.floor(Math.random() * POSITION_DISTRIBUTION.length)];
+  const player: Player = {
+    id,
+    firstName: generated.firstName,
+    lastName: generated.lastName,
+    primaryNationality: generated.primaryNationality,
+    secondaryNationality: generated.secondaryNationality,
+    age,
+    overall,
+    potential,
+    contractExpiry: year + 3,
+    position,
+    isScouted: false,
+    playerType: null,
+    peakRange: null,
+    progression: [],
+    history: [],
+    caps: 0,
+    isShortlisted: false
+  };
+  recordInitialProgression(player, year);
+  openStint(player, { id: club.id, name: club.name }, year, 0);
   return player;
 }
 
@@ -461,13 +509,18 @@ export function initializeManagerTeam(team: Team, year: number): Team {
   return team;
 }
 
-export function createEmergencyPlayer(team: Team, position: Position, year: number): Player {
+export function createEmergencyPlayer(
+  team: Team,
+  position: Position,
+  year: number,
+  allocateId: (prefix: string) => string
+): Player {
   const targetOverall = Math.max(1, Math.round(team.BaseOverall * 0.70));
   const potential = Math.max(1, Math.round(team.BaseOverall * 0.70));
   const age = 18 + Math.floor(Math.random() * 3);
   const player = createPlayer(
     team,
-    `${team.ID}-A${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+    allocateId(`${team.ID}-A`),
     position,
     age,
     generateNationality(team.Tier),
@@ -480,12 +533,16 @@ export function createEmergencyPlayer(team: Team, position: Position, year: numb
   return player;
 }
 
-export function ensureMinimumSeniorSquad(team: Team, year: number): Player[] {
+export function ensureMinimumSeniorSquad(
+  team: Team,
+  year: number,
+  allocateId: (prefix: string) => string
+): Player[] {
   const squad = team.seniorSquad as Player[];
   const added: Player[] = [];
   const add = (position: Position) => {
     if (squad.length >= team.maxSeniorSquadSize) return;
-    const player = createEmergencyPlayer(team, position, year);
+    const player = createEmergencyPlayer(team, position, year, allocateId);
     squad.push(player);
     added.push(player);
   };
@@ -644,11 +701,7 @@ export function createYouthScoutedPlayer(
 ): Player {
   const age = 15 + Math.floor(Math.random() * 3);
   const generated = generatePlayerName(countryCode);
-  const potentialParams = ({
-    1: [67, 83], 2: [70, 87], 3: [73, 90], 4: [76, 93], 5: [79, 95]
-  } as Record<number, number[]>)[team.scoutingRating] ?? [73, 90];
-  const sd = (potentialParams[1] - potentialParams[0]) / 2;
-  const potential = Math.max(50, Math.min(95, Math.round(potentialParams[0] + randomNormal() * sd)));
+  const potential = sampleYouthPotential(team.scoutingRating);
   const ratioBase = ({ 1: 0.50, 2: 0.60, 3: 0.65, 4: 0.70, 5: 0.75 } as Record<number, number>)[team.scoutingExperience] ?? 0.65;
   const ratio = Math.max(0, ratioBase - 0.03 + Math.random() * 0.06);
   const pool = positions.length > 0 ? positions : POSITION_ORDER;

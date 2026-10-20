@@ -1,11 +1,6 @@
-import type { Position } from "../engine/types";
 import type { ScoreSnap } from "../engine/snapshots";
 
-export const POSITION_GROUP: Record<Position, "GK" | "DEF" | "MID" | "FWD"> = {
-  GK: "GK", RB: "DEF", CB: "DEF", LB: "DEF",
-  CDM: "MID", CM: "MID", CAM: "MID", RM: "MID", LM: "MID",
-  RW: "FWD", LW: "FWD", ST: "FWD"
-};
+export { POSITION_GROUP } from "../engine/formation";
 
 export function ordinal(n: number): string {
   if (n % 100 >= 11 && n % 100 <= 13) return `${n}th`;

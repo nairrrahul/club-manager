@@ -11,8 +11,10 @@ import {
 } from "./playerSquad";
 import { sendYouthScout, signScoutedPlayer } from "./youthScouting";
 import { europeanTeamPool } from "./europeanCompetitions";
-import { addReleasedPlayer, signFreeAgentForTeam, isResignBlocked } from "./freeAgents";
-import { clubRestingOverall } from "./squadStrength";
+import {
+  addReleasedPlayer, signFreeAgentForTeam, isResignBlocked, generateClubRegens
+} from "./freeAgents";
+import { clubRestingOverall, refreshAllClubOveralls, refreshClubOverall } from "./squadStrength";
 import { snapshotSeason } from "./snapshots";
 import type { SeasonArchive } from "./snapshots";
 import {
@@ -25,6 +27,11 @@ import { RESIGN_BLOCK_SEASONS } from "./freeAgents";
 import { Team } from "./team";
 import type { RawTeam } from "./team";
 import type { ClubPlayerEntry, FreeAgentEntry, Player, Position } from "./types";
+import { POSITION_ORDER } from "./formation";
+import { generateNameForNationalities } from "./nameGenerator";
+import { isValidNationCode } from "./nations";
+import { openStint } from "./playerHistory";
+import { nextPlayerID, assertUniquePlayerID } from "./playerIds";
 
 export interface Game {
   season: Season;
@@ -39,6 +46,21 @@ export interface ActionResult {
   ok: boolean;
   message?: string;
   error?: string;
+}
+
+export const ADD_PLAYER_AGE_MIN = 15;
+export const ADD_PLAYER_AGE_MAX = 45;
+
+export interface GodAddPlayerInput {
+  firstName?: string;
+  lastName?: string;
+  age: number;
+  position: Position;
+  overall: number;
+  potential: number;
+  primaryNationality: string;
+  secondaryNationality: string | null;
+  clubID: number | null;
 }
 
 const ok = (message?: string): ActionResult => ({ ok: true, message });
@@ -81,6 +103,8 @@ export function createGame(teamID: number): Game {
 
   initializeManagerTeam(team, season.year);
   season.managerTeam = team;
+  generateClubRegens(season);
+  refreshAllClubOveralls(season);
 
   return { season, managerTeam: team, godMode: false, version: 0, liveCache: null };
 }
@@ -369,6 +393,93 @@ export function godChangePosition(game: Game, playerID: string, position: Positi
     message += ` Team OVR is now ${game.managerTeam.BaseOverall}.`;
   }
   return ok(message);
+}
+
+export function godAddPlayer(
+  game: Game,
+  input: GodAddPlayerInput
+): ActionResult & { playerID?: string } {
+  if (!game.godMode) return fail("God Mode is not enabled.");
+  if (!Number.isInteger(input.age) || input.age < ADD_PLAYER_AGE_MIN || input.age > ADD_PLAYER_AGE_MAX) {
+    return fail(`Age must be an integer from ${ADD_PLAYER_AGE_MIN} to ${ADD_PLAYER_AGE_MAX}.`);
+  }
+  if (!POSITION_ORDER.includes(input.position)) return fail("Choose a valid player position.");
+  if (!Number.isInteger(input.overall) || input.overall < 20 || input.overall > 99) {
+    return fail("Overall must be an integer from 20 to 99.");
+  }
+  if (!Number.isInteger(input.potential) || input.potential < 20 || input.potential > 99) {
+    return fail("Potential must be an integer from 20 to 99.");
+  }
+  if (input.potential < input.overall) return fail("Potential must be greater than or equal to overall.");
+  if (typeof input.primaryNationality !== "string") return fail("Choose a valid primary nationality.");
+
+  const primaryNationality = input.primaryNationality.toUpperCase();
+  if (!isValidNationCode(primaryNationality)) return fail("Choose a valid primary nationality.");
+  const secondaryNationality = input.secondaryNationality?.toUpperCase() ?? null;
+  if (secondaryNationality && !isValidNationCode(secondaryNationality)) {
+    return fail("Choose a valid secondary nationality.");
+  }
+  if (secondaryNationality === primaryNationality) {
+    return fail("The second nationality must differ from the primary nationality.");
+  }
+
+  const club = input.clubID === null ? null : TEAM_DIRECTORY.get(input.clubID);
+  if (input.clubID !== null && !club) return fail("Choose a valid club.");
+  if (input.clubID === game.managerTeam.ID) return fail("Players cannot be added directly to your managed club.");
+
+  const firstName = input.firstName?.trim() ?? "";
+  const lastName = input.lastName?.trim() ?? "";
+  const generatedName = !firstName || !lastName
+    ? generateNameForNationalities(primaryNationality, secondaryNationality)
+    : { firstName, lastName };
+  const player: Player = {
+    id: nextPlayerID(game.season, "GM"),
+    firstName: firstName || generatedName.firstName,
+    lastName: lastName || generatedName.lastName,
+    primaryNationality,
+    secondaryNationality,
+    age: input.age,
+    overall: input.overall,
+    potential: input.potential,
+    contractExpiry: club ? game.season.year + 3 : null,
+    position: input.position,
+    isScouted: false,
+    playerType: null,
+    peakRange: null,
+    progression: [{
+      year: game.season.year,
+      age: input.age,
+      overall: input.overall,
+      potential: input.potential
+    }],
+    history: [],
+    caps: 0,
+    isShortlisted: false
+  };
+  assertUniquePlayerID(game.season, player.id);
+  openStint(player, club ? { id: club.id, name: club.name } : null, game.season.year, game.season.matchday);
+
+  if (club) {
+    const entry: ClubPlayerEntry = {
+      player,
+      teamID: club.id,
+      signedYear: game.season.year,
+      signedMatchday: game.season.matchday,
+      source: "god-mode"
+    };
+    (game.season.freeAgents.clubPlayers[club.id] ??= []).push(entry);
+    refreshClubOverall(game.season, club.id);
+  } else {
+    const entry: FreeAgentEntry = {
+      player,
+      addedYear: game.season.year,
+      releasedBy: null,
+      resignBlockedUntilYear: null
+    };
+    game.season.freeAgents.available.push(entry);
+  }
+
+  return { ...ok(`Added ${player.firstName} ${player.lastName}.`), playerID: player.id };
 }
 
 export type PlayerLocation = "senior" | "youth" | "free-agent" | "club";

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useGame, useGameStore } from "../../store/gameStore";
 import { LEAGUE_NAMES, CUP_NAME, SEASON_END_MATCHDAY, seasonDisplay } from "../../engine/constants";
 import { COMPETITION_NAMES } from "../../engine/europeanCompetitions";
@@ -64,6 +64,11 @@ function Sidebar() {
             <NavLink key={code} to={`/europe/${code}`} className={navClass}>{name}</NavLink>
           ))}
         </NavSection>
+        {game.godMode && (
+          <NavSection title="God Mode">
+            <NavLink to="/add-player" className={navClass}>Add Player</NavLink>
+          </NavSection>
+        )}
       </nav>
       <div className="p-3 border-t border-navy-700 grid grid-cols-2 gap-2">
         <SaveGameButton className="btn-ghost btn-sm" />
@@ -252,15 +257,17 @@ function ScoutFreeAgentToggle() {
 function GodModeToggle() {
   const game = useGame();
   const godMode = useGameStore(s => s.godMode);
+  const locked = useLocation().pathname === "/add-player";
   return (
     <button
       onClick={() => godMode(!game.godMode)}
-      title="Toggle God Mode"
+      disabled={locked}
+      title={locked ? "Leave the Add Player page to turn off God Mode" : "Toggle God Mode"}
       className={`flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider border ${
         game.godMode
           ? "bg-accent-yellow text-navy-950 border-accent-yellow"
-          : "bg-navy-800 text-navy-200 border-navy-600 hover:text-white"
-      }`}
+          : "bg-navy-800 text-navy-200 border-navy-600"
+      } ${locked ? "opacity-50 cursor-not-allowed" : "hover:text-white"}`}
     >
       <span className={`w-2 h-2 rounded-full ${game.godMode ? "bg-navy-950" : "bg-navy-500"}`} />
       God Mode
@@ -293,6 +300,15 @@ function Toasts() {
         >
           {toast.kind === "error" && <span className="text-accent-yellow font-bold mr-1.5">!</span>}
           {toast.text}
+          {toast.link && (
+            <Link
+              to={toast.link.to}
+              onClick={event => event.stopPropagation()}
+              className="link ml-2 font-semibold"
+            >
+              {toast.link.label}
+            </Link>
+          )}
         </div>
       ))}
     </div>

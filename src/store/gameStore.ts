@@ -3,9 +3,9 @@ import {
   createGame, simulate, finishSeason, startNextSeason, promotePlayer, releaseSenior, releaseYouth,
   setFormation, setXIMode, setXISlot, sendScout, signScouted, setGodMode, setGodRating,
   godChangePosition, canStartNextSeason, signFreeAgent, simulateWindow, setExplicitWindows,
-  toggleShortlist, setAutoSendScouts
+  toggleShortlist, setAutoSendScouts, godAddPlayer, findPlayer
 } from "../engine/game";
-import type { ActionResult, Game, SeasonSummary } from "../engine/game";
+import type { ActionResult, Game, GodAddPlayerInput, SeasonSummary } from "../engine/game";
 import { gameFromSave, gameToSave, saveFileName, verifySave } from "../engine/save";
 import type { SaveFile } from "../engine/save";
 import type { Position } from "../engine/types";
@@ -14,6 +14,7 @@ export interface Toast {
   id: number;
   kind: "success" | "error" | "info";
   text: string;
+  link?: { to: string; label: string };
 }
 
 interface GameStore {
@@ -62,13 +63,14 @@ interface GameStore {
   godMode: (enabled: boolean) => void;
   godRating: (which: "scouting" | "experience" | "training", rating: number) => void;
   godPosition: (playerID: string, position: Position) => void;
+  godAddPlayer: (input: GodAddPlayerInput) => ActionResult & { playerID?: string };
 }
 
 let toastId = 1;
 
 export const useGameStore = create<GameStore>()((set, get) => {
-  const pushToast = (kind: Toast["kind"], text: string) => {
-    const toast: Toast = { id: toastId++, kind, text };
+  const pushToast = (kind: Toast["kind"], text: string, link?: Toast["link"]) => {
+    const toast: Toast = { id: toastId++, kind, text, link };
     set(state => ({ toasts: [...state.toasts.slice(-3), toast] }));
   };
 
@@ -177,7 +179,25 @@ export const useGameStore = create<GameStore>()((set, get) => {
       act(game => { setGodMode(game, enabled); return { ok: true, message: enabled ? "God Mode enabled." : "God Mode disabled." }; });
     },
     godRating: (which, rating) => { act(game => setGodRating(game, which, rating)); },
-    godPosition: (id, position) => { act(game => godChangePosition(game, id, position)); }
+    godPosition: (id, position) => { act(game => godChangePosition(game, id, position)); },
+    godAddPlayer: input => {
+      let playerID: string | undefined;
+      const result = act(game => {
+        const created = godAddPlayer(game, input);
+        playerID = created.playerID;
+        return created;
+      }, true);
+      if (result.ok && playerID) {
+        const game = get().game;
+        const player = game ? findPlayer(game, playerID)?.player : null;
+        pushToast(
+          "success",
+          result.message ?? `Added ${player ? `${player.firstName} ${player.lastName}` : "player"}.`,
+          { to: `/player/${encodeURIComponent(playerID)}`, label: "View player" }
+        );
+      }
+      return { ...result, playerID };
+    }
   };
 });
 

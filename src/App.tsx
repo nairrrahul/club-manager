@@ -16,8 +16,10 @@ import Shortlist from "./ui/pages/Shortlist";
 import Rankings from "./ui/pages/Rankings";
 import NationPage from "./ui/pages/NationPage";
 import International from "./ui/pages/International";
+import AddPlayer from "./ui/pages/AddPlayer";
 
 export default function App() {
+  useGameStore(state => state.tick);
   const game = useGameStore(state => state.game);
 
   if (!game) return <TeamSelect />;
@@ -34,6 +36,7 @@ export default function App() {
         <Route path="/rankings" element={<Rankings />} />
         <Route path="/nation/:code" element={<NationPage />} />
         <Route path="/international" element={<International />} />
+        <Route path="/add-player" element={game.godMode ? <AddPlayer /> : <Navigate to="/" replace />} />
         <Route path="/player/:id" element={<PlayerPage />} />
         <Route path="/league/:tier" element={<LeaguePage />} />
         <Route path="/cup" element={<CupPage />} />

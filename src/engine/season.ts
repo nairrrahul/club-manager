@@ -30,7 +30,7 @@ import type { EuropeanCompetition } from "./europeanCompetitions";
 import { SEASON_START_YEAR, SEASON_END_MATCHDAY } from "./constants";
 import {
   createFreeAgentState, generateFreeAgents, developFreeAgentWorld, processFreeAgentSigning,
-  sendUnsignedScoutsToFreeAgents
+  sendUnsignedScoutsToFreeAgents, generateClubRegens
 } from "./freeAgents";
 import {
   createInternationalState, startWindowIfDue, autoSimulateWindowIfDue, hasPendingWindow
@@ -38,6 +38,7 @@ import {
 import type { InternationalState } from "./international";
 import { refreshAllClubOveralls } from "./squadStrength";
 import { snapshotSeason } from "./snapshots";
+import { nextPlayerID } from "./playerIds";
 import type { SeasonArchive } from "./snapshots";
 import type {
   CupState, FinalHistory, FreeAgentState, LeagueState, Notice, OverallChange, PlayoffResult,
@@ -163,7 +164,7 @@ export function createSeason(
 export function createInitialSeason(): Season {
   const initialTeams = createTeams(rawTeams);
   const season = createSeason(separateByTier(initialTeams));
-  generateFreeAgents(season.freeAgents, season.year);
+  generateFreeAgents(season);
   return season;
 }
 
@@ -511,7 +512,11 @@ export function advanceToNextSeason(season: Season, managerTeam: Team | null = n
     // Returned scouting reports expire with the season if they were not signed.
     expireAllScoutingMissions(managerTeam, unsigned => sendUnsignedScoutsToFreeAgents(season, unsigned));
     applySquadGrowth(managerTeam, nextYear);
-    const addedPlayers = ensureMinimumSeniorSquad(managerTeam, nextYear);
+    const addedPlayers = ensureMinimumSeniorSquad(
+      managerTeam,
+      nextYear,
+      prefix => nextPlayerID(season, prefix, nextYear)
+    );
     // Web UI: the starting XI is auto-selected at the start of every season.
     resetStartingXIToAuto(managerTeam);
     calculateTeamOverall(managerTeam);
@@ -520,7 +525,8 @@ export function advanceToNextSeason(season: Season, managerTeam: Team | null = n
 
   // Free agents (and players signed by other clubs) age and develop; new free agents arrive.
   developFreeAgentWorld(season, nextYear);
-  generateFreeAgents(season.freeAgents, nextYear);
+  generateFreeAgents(season, nextYear);
+  generateClubRegens(season, nextYear);
   // Clubs' player-based overall bonus follows their players' development and the new base overalls.
   refreshAllClubOveralls(season);
 
@@ -540,8 +546,8 @@ export function advanceToNextSeason(season: Season, managerTeam: Team | null = n
       competition.seasonLabel = nextSeason.season;
     }
   }
+  refreshAllClubOveralls(nextSeason);
   // Keep the previous season's overall-change report available for the new-season summary.
   nextSeason.notices = [];
   return nextSeason;
 }
-

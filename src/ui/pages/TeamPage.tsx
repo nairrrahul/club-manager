@@ -137,7 +137,11 @@ function PlayersTab(props: { teamID: number; isManaged: boolean }) {
       <PlayersTable
         rows={entries.map(entry => ({
           player: entry.player,
-          extra: `${seasonDisplay(entry.signedYear)} · MD ${entry.signedMatchday}`
+          extra: entry.source === "regen"
+            ? `Regen · ${seasonDisplay(entry.signedYear)}`
+            : entry.source === "god-mode"
+              ? "Added (God Mode)"
+              : `${seasonDisplay(entry.signedYear)} · MD ${entry.signedMatchday}`
         }))}
         extraLabel="Signed"
         emptyText="No players yet. For now, other clubs only add players by signing free agents."

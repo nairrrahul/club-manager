@@ -11,6 +11,12 @@ export const FORMATIONS: Record<string, Partial<Record<Position, number>>> = {
 
 export const POSITION_ORDER: Position[] = ["GK", "RB", "CB", "LB", "CDM", "CM", "CAM", "RM", "LM", "RW", "LW", "ST"];
 
+export const POSITION_GROUP: Record<Position, "GK" | "DEF" | "MID" | "FWD"> = {
+  GK: "GK", RB: "DEF", CB: "DEF", LB: "DEF",
+  CDM: "MID", CM: "MID", CAM: "MID", RM: "MID", LM: "MID",
+  RW: "FWD", LW: "FWD", ST: "FWD"
+};
+
 const POSITION_ALIASES: Record<Position, Position[]> = {
   GK: ["GK"],
   RB: ["RB"],

@@ -6,6 +6,8 @@ import { createFreeAgentState, generateFreeAgents } from "./freeAgents";
 import { FREE_AGENTS_LABEL } from "./playerHistory";
 import { createInternationalState, startWindowIfDue, collectAllPlayers } from "./international";
 import { refreshAllClubOveralls } from "./squadStrength";
+import { collectSeasonPlayers } from "./playerIds";
+import { refreshStartingXI } from "./playerSquad";
 import { TEAM_DIRECTORY } from "./game";
 import type { Player, PlayerStint } from "./types";
 
@@ -33,9 +35,10 @@ export const SAVE_FORMAT = "soccer-season-simulator-save";
  *     (a missing caps value in an older save means 0 caps).
  * v5: clubs have playerBonus (overall added by exceptional players they signed); recomputed on load.
  * v6: player.isShortlisted (missing = false) and freeAgents.autoSendUnsignedScouts (missing = false).
+ * v7: club-player source, duplicate player-ID repair, and positional club overall recalculation.
  *     Older saves are migrated on load.
  */
-export const SAVE_VERSION = 6;
+export const SAVE_VERSION = 7;
 
 export interface SaveMeta {
   team: string;
@@ -426,7 +429,7 @@ export function gameFromSave(file: SaveFile): Game {
   if (loadedSeason && file.version < 2 && loadedSeason.freeAgents === undefined) {
     // v1 -> v2: introduce the free-agent pool (with a first batch for the current season).
     loadedSeason.freeAgents = createFreeAgentState();
-    generateFreeAgents(loadedSeason.freeAgents, loadedSeason.year);
+    generateFreeAgents(loadedSeason);
   }
   if (loadedSeason && file.version < 3) {
     migratePlayerHistories(loadedSeason, (root as Partial<GameRoot>).managerTeam as Team);
@@ -464,6 +467,43 @@ export function gameFromSave(file: SaveFile): Game {
   }
   if (loadedSeason && file.version < 5) {
     // v4 -> v5: clubs gain a player-based overall bonus (and whole-number in-season overalls).
+    refreshAllClubOveralls(loadedSeason);
+  }
+  if (loadedSeason && file.version < 7) {
+    const manager = (root as Partial<GameRoot>).managerTeam as Team;
+    const used = new Set<string>();
+    const duplicated = new Set<string>();
+    for (const player of collectSeasonPlayers(loadedSeason)) {
+      const originalID = player.id;
+      if (!used.has(originalID)) {
+        used.add(originalID);
+        continue;
+      }
+      duplicated.add(originalID);
+      let suffix = 1;
+      let repairedID = `${originalID}-r${suffix}`;
+      while (used.has(repairedID)) repairedID = `${originalID}-r${++suffix}`;
+      player.id = repairedID;
+      used.add(repairedID);
+    }
+
+    for (const entries of Object.values(loadedSeason.freeAgents.clubPlayers)) {
+      for (const entry of entries) {
+        if (entry.source !== "regen" && entry.source !== "god-mode" && entry.source !== "free-agent") {
+          entry.source = "free-agent";
+        }
+      }
+    }
+
+    if (duplicated.size > 0) {
+      refreshStartingXI(manager);
+      const openWindow = loadedSeason.international.windows.find(window => window.status === "scheduled");
+      if (openWindow) {
+        for (const code of Object.keys(openWindow.callUps)) {
+          openWindow.callUps[code] = openWindow.callUps[code].filter(id => !duplicated.has(id));
+        }
+      }
+    }
     refreshAllClubOveralls(loadedSeason);
   }
   const { season, managerTeam, godMode } = validateRoot(root);

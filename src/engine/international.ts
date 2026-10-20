@@ -4,6 +4,7 @@ import { nationInfo, getNationName } from "./nations";
 import { simulateMatch } from "./matchEngine";
 import { SEASON_END_MATCHDAY } from "./constants";
 import { STAR_PLAYER_FACTOR, starBonus } from "./squadStrength";
+import { POSITION_GROUP } from "./formation";
 import type { Season } from "./season";
 import type { Team } from "./team";
 import type { Player } from "./types";
@@ -175,6 +176,9 @@ export function computeOverallRankings(state: InternationalState): OverallRankRo
 /** Spread of the call-up distribution: the further below the nation's overall, the less likely. */
 export const CALL_UP_SIGMA = 7;
 export { STAR_PLAYER_FACTOR };
+export const NATIONAL_SQUAD_QUOTAS: Record<"GK" | "DEF" | "MID" | "FWD", number> = {
+  GK: 3, DEF: 8, MID: 8, FWD: 7
+};
 
 export function callUpChance(playerOverall: number, nationBaseOverall: number): number {
   if (playerOverall > nationBaseOverall) return 1;
@@ -335,23 +339,34 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
   const def = findDueWindowDef(season);
   if (!def) return null;
 
-  // Call-ups.
+  // Players first decide whether they are willing, then compete for their positional quota.
   const callUps: Record<string, string[]> = {};
   const calledPlayers: Record<string, Player[]> = {};
   for (const player of collectAllPlayers(season)) {
     const nation = state.nations[player.primaryNationality];
     if (!nation) continue;
     if (Math.random() < callUpChance(player.overall, nation.baseOverall)) {
-      (callUps[nation.code] ??= []).push(player.id);
       (calledPlayers[nation.code] ??= []).push(player);
     }
   }
 
-  // Actual overall: the top 11 called-up players above 1.1x the base overall each add
-  // 1/11 of (player overall - base overall); the result is a whole number.
+  for (const nation of Object.values(state.nations)) {
+    const willing = calledPlayers[nation.code] ?? [];
+    const selected: Player[] = [];
+    for (const [group, quota] of Object.entries(NATIONAL_SQUAD_QUOTAS) as ["GK" | "DEF" | "MID" | "FWD", number][]) {
+      selected.push(...willing
+        .filter(player => POSITION_GROUP[player.position] === group)
+        .sort((a, b) => b.overall - a.overall || b.potential - a.potential || a.id.localeCompare(b.id))
+        .slice(0, quota));
+    }
+    calledPlayers[nation.code] = selected;
+    if (selected.length > 0) callUps[nation.code] = selected.map(player => player.id);
+  }
+
+  // Actual overall uses the same positional XI selection as non-managed clubs.
   const overalls: Record<string, number> = {};
   for (const nation of Object.values(state.nations)) {
-    const bonus = starBonus(nation.baseOverall, (calledPlayers[nation.code] ?? []).map(player => player.overall));
+    const bonus = starBonus(nation.baseOverall, calledPlayers[nation.code] ?? []);
     nation.actualOverall = Math.round(nation.baseOverall + bonus);
     overalls[nation.code] = nation.actualOverall;
   }
