@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root { height: 100%; }
+  body { @apply bg-navy-950 text-white font-sans antialiased; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { @apply bg-navy-900; }
+  ::-webkit-scrollbar-thumb { @apply bg-navy-600 rounded; }
+  select, input { @apply outline-none; }
+}
+
+@layer components {
+  .panel { @apply bg-navy-800 border border-navy-700 rounded-lg; }
+  .panel-title { @apply px-4 py-2.5 border-b border-navy-700 text-xs font-semibold uppercase tracking-wider text-navy-200; }
+  .btn { @apply inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed; }
+  .btn-primary { @apply btn bg-accent-purple text-white hover:bg-accent-purple-dark; }
+  .btn-yellow { @apply btn bg-accent-yellow text-navy-950 hover:bg-accent-yellow-dark; }
+  .btn-ghost { @apply btn bg-navy-700 text-white hover:bg-navy-600; }
+  .btn-danger { @apply btn bg-navy-700 text-white hover:bg-navy-600 border border-navy-500; }
+  .btn-sm { @apply px-2 py-1 text-xs; }
+  .input { @apply bg-navy-900 border border-navy-600 rounded-md px-2.5 py-1.5 text-sm text-white placeholder-navy-300 focus:border-accent-purple; }
+  .tbl { @apply w-full text-sm; }
+  .tbl th { @apply text-left text-[11px] font-semibold uppercase tracking-wider text-navy-300 px-2 py-2 border-b border-navy-700 whitespace-nowrap; }
+  .tbl td { @apply px-2 py-1.5 border-b border-navy-700/60 whitespace-nowrap; }
+  .tbl tr:hover td { @apply bg-navy-700/40; }
+  .num { @apply tabular-nums; }
+  .link { @apply hover:text-accent-yellow hover:underline underline-offset-2 cursor-pointer; }
+}

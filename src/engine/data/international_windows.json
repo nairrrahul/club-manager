@@ -1,0 +1,10 @@
+{
+  "windows": [
+    { "id": "IW1", "label": "International Window 1", "afterMatchday": 2 },
+    { "id": "IW2", "label": "International Window 2", "afterMatchday": 6 },
+    { "id": "IW3", "label": "International Window 3", "afterMatchday": 10 },
+    { "id": "IW4", "label": "International Window 4", "afterMatchday": 19 },
+    { "id": "IW5", "label": "International Window 5", "afterMatchday": 34 },
+    { "id": "IW6", "label": "Post-season International Window", "afterMatchday": 46, "postSeason": true }
+  ]
+}

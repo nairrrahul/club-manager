@@ -1,0 +1,1690 @@
+{
+  "Afghanistan": {
+    "teamOverall": 60,
+    "confederationID": "AFC",
+    "flagCode": "af",
+    "threeLetterCode": "AFG",
+    "youthRating": 19,
+    "rankingPts": 1059.63
+  },
+  "Albania": {
+    "teamOverall": 74,
+    "confederationID": "UEFA",
+    "flagCode": "al",
+    "threeLetterCode": "ALB",
+    "youthRating": 65,
+    "rankingPts": 1375.39
+  },
+  "Algeria": {
+    "teamOverall": 78,
+    "confederationID": "CAF",
+    "flagCode": "dz",
+    "threeLetterCode": "ALG",
+    "youthRating": 102,
+    "rankingPts": 1560.91
+  },
+  "American Samoa": {
+    "teamOverall": 47,
+    "confederationID": "OFC",
+    "flagCode": "as",
+    "threeLetterCode": "ASA",
+    "youthRating": 5,
+    "rankingPts": 900.71
+  },
+  "Andorra": {
+    "teamOverall": 57,
+    "confederationID": "UEFA",
+    "flagCode": "ad",
+    "threeLetterCode": "AND",
+    "youthRating": 36,
+    "rankingPts": 1032.35
+  },
+  "Angola": {
+    "teamOverall": 71,
+    "confederationID": "CAF",
+    "flagCode": "ao",
+    "threeLetterCode": "ANG",
+    "youthRating": 75,
+    "rankingPts": 1327.88
+  },
+  "Anguilla": {
+    "teamOverall": 47,
+    "confederationID": "CONCACAF",
+    "flagCode": "ai",
+    "threeLetterCode": "AIA",
+    "youthRating": 8,
+    "rankingPts": 779.38
+  },
+  "Antigua and Barbuda": {
+    "teamOverall": 60,
+    "confederationID": "CONCACAF",
+    "flagCode": "ag",
+    "threeLetterCode": "ATG",
+    "youthRating": 30,
+    "rankingPts": 1058.44
+  },
+  "Argentina": {
+    "teamOverall": 83,
+    "confederationID": "CONMEBOL",
+    "flagCode": "ar",
+    "threeLetterCode": "ARG",
+    "youthRating": 140,
+    "rankingPts": 1874.81
+  },
+  "Armenia": {
+    "teamOverall": 70,
+    "confederationID": "UEFA",
+    "flagCode": "am",
+    "threeLetterCode": "ARM",
+    "youthRating": 41,
+    "rankingPts": 1204.44
+  },
+  "Aruba": {
+    "teamOverall": 54,
+    "confederationID": "CONCACAF",
+    "flagCode": "aw",
+    "threeLetterCode": "ARU",
+    "youthRating": 20,
+    "rankingPts": 984.67
+  },
+  "Australia": {
+    "teamOverall": 72,
+    "confederationID": "AFC",
+    "flagCode": "au",
+    "threeLetterCode": "AUS",
+    "youthRating": 100,
+    "rankingPts": 1574.01
+  },
+  "Austria": {
+    "teamOverall": 78,
+    "confederationID": "UEFA",
+    "flagCode": "at",
+    "threeLetterCode": "AUT",
+    "youthRating": 98,
+    "rankingPts": 1585.51
+  },
+  "Azerbaijan": {
+    "teamOverall": 67,
+    "confederationID": "UEFA",
+    "flagCode": "az",
+    "threeLetterCode": "AZE",
+    "youthRating": 43,
+    "rankingPts": 1153.73
+  },
+  "Bahamas": {
+    "teamOverall": 53,
+    "confederationID": "CONCACAF",
+    "flagCode": "bs",
+    "threeLetterCode": "BAH",
+    "youthRating": 11,
+    "rankingPts": 820.45
+  },
+  "Bahrain": {
+    "teamOverall": 63,
+    "confederationID": "AFC",
+    "flagCode": "bh",
+    "threeLetterCode": "BHR",
+    "youthRating": 82,
+    "rankingPts": 1321.41
+  },
+  "Bangladesh": {
+    "teamOverall": 58,
+    "confederationID": "AFC",
+    "flagCode": "bd",
+    "threeLetterCode": "BAN",
+    "youthRating": 36,
+    "rankingPts": 1001.94
+  },
+  "Barbados": {
+    "teamOverall": 59,
+    "confederationID": "CONCACAF",
+    "flagCode": "bb",
+    "threeLetterCode": "BRB",
+    "youthRating": 34,
+    "rankingPts": 1012.61
+  },
+  "Belarus": {
+    "teamOverall": 67,
+    "confederationID": "UEFA",
+    "flagCode": "by",
+    "threeLetterCode": "BLR",
+    "youthRating": 62,
+    "rankingPts": 1265.49
+  },
+  "Belgium": {
+    "teamOverall": 83,
+    "confederationID": "UEFA",
+    "flagCode": "be",
+    "threeLetterCode": "BEL",
+    "youthRating": 120,
+    "rankingPts": 1734.71
+  },
+  "Belize": {
+    "teamOverall": 57,
+    "confederationID": "CONCACAF",
+    "flagCode": "bz",
+    "threeLetterCode": "BLZ",
+    "youthRating": 15,
+    "rankingPts": 1005.36
+  },
+  "Benin": {
+    "teamOverall": 66,
+    "confederationID": "CAF",
+    "flagCode": "bj",
+    "threeLetterCode": "BEN",
+    "youthRating": 55,
+    "rankingPts": 1324.91
+  },
+  "Bermuda": {
+    "teamOverall": 60,
+    "confederationID": "CONCACAF",
+    "flagCode": "bm",
+    "threeLetterCode": "BER",
+    "youthRating": 28,
+    "rankingPts": 1071.22
+  },
+  "Bhutan": {
+    "teamOverall": 54,
+    "confederationID": "AFC",
+    "flagCode": "bt",
+    "threeLetterCode": "BHU",
+    "youthRating": 4,
+    "rankingPts": 970.32
+  },
+  "Bolivia": {
+    "teamOverall": 68,
+    "confederationID": "CONMEBOL",
+    "flagCode": "bo",
+    "threeLetterCode": "BOL",
+    "youthRating": 59,
+    "rankingPts": 1364.21
+  },
+  "Bosnia and Herzegovina": {
+    "teamOverall": 75,
+    "confederationID": "UEFA",
+    "flagCode": "ba",
+    "threeLetterCode": "BIH",
+    "youthRating": 78,
+    "rankingPts": 1350.92
+  },
+  "Botswana": {
+    "teamOverall": 61,
+    "confederationID": "CAF",
+    "flagCode": "bw",
+    "threeLetterCode": "BOT",
+    "youthRating": 42,
+    "rankingPts": 1114.88
+  },
+  "Brazil": {
+    "teamOverall": 85,
+    "confederationID": "CONMEBOL",
+    "flagCode": "br",
+    "threeLetterCode": "BRA",
+    "youthRating": 163,
+    "rankingPts": 1761.16
+  },
+  "British Virgin Islands": {
+    "teamOverall": 47,
+    "confederationID": "CONCACAF",
+    "flagCode": "vg",
+    "threeLetterCode": "VGB",
+    "youthRating": 10,
+    "rankingPts": 805.74
+  },
+  "Brunei": {
+    "teamOverall": 52,
+    "confederationID": "AFC",
+    "flagCode": "bn",
+    "threeLetterCode": "BRU",
+    "youthRating": 6,
+    "rankingPts": 925.16
+  },
+  "Bulgaria": {
+    "teamOverall": 70,
+    "confederationID": "UEFA",
+    "flagCode": "bg",
+    "threeLetterCode": "BUL",
+    "youthRating": 72,
+    "rankingPts": 1340.68
+  },
+  "Burkina Faso": {
+    "teamOverall": 71,
+    "confederationID": "CAF",
+    "flagCode": "bf",
+    "threeLetterCode": "BFA",
+    "youthRating": 70,
+    "rankingPts": 1380.52
+  },
+  "Burundi": {
+    "teamOverall": 65,
+    "confederationID": "CAF",
+    "flagCode": "bi",
+    "threeLetterCode": "BDI",
+    "youthRating": 40,
+    "rankingPts": 1116.21
+  },
+  "Cambodia": {
+    "teamOverall": 55,
+    "confederationID": "AFC",
+    "flagCode": "kh",
+    "threeLetterCode": "CAM",
+    "youthRating": 8,
+    "rankingPts": 1010.33
+  },
+  "Cameroon": {
+    "teamOverall": 78,
+    "confederationID": "CAF",
+    "flagCode": "cm",
+    "threeLetterCode": "CMR",
+    "youthRating": 100,
+    "rankingPts": 1481.24
+  },
+  "Canada": {
+    "teamOverall": 76,
+    "confederationID": "CONCACAF",
+    "flagCode": "ca",
+    "threeLetterCode": "CAN",
+    "youthRating": 85,
+    "rankingPts": 1559.15
+  },
+  "Cape Verde": {
+    "teamOverall": 71,
+    "confederationID": "CAF",
+    "flagCode": "cv",
+    "threeLetterCode": "CPV",
+    "youthRating": 60,
+    "rankingPts": 1354.77
+  },
+  "Cayman Islands": {
+    "teamOverall": 53,
+    "confederationID": "CONCACAF",
+    "flagCode": "ky",
+    "threeLetterCode": "CAY",
+    "youthRating": 16,
+    "rankingPts": 912.38
+  },
+  "Central African Republic": {
+    "teamOverall": 64,
+    "confederationID": "CAF",
+    "flagCode": "cf",
+    "threeLetterCode": "CTA",
+    "youthRating": 17,
+    "rankingPts": 1148.02
+  },
+  "Chad": {
+    "teamOverall": 62,
+    "confederationID": "CAF",
+    "flagCode": "td",
+    "threeLetterCode": "CHA",
+    "youthRating": 26,
+    "rankingPts": 1007.11
+  },
+  "Chile": {
+    "teamOverall": 75,
+    "confederationID": "CONMEBOL",
+    "flagCode": "cl",
+    "threeLetterCode": "CHI",
+    "youthRating": 93,
+    "rankingPts": 1405.29
+  },
+  "China PR": {
+    "teamOverall": 70,
+    "confederationID": "AFC",
+    "flagCode": "cn",
+    "threeLetterCode": "CHN",
+    "youthRating": 60,
+    "rankingPts": 1303.72
+  },
+  "Chinese Taipei": {
+    "teamOverall": 56,
+    "confederationID": "AFC",
+    "flagCode": "tw",
+    "threeLetterCode": "TPE",
+    "youthRating": 14,
+    "rankingPts": 1031.44
+  },
+  "Colombia": {
+    "teamOverall": 80,
+    "confederationID": "CONMEBOL",
+    "flagCode": "co",
+    "threeLetterCode": "COL",
+    "youthRating": 117,
+    "rankingPts": 1701.3
+  },
+  "Comoros": {
+    "teamOverall": 69,
+    "confederationID": "CAF",
+    "flagCode": "km",
+    "threeLetterCode": "COM",
+    "youthRating": 45,
+    "rankingPts": 1201.88
+  },
+  "Congo": {
+    "teamOverall": 68,
+    "confederationID": "CAF",
+    "flagCode": "cg",
+    "threeLetterCode": "CGO",
+    "youthRating": 50,
+    "rankingPts": 1189.43
+  },
+  "Cook Islands": {
+    "teamOverall": 54,
+    "confederationID": "OFC",
+    "flagCode": "ck",
+    "threeLetterCode": "COK",
+    "youthRating": 8,
+    "rankingPts": 986.9
+  },
+  "Costa Rica": {
+    "teamOverall": 72,
+    "confederationID": "CONCACAF",
+    "flagCode": "cr",
+    "threeLetterCode": "CRC",
+    "youthRating": 66,
+    "rankingPts": 1443.92
+  },
+  "Croatia": {
+    "teamOverall": 80,
+    "confederationID": "UEFA",
+    "flagCode": "hr",
+    "threeLetterCode": "CRO",
+    "youthRating": 98,
+    "rankingPts": 1717.07
+  },
+  "Cuba": {
+    "teamOverall": 64,
+    "confederationID": "CONCACAF",
+    "flagCode": "cu",
+    "threeLetterCode": "CUB",
+    "youthRating": 51,
+    "rankingPts": 1060.67
+  },
+  "Curaçao": {
+    "teamOverall": 69,
+    "confederationID": "CONCACAF",
+    "flagCode": "cw",
+    "threeLetterCode": "CUW",
+    "youthRating": 50,
+    "rankingPts": 1347.89
+  },
+  "Cyprus": {
+    "teamOverall": 69,
+    "confederationID": "UEFA",
+    "flagCode": "cy",
+    "threeLetterCode": "CYP",
+    "youthRating": 74,
+    "rankingPts": 1160.55
+  },
+  "Czech Republic": {
+    "teamOverall": 77,
+    "confederationID": "UEFA",
+    "flagCode": "cz",
+    "threeLetterCode": "CZE",
+    "youthRating": 94,
+    "rankingPts": 1501.38
+  },
+  "Denmark": {
+    "teamOverall": 79,
+    "confederationID": "UEFA",
+    "flagCode": "dk",
+    "threeLetterCode": "DEN",
+    "youthRating": 91,
+    "rankingPts": 1601.31
+  },
+  "Djibouti": {
+    "teamOverall": 49,
+    "confederationID": "CAF",
+    "flagCode": "dj",
+    "threeLetterCode": "DJI",
+    "youthRating": 7,
+    "rankingPts": 882.47
+  },
+  "Dominica": {
+    "teamOverall": 55,
+    "confederationID": "CONCACAF",
+    "flagCode": "dm",
+    "threeLetterCode": "DMA",
+    "youthRating": 15,
+    "rankingPts": 997.52
+  },
+  "Dominican Republic": {
+    "teamOverall": 68,
+    "confederationID": "CONCACAF",
+    "flagCode": "do",
+    "threeLetterCode": "DOM",
+    "youthRating": 55,
+    "rankingPts": 1097.88
+  },
+  "DR Congo": {
+    "teamOverall": 75,
+    "confederationID": "CAF",
+    "flagCode": "cd",
+    "threeLetterCode": "COD",
+    "youthRating": 101,
+    "rankingPts": 1393.54
+  },
+  "Ecuador": {
+    "teamOverall": 77,
+    "confederationID": "CONMEBOL",
+    "flagCode": "ec",
+    "threeLetterCode": "ECU",
+    "youthRating": 94,
+    "rankingPts": 1591.73
+  },
+  "Egypt": {
+    "teamOverall": 75,
+    "confederationID": "CAF",
+    "flagCode": "eg",
+    "threeLetterCode": "EGY",
+    "youthRating": 125,
+    "rankingPts": 1556.71
+  },
+  "El Salvador": {
+    "teamOverall": 66,
+    "confederationID": "CONCACAF",
+    "flagCode": "sv",
+    "threeLetterCode": "SLV",
+    "youthRating": 55,
+    "rankingPts": 1183.27
+  },
+  "England": {
+    "teamOverall": 86,
+    "confederationID": "UEFA",
+    "flagCode": "gb-eng",
+    "threeLetterCode": "ENG",
+    "youthRating": 135,
+    "rankingPts": 1825.97
+  },
+  "Equatorial Guinea": {
+    "teamOverall": 68,
+    "confederationID": "CAF",
+    "flagCode": "gq",
+    "threeLetterCode": "EQG",
+    "youthRating": 28,
+    "rankingPts": 1194.41
+  },
+  "Eritrea": {
+    "teamOverall": 63,
+    "confederationID": "CAF",
+    "flagCode": "er",
+    "threeLetterCode": "ERI",
+    "youthRating": 8,
+    "rankingPts": 855.56
+  },
+  "Estonia": {
+    "teamOverall": 66,
+    "confederationID": "UEFA",
+    "flagCode": "ee",
+    "threeLetterCode": "EST",
+    "youthRating": 62,
+    "rankingPts": 1126.31
+  },
+  "Eswatini": {
+    "teamOverall": 56,
+    "confederationID": "CAF",
+    "flagCode": "sz",
+    "threeLetterCode": "SWZ",
+    "youthRating": 14,
+    "rankingPts": 1082.19
+  },
+  "Ethiopia": {
+    "teamOverall": 61,
+    "confederationID": "CAF",
+    "flagCode": "et",
+    "threeLetterCode": "ETH",
+    "youthRating": 51,
+    "rankingPts": 1091.44
+  },
+  "Faroe Islands": {
+    "teamOverall": 60,
+    "confederationID": "UEFA",
+    "flagCode": "fo",
+    "threeLetterCode": "FRO",
+    "youthRating": 42,
+    "rankingPts": 1115.44
+  },
+  "Fiji": {
+    "teamOverall": 59,
+    "confederationID": "OFC",
+    "flagCode": "fj",
+    "threeLetterCode": "FIJ",
+    "youthRating": 36,
+    "rankingPts": 1007.68
+  },
+  "Finland": {
+    "teamOverall": 73,
+    "confederationID": "UEFA",
+    "flagCode": "fi",
+    "threeLetterCode": "FIN",
+    "youthRating": 75,
+    "rankingPts": 1378.89
+  },
+  "France": {
+    "teamOverall": 86,
+    "confederationID": "UEFA",
+    "flagCode": "fr",
+    "threeLetterCode": "FRA",
+    "youthRating": 155,
+    "rankingPts": 1877.32
+  },
+  "Gabon": {
+    "teamOverall": 72,
+    "confederationID": "CAF",
+    "flagCode": "ga",
+    "threeLetterCode": "GAB",
+    "youthRating": 55,
+    "rankingPts": 1341.21
+  },
+  "Gambia": {
+    "teamOverall": 70,
+    "confederationID": "CAF",
+    "flagCode": "gm",
+    "threeLetterCode": "GAM",
+    "youthRating": 49,
+    "rankingPts": 1202.14
+  },
+  "Georgia": {
+    "teamOverall": 75,
+    "confederationID": "UEFA",
+    "flagCode": "ge",
+    "threeLetterCode": "GEO",
+    "youthRating": 70,
+    "rankingPts": 1376.55
+  },
+  "Germany": {
+    "teamOverall": 85,
+    "confederationID": "UEFA",
+    "flagCode": "de",
+    "threeLetterCode": "GER",
+    "youthRating": 155,
+    "rankingPts": 1730.37
+  },
+  "Ghana": {
+    "teamOverall": 76,
+    "confederationID": "CAF",
+    "flagCode": "gh",
+    "threeLetterCode": "GHA",
+    "youthRating": 99,
+    "rankingPts": 1379.62
+  },
+  "Gibraltar": {
+    "teamOverall": 58,
+    "confederationID": "UEFA",
+    "flagCode": "gi",
+    "threeLetterCode": "GIB",
+    "youthRating": 35,
+    "rankingPts": 847.25
+  },
+  "Greece": {
+    "teamOverall": 77,
+    "confederationID": "UEFA",
+    "flagCode": "gr",
+    "threeLetterCode": "GRE",
+    "youthRating": 94,
+    "rankingPts": 1432.87
+  },
+  "Grenada": {
+    "teamOverall": 63,
+    "confederationID": "CONCACAF",
+    "flagCode": "gd",
+    "threeLetterCode": "GRN",
+    "youthRating": 26,
+    "rankingPts": 1006.84
+  },
+  "Guam": {
+    "teamOverall": 51,
+    "confederationID": "AFC",
+    "flagCode": "gu",
+    "threeLetterCode": "GUM",
+    "youthRating": 6,
+    "rankingPts": 822.37
+  },
+  "Guatemala": {
+    "teamOverall": 64,
+    "confederationID": "CONCACAF",
+    "flagCode": "gt",
+    "threeLetterCode": "GUA",
+    "youthRating": 58,
+    "rankingPts": 1239.62
+  },
+  "Guinea": {
+    "teamOverall": 73,
+    "confederationID": "CAF",
+    "flagCode": "gn",
+    "threeLetterCode": "GUI",
+    "youthRating": 64,
+    "rankingPts": 1301.61
+  },
+  "Guinea-Bissau": {
+    "teamOverall": 70,
+    "confederationID": "CAF",
+    "flagCode": "gw",
+    "threeLetterCode": "GNB",
+    "youthRating": 18,
+    "rankingPts": 1122.92
+  },
+  "Guyana": {
+    "teamOverall": 62,
+    "confederationID": "CONCACAF",
+    "flagCode": "gy",
+    "threeLetterCode": "GUY",
+    "youthRating": 37,
+    "rankingPts": 1085.71
+  },
+  "Haiti": {
+    "teamOverall": 70,
+    "confederationID": "CONCACAF",
+    "flagCode": "ht",
+    "threeLetterCode": "HAI",
+    "youthRating": 59,
+    "rankingPts": 1295.16
+  },
+  "Honduras": {
+    "teamOverall": 69,
+    "confederationID": "CONCACAF",
+    "flagCode": "hn",
+    "threeLetterCode": "HON",
+    "youthRating": 68,
+    "rankingPts": 1371.78
+  },
+  "Hong Kong": {
+    "teamOverall": 62,
+    "confederationID": "AFC",
+    "flagCode": "hk",
+    "threeLetterCode": "HKG",
+    "youthRating": 47,
+    "rankingPts": 1045.37
+  },
+  "Hungary": {
+    "teamOverall": 77,
+    "confederationID": "UEFA",
+    "flagCode": "hu",
+    "threeLetterCode": "HUN",
+    "youthRating": 74,
+    "rankingPts": 1509.69
+  },
+  "Iceland": {
+    "teamOverall": 72,
+    "confederationID": "UEFA",
+    "flagCode": "is",
+    "threeLetterCode": "ISL",
+    "youthRating": 67,
+    "rankingPts": 1368.98
+  },
+  "India": {
+    "teamOverall": 66,
+    "confederationID": "AFC",
+    "flagCode": "in",
+    "threeLetterCode": "IND",
+    "youthRating": 78,
+    "rankingPts": 1099.02
+  },
+  "Indonesia": {
+    "teamOverall": 68,
+    "confederationID": "AFC",
+    "flagCode": "id",
+    "threeLetterCode": "IDN",
+    "youthRating": 68,
+    "rankingPts": 1109.31
+  },
+  "Iran": {
+    "teamOverall": 72,
+    "confederationID": "AFC",
+    "flagCode": "ir",
+    "threeLetterCode": "IRN",
+    "youthRating": 110,
+    "rankingPts": 1620.05
+  },
+  "Iraq": {
+    "teamOverall": 67,
+    "confederationID": "AFC",
+    "flagCode": "iq",
+    "threeLetterCode": "IRQ",
+    "youthRating": 92,
+    "rankingPts": 1398.42
+  },
+  "Israel": {
+    "teamOverall": 73,
+    "confederationID": "UEFA",
+    "flagCode": "il",
+    "threeLetterCode": "ISR",
+    "youthRating": 84,
+    "rankingPts": 1352.19
+  },
+  "Italy": {
+    "teamOverall": 85,
+    "confederationID": "UEFA",
+    "flagCode": "it",
+    "threeLetterCode": "ITA",
+    "youthRating": 144,
+    "rankingPts": 1712.89
+  },
+  "Cote d'Ivoire": {
+    "teamOverall": 78,
+    "confederationID": "CAF",
+    "flagCode": "ci",
+    "threeLetterCode": "CIV",
+    "youthRating": 105,
+    "rankingPts": 1532.98
+  },
+  "Jamaica": {
+    "teamOverall": 74,
+    "confederationID": "CONCACAF",
+    "flagCode": "jm",
+    "threeLetterCode": "JAM",
+    "youthRating": 59,
+    "rankingPts": 1337.62
+  },
+  "Japan": {
+    "teamOverall": 78,
+    "confederationID": "AFC",
+    "flagCode": "jp",
+    "threeLetterCode": "JPN",
+    "youthRating": 121,
+    "rankingPts": 1623.91
+  },
+  "Jordan": {
+    "teamOverall": 66,
+    "confederationID": "AFC",
+    "flagCode": "jo",
+    "threeLetterCode": "JOR",
+    "youthRating": 90,
+    "rankingPts": 1372.11
+  },
+  "Kazakhstan": {
+    "teamOverall": 68,
+    "confederationID": "UEFA",
+    "flagCode": "kz",
+    "threeLetterCode": "KAZ",
+    "youthRating": 47,
+    "rankingPts": 1201.37
+  },
+  "Kenya": {
+    "teamOverall": 65,
+    "confederationID": "CAF",
+    "flagCode": "ke",
+    "threeLetterCode": "KEN",
+    "youthRating": 55,
+    "rankingPts": 1189.82
+  },
+  "Kosovo": {
+    "teamOverall": 74,
+    "confederationID": "UEFA",
+    "flagCode": "xk",
+    "threeLetterCode": "KVX",
+    "youthRating": 60,
+    "rankingPts": 1348.47
+  },
+  "Kuwait": {
+    "teamOverall": 61,
+    "confederationID": "AFC",
+    "flagCode": "kw",
+    "threeLetterCode": "KUW",
+    "youthRating": 75,
+    "rankingPts": 1147.11
+  },
+  "Kyrgyzstan": {
+    "teamOverall": 62,
+    "confederationID": "AFC",
+    "flagCode": "kg",
+    "threeLetterCode": "KGZ",
+    "youthRating": 37,
+    "rankingPts": 1197.33
+  },
+  "Laos": {
+    "teamOverall": 53,
+    "confederationID": "AFC",
+    "flagCode": "la",
+    "threeLetterCode": "LAO",
+    "youthRating": 7,
+    "rankingPts": 907.88
+  },
+  "Latvia": {
+    "teamOverall": 63,
+    "confederationID": "UEFA",
+    "flagCode": "lv",
+    "threeLetterCode": "LVA",
+    "youthRating": 63,
+    "rankingPts": 1134.78
+  },
+  "Lebanon": {
+    "teamOverall": 63,
+    "confederationID": "AFC",
+    "flagCode": "lb",
+    "threeLetterCode": "LBN",
+    "youthRating": 85,
+    "rankingPts": 1201.99
+  },
+  "Lesotho": {
+    "teamOverall": 60,
+    "confederationID": "CAF",
+    "flagCode": "ls",
+    "threeLetterCode": "LES",
+    "youthRating": 25,
+    "rankingPts": 1082.55
+  },
+  "Liberia": {
+    "teamOverall": 64,
+    "confederationID": "CAF",
+    "flagCode": "lr",
+    "threeLetterCode": "LBR",
+    "youthRating": 32,
+    "rankingPts": 1130.62
+  },
+  "Libya": {
+    "teamOverall": 65,
+    "confederationID": "CAF",
+    "flagCode": "ly",
+    "threeLetterCode": "LBY",
+    "youthRating": 46,
+    "rankingPts": 1194.09
+  },
+  "Liechtenstein": {
+    "teamOverall": 61,
+    "confederationID": "UEFA",
+    "flagCode": "li",
+    "threeLetterCode": "LIE",
+    "youthRating": 28,
+    "rankingPts": 914.62
+  },
+  "Lithuania": {
+    "teamOverall": 65,
+    "confederationID": "UEFA",
+    "flagCode": "lt",
+    "threeLetterCode": "LTU",
+    "youthRating": 59,
+    "rankingPts": 1108.22
+  },
+  "Luxembourg": {
+    "teamOverall": 70,
+    "confederationID": "UEFA",
+    "flagCode": "lu",
+    "threeLetterCode": "LUX",
+    "youthRating": 35,
+    "rankingPts": 1218.03
+  },
+  "Macau": {
+    "teamOverall": 50,
+    "confederationID": "AFC",
+    "flagCode": "mo",
+    "threeLetterCode": "MAC",
+    "youthRating": 5,
+    "rankingPts": 888.92
+  },
+  "North Macedonia": {
+    "teamOverall": 70,
+    "confederationID": "UEFA",
+    "flagCode": "mk",
+    "threeLetterCode": "MKD",
+    "youthRating": 71,
+    "rankingPts": 1373.28
+  },
+  "Madagascar": {
+    "teamOverall": 68,
+    "confederationID": "CAF",
+    "flagCode": "mg",
+    "threeLetterCode": "MAD",
+    "youthRating": 28,
+    "rankingPts": 1198.34
+  },
+  "Malawi": {
+    "teamOverall": 60,
+    "confederationID": "CAF",
+    "flagCode": "mw",
+    "threeLetterCode": "MWI",
+    "youthRating": 51,
+    "rankingPts": 1120.11
+  },
+  "Malaysia": {
+    "teamOverall": 61,
+    "confederationID": "AFC",
+    "flagCode": "my",
+    "threeLetterCode": "MAS",
+    "youthRating": 35,
+    "rankingPts": 1110.73
+  },
+  "Maldives": {
+    "teamOverall": 55,
+    "confederationID": "AFC",
+    "flagCode": "mv",
+    "threeLetterCode": "MDV",
+    "youthRating": 50,
+    "rankingPts": 1022.47
+  },
+  "Mali": {
+    "teamOverall": 75,
+    "confederationID": "CAF",
+    "flagCode": "ml",
+    "threeLetterCode": "MLI",
+    "youthRating": 73,
+    "rankingPts": 1440.88
+  },
+  "Malta": {
+    "teamOverall": 66,
+    "confederationID": "UEFA",
+    "flagCode": "mt",
+    "threeLetterCode": "MLT",
+    "youthRating": 42,
+    "rankingPts": 1063.12
+  },
+  "Mauritania": {
+    "teamOverall": 65,
+    "confederationID": "CAF",
+    "flagCode": "mr",
+    "threeLetterCode": "MTN",
+    "youthRating": 25,
+    "rankingPts": 1202.77
+  },
+  "Mauritius": {
+    "teamOverall": 60,
+    "confederationID": "CAF",
+    "flagCode": "mu",
+    "threeLetterCode": "MRI",
+    "youthRating": 21,
+    "rankingPts": 1010.41
+  },
+  "Mexico": {
+    "teamOverall": 77,
+    "confederationID": "CONCACAF",
+    "flagCode": "mx",
+    "threeLetterCode": "MEX",
+    "youthRating": 120,
+    "rankingPts": 1659.12
+  },
+  "Moldova": {
+    "teamOverall": 66,
+    "confederationID": "UEFA",
+    "flagCode": "md",
+    "threeLetterCode": "MDA",
+    "youthRating": 46,
+    "rankingPts": 1068.72
+  },
+  "Mongolia": {
+    "teamOverall": 52,
+    "confederationID": "AFC",
+    "flagCode": "mn",
+    "threeLetterCode": "MNG",
+    "youthRating": 15,
+    "rankingPts": 932.45
+  },
+  "Montenegro": {
+    "teamOverall": 72,
+    "confederationID": "UEFA",
+    "flagCode": "me",
+    "threeLetterCode": "MNE",
+    "youthRating": 60,
+    "rankingPts": 1298.44
+  },
+  "Montserrat": {
+    "teamOverall": 59,
+    "confederationID": "CONCACAF",
+    "flagCode": "ms",
+    "threeLetterCode": "MSR",
+    "youthRating": 8,
+    "rankingPts": 884.38
+  },
+  "Morocco": {
+    "teamOverall": 80,
+    "confederationID": "CAF",
+    "flagCode": "ma",
+    "threeLetterCode": "MAR",
+    "youthRating": 120,
+    "rankingPts": 1755.87
+  },
+  "Mozambique": {
+    "teamOverall": 68,
+    "confederationID": "CAF",
+    "flagCode": "mz",
+    "threeLetterCode": "MOZ",
+    "youthRating": 64,
+    "rankingPts": 1181.88
+  },
+  "Myanmar": {
+    "teamOverall": 57,
+    "confederationID": "AFC",
+    "flagCode": "mm",
+    "threeLetterCode": "MYA",
+    "youthRating": 50,
+    "rankingPts": 1052.47
+  },
+  "Namibia": {
+    "teamOverall": 64,
+    "confederationID": "CAF",
+    "flagCode": "na",
+    "threeLetterCode": "NAM",
+    "youthRating": 39,
+    "rankingPts": 1160.04
+  },
+  "Nepal": {
+    "teamOverall": 53,
+    "confederationID": "AFC",
+    "flagCode": "np",
+    "threeLetterCode": "NEP",
+    "youthRating": 13,
+    "rankingPts": 880.12
+  },
+  "Netherlands": {
+    "teamOverall": 83,
+    "confederationID": "UEFA",
+    "flagCode": "nl",
+    "threeLetterCode": "NED",
+    "youthRating": 132,
+    "rankingPts": 1757.87
+  },
+  "New Caledonia": {
+    "teamOverall": 60,
+    "confederationID": "OFC",
+    "flagCode": "nc",
+    "threeLetterCode": "NCL",
+    "youthRating": 34,
+    "rankingPts": 1073.61
+  },
+  "New Zealand": {
+    "teamOverall": 70,
+    "confederationID": "OFC",
+    "flagCode": "nz",
+    "threeLetterCode": "NZL",
+    "youthRating": 95,
+    "rankingPts": 1305.11
+  },
+  "Nicaragua": {
+    "teamOverall": 63,
+    "confederationID": "CONCACAF",
+    "flagCode": "ni",
+    "threeLetterCode": "NCA",
+    "youthRating": 18,
+    "rankingPts": 1125.39
+  },
+  "Niger": {
+    "teamOverall": 62,
+    "confederationID": "CAF",
+    "flagCode": "ne",
+    "threeLetterCode": "NIG",
+    "youthRating": 31,
+    "rankingPts": 1193.27
+  },
+  "Nigeria": {
+    "teamOverall": 78,
+    "confederationID": "CAF",
+    "flagCode": "ng",
+    "threeLetterCode": "NGA",
+    "youthRating": 120,
+    "rankingPts": 1581.55
+  },
+  "North Korea": {
+    "teamOverall": 62,
+    "confederationID": "AFC",
+    "flagCode": "kp",
+    "threeLetterCode": "PRK",
+    "youthRating": 65,
+    "rankingPts": 1162.73
+  },
+  "Northern Ireland": {
+    "teamOverall": 70,
+    "confederationID": "UEFA",
+    "flagCode": "gb-nir",
+    "threeLetterCode": "NIR",
+    "youthRating": 79,
+    "rankingPts": 1349.01
+  },
+  "Norway": {
+    "teamOverall": 79,
+    "confederationID": "UEFA",
+    "flagCode": "no",
+    "threeLetterCode": "NOR",
+    "youthRating": 105,
+    "rankingPts": 1518.44
+  },
+  "Oman": {
+    "teamOverall": 62,
+    "confederationID": "AFC",
+    "flagCode": "om",
+    "threeLetterCode": "OMA",
+    "youthRating": 70,
+    "rankingPts": 1347.54
+  },
+  "Pakistan": {
+    "teamOverall": 59,
+    "confederationID": "AFC",
+    "flagCode": "pk",
+    "threeLetterCode": "PAK",
+    "youthRating": 37,
+    "rankingPts": 823.92
+  },
+  "Palestine": {
+    "teamOverall": 65,
+    "confederationID": "AFC",
+    "flagCode": "ps",
+    "threeLetterCode": "PLE",
+    "youthRating": 51,
+    "rankingPts": 1232.87
+  },
+  "Panama": {
+    "teamOverall": 70,
+    "confederationID": "CONCACAF",
+    "flagCode": "pa",
+    "threeLetterCode": "PAN",
+    "youthRating": 60,
+    "rankingPts": 1456.31
+  },
+  "Papua New Guinea": {
+    "teamOverall": 59,
+    "confederationID": "OFC",
+    "flagCode": "pg",
+    "threeLetterCode": "PNG",
+    "youthRating": 34,
+    "rankingPts": 1009.22
+  },
+  "Paraguay": {
+    "teamOverall": 75,
+    "confederationID": "CONMEBOL",
+    "flagCode": "py",
+    "threeLetterCode": "PAR",
+    "youthRating": 90,
+    "rankingPts": 1503.5
+  },
+  "Peru": {
+    "teamOverall": 74,
+    "confederationID": "CONMEBOL",
+    "flagCode": "pe",
+    "threeLetterCode": "PER",
+    "youthRating": 85,
+    "rankingPts": 1441.33
+  },
+  "Philippines": {
+    "teamOverall": 65,
+    "confederationID": "AFC",
+    "flagCode": "ph",
+    "threeLetterCode": "PHI",
+    "youthRating": 30,
+    "rankingPts": 1141.09
+  },
+  "Poland": {
+    "teamOverall": 78,
+    "confederationID": "UEFA",
+    "flagCode": "pl",
+    "threeLetterCode": "POL",
+    "youthRating": 94,
+    "rankingPts": 1528.0
+  },
+  "Portugal": {
+    "teamOverall": 85,
+    "confederationID": "UEFA",
+    "flagCode": "pt",
+    "threeLetterCode": "POR",
+    "youthRating": 134,
+    "rankingPts": 1763.83
+  },
+  "Puerto Rico": {
+    "teamOverall": 57,
+    "confederationID": "CONCACAF",
+    "flagCode": "pr",
+    "threeLetterCode": "PUR",
+    "youthRating": 30,
+    "rankingPts": 1043.29
+  },
+  "Qatar": {
+    "teamOverall": 72,
+    "confederationID": "AFC",
+    "flagCode": "qa",
+    "threeLetterCode": "QAT",
+    "youthRating": 90,
+    "rankingPts": 1417.92
+  },
+  "Republic of Ireland": {
+    "teamOverall": 75,
+    "confederationID": "UEFA",
+    "flagCode": "ie",
+    "threeLetterCode": "IRL",
+    "youthRating": 83,
+    "rankingPts": 1364.83
+  },
+  "Romania": {
+    "teamOverall": 75,
+    "confederationID": "UEFA",
+    "flagCode": "ro",
+    "threeLetterCode": "ROU",
+    "youthRating": 91,
+    "rankingPts": 1425.21
+  },
+  "Russia": {
+    "teamOverall": 75,
+    "confederationID": "UEFA",
+    "flagCode": "ru",
+    "threeLetterCode": "RUS",
+    "youthRating": 81,
+    "rankingPts": 1525.6
+  },
+  "Rwanda": {
+    "teamOverall": 60,
+    "confederationID": "CAF",
+    "flagCode": "rw",
+    "threeLetterCode": "RWA",
+    "youthRating": 42,
+    "rankingPts": 1123.77
+  },
+  "St. Kitts and Nevis": {
+    "teamOverall": 60,
+    "confederationID": "CONCACAF",
+    "flagCode": "kn",
+    "threeLetterCode": "SKN",
+    "youthRating": 28,
+    "rankingPts": 1032.88
+  },
+  "St. Lucia": {
+    "teamOverall": 60,
+    "confederationID": "CONCACAF",
+    "flagCode": "lc",
+    "threeLetterCode": "LCA",
+    "youthRating": 28,
+    "rankingPts": 1028.33
+  },
+  "St. Vincent and the Grenadines": {
+    "teamOverall": 57,
+    "confederationID": "CONCACAF",
+    "flagCode": "vc",
+    "threeLetterCode": "VIN",
+    "youthRating": 34,
+    "rankingPts": 1005.49
+  },
+  "Samoa": {
+    "teamOverall": 57,
+    "confederationID": "OFC",
+    "flagCode": "ws",
+    "threeLetterCode": "SAM",
+    "youthRating": 14,
+    "rankingPts": 978.88
+  },
+  "San Marino": {
+    "teamOverall": 52,
+    "confederationID": "UEFA",
+    "flagCode": "sm",
+    "threeLetterCode": "SMR",
+    "youthRating": 29,
+    "rankingPts": 741.32
+  },
+  "São Tomé e Príncipe": {
+    "teamOverall": 59,
+    "confederationID": "CAF",
+    "flagCode": "st",
+    "threeLetterCode": "STP",
+    "youthRating": 7,
+    "rankingPts": 889.11
+  },
+  "Saudi Arabia": {
+    "teamOverall": 73,
+    "confederationID": "AFC",
+    "flagCode": "sa",
+    "threeLetterCode": "KSA",
+    "youthRating": 95,
+    "rankingPts": 1404.11
+  },
+  "Scotland": {
+    "teamOverall": 77,
+    "confederationID": "UEFA",
+    "flagCode": "gb-sct",
+    "threeLetterCode": "SCO",
+    "youthRating": 83,
+    "rankingPts": 1507.66
+  },
+  "Senegal": {
+    "teamOverall": 78,
+    "confederationID": "CAF",
+    "flagCode": "sn",
+    "threeLetterCode": "SEN",
+    "youthRating": 110,
+    "rankingPts": 1706.83
+  },
+  "Serbia": {
+    "teamOverall": 79,
+    "confederationID": "UEFA",
+    "flagCode": "rs",
+    "threeLetterCode": "SRB",
+    "youthRating": 100,
+    "rankingPts": 1508.65
+  },
+  "Seychelles": {
+    "teamOverall": 52,
+    "confederationID": "CAF",
+    "flagCode": "sc",
+    "threeLetterCode": "SEY",
+    "youthRating": 21,
+    "rankingPts": 868.55
+  },
+  "Sierra Leone": {
+    "teamOverall": 66,
+    "confederationID": "CAF",
+    "flagCode": "sl",
+    "threeLetterCode": "SLE",
+    "youthRating": 29,
+    "rankingPts": 1161.38
+  },
+  "Singapore": {
+    "teamOverall": 57,
+    "confederationID": "AFC",
+    "flagCode": "sg",
+    "threeLetterCode": "SIN",
+    "youthRating": 35,
+    "rankingPts": 1098.19
+  },
+  "Slovakia": {
+    "teamOverall": 76,
+    "confederationID": "UEFA",
+    "flagCode": "sk",
+    "threeLetterCode": "SVK",
+    "youthRating": 79,
+    "rankingPts": 1489.77
+  },
+  "Slovenia": {
+    "teamOverall": 75,
+    "confederationID": "UEFA",
+    "flagCode": "si",
+    "threeLetterCode": "SVN",
+    "youthRating": 78,
+    "rankingPts": 1401.82
+  },
+  "Solomon Islands": {
+    "teamOverall": 59,
+    "confederationID": "OFC",
+    "flagCode": "sb",
+    "threeLetterCode": "SOL",
+    "youthRating": 40,
+    "rankingPts": 1038.12
+  },
+  "Somalia": {
+    "teamOverall": 57,
+    "confederationID": "CAF",
+    "flagCode": "so",
+    "threeLetterCode": "SOM",
+    "youthRating": 23,
+    "rankingPts": 873.72
+  },
+  "South Africa": {
+    "teamOverall": 72,
+    "confederationID": "CAF",
+    "flagCode": "za",
+    "threeLetterCode": "RSA",
+    "youthRating": 95,
+    "rankingPts": 1397.12
+  },
+  "South Korea": {
+    "teamOverall": 76,
+    "confederationID": "AFC",
+    "flagCode": "kr",
+    "threeLetterCode": "KOR",
+    "youthRating": 110,
+    "rankingPts": 1568.77
+  },
+  "South Sudan": {
+    "teamOverall": 59,
+    "confederationID": "CAF",
+    "flagCode": "ss",
+    "threeLetterCode": "SSD",
+    "youthRating": 7,
+    "rankingPts": 1014.92
+  },
+  "Spain": {
+    "teamOverall": 86,
+    "confederationID": "UEFA",
+    "flagCode": "es",
+    "threeLetterCode": "ESP",
+    "youthRating": 145,
+    "rankingPts": 1876.4
+  },
+  "Sri Lanka": {
+    "teamOverall": 54,
+    "confederationID": "AFC",
+    "flagCode": "lk",
+    "threeLetterCode": "SRI",
+    "youthRating": 16,
+    "rankingPts": 977.66
+  },
+  "Sudan": {
+    "teamOverall": 60,
+    "confederationID": "CAF",
+    "flagCode": "sd",
+    "threeLetterCode": "SUD",
+    "youthRating": 74,
+    "rankingPts": 1203.33
+  },
+  "Suriname": {
+    "teamOverall": 71,
+    "confederationID": "CONCACAF",
+    "flagCode": "sr",
+    "threeLetterCode": "SUR",
+    "youthRating": 67,
+    "rankingPts": 1158.44
+  },
+  "Sweden": {
+    "teamOverall": 79,
+    "confederationID": "UEFA",
+    "flagCode": "se",
+    "threeLetterCode": "SWE",
+    "youthRating": 88,
+    "rankingPts": 1514.77
+  },
+  "Switzerland": {
+    "teamOverall": 80,
+    "confederationID": "UEFA",
+    "flagCode": "ch",
+    "threeLetterCode": "SUI",
+    "youthRating": 90,
+    "rankingPts": 1616.41
+  },
+  "Syria": {
+    "teamOverall": 70,
+    "confederationID": "AFC",
+    "flagCode": "sy",
+    "threeLetterCode": "SYR",
+    "youthRating": 85,
+    "rankingPts": 1300.27
+  },
+  "Tahiti": {
+    "teamOverall": 57,
+    "confederationID": "OFC",
+    "flagCode": "pf",
+    "threeLetterCode": "TAH",
+    "youthRating": 39,
+    "rankingPts": 1041.88
+  },
+  "Tajikistan": {
+    "teamOverall": 61,
+    "confederationID": "AFC",
+    "flagCode": "tj",
+    "threeLetterCode": "TJK",
+    "youthRating": 37,
+    "rankingPts": 1182.91
+  },
+  "Tanzania": {
+    "teamOverall": 63,
+    "confederationID": "CAF",
+    "flagCode": "tz",
+    "threeLetterCode": "TAN",
+    "youthRating": 80,
+    "rankingPts": 1193.76
+  },
+  "Thailand": {
+    "teamOverall": 65,
+    "confederationID": "AFC",
+    "flagCode": "th",
+    "threeLetterCode": "THA",
+    "youthRating": 86,
+    "rankingPts": 1242.88
+  },
+  "Timor-Leste": {
+    "teamOverall": 49,
+    "confederationID": "AFC",
+    "flagCode": "tl",
+    "threeLetterCode": "TLS",
+    "youthRating": 5,
+    "rankingPts": 897.22
+  },
+  "Togo": {
+    "teamOverall": 67,
+    "confederationID": "CAF",
+    "flagCode": "tg",
+    "threeLetterCode": "TOG",
+    "youthRating": 64,
+    "rankingPts": 1164.66
+  },
+  "Tonga": {
+    "teamOverall": 53,
+    "confederationID": "OFC",
+    "flagCode": "to",
+    "threeLetterCode": "TGA",
+    "youthRating": 8,
+    "rankingPts": 861.11
+  },
+  "Trinidad and Tobago": {
+    "teamOverall": 66,
+    "confederationID": "CONCACAF",
+    "flagCode": "tt",
+    "threeLetterCode": "TRI",
+    "youthRating": 57,
+    "rankingPts": 1181.55
+  },
+  "Tunisia": {
+    "teamOverall": 73,
+    "confederationID": "CAF",
+    "flagCode": "tn",
+    "threeLetterCode": "TUN",
+    "youthRating": 82,
+    "rankingPts": 1520.03
+  },
+  "Turkey": {
+    "teamOverall": 80,
+    "confederationID": "UEFA",
+    "flagCode": "tr",
+    "threeLetterCode": "TUR",
+    "youthRating": 124,
+    "rankingPts": 1582.69
+  },
+  "Turkmenistan": {
+    "teamOverall": 62,
+    "confederationID": "AFC",
+    "flagCode": "tm",
+    "threeLetterCode": "TKM",
+    "youthRating": 36,
+    "rankingPts": 1138.11
+  },
+  "Turks and Caicos Islands": {
+    "teamOverall": 47,
+    "confederationID": "CONCACAF",
+    "flagCode": "tc",
+    "threeLetterCode": "TCA",
+    "youthRating": 9,
+    "rankingPts": 845.44
+  },
+  "Uganda": {
+    "teamOverall": 65,
+    "confederationID": "CAF",
+    "flagCode": "ug",
+    "threeLetterCode": "UGA",
+    "youthRating": 59,
+    "rankingPts": 1338.19
+  },
+  "Ukraine": {
+    "teamOverall": 79,
+    "confederationID": "UEFA",
+    "flagCode": "ua",
+    "threeLetterCode": "UKR",
+    "youthRating": 110,
+    "rankingPts": 1557.47
+  },
+  "United Arab Emirates": {
+    "teamOverall": 71,
+    "confederationID": "AFC",
+    "flagCode": "ae",
+    "threeLetterCode": "UAE",
+    "youthRating": 90,
+    "rankingPts": 1359.77
+  },
+  "United States": {
+    "teamOverall": 79,
+    "confederationID": "CONCACAF",
+    "flagCode": "us",
+    "threeLetterCode": "USA",
+    "youthRating": 118,
+    "rankingPts": 1665.27
+  },
+  "Uruguay": {
+    "teamOverall": 80,
+    "confederationID": "CONMEBOL",
+    "flagCode": "uy",
+    "threeLetterCode": "URU",
+    "youthRating": 90,
+    "rankingPts": 1674.32
+  },
+  "U.S. Virgin Islands": {
+    "teamOverall": 49,
+    "confederationID": "CONCACAF",
+    "flagCode": "vi",
+    "threeLetterCode": "VIR",
+    "youthRating": 8,
+    "rankingPts": 808.14
+  },
+  "Uzbekistan": {
+    "teamOverall": 69,
+    "confederationID": "AFC",
+    "flagCode": "uz",
+    "threeLetterCode": "UZB",
+    "youthRating": 84,
+    "rankingPts": 1452.88
+  },
+  "Vanuatu": {
+    "teamOverall": 59,
+    "confederationID": "OFC",
+    "flagCode": "vu",
+    "threeLetterCode": "VAN",
+    "youthRating": 33,
+    "rankingPts": 1021.83
+  },
+  "Venezuela": {
+    "teamOverall": 74,
+    "confederationID": "CONMEBOL",
+    "flagCode": "ve",
+    "threeLetterCode": "VEN",
+    "youthRating": 71,
+    "rankingPts": 1457.23
+  },
+  "Vietnam": {
+    "teamOverall": 64,
+    "confederationID": "AFC",
+    "flagCode": "vn",
+    "threeLetterCode": "VIE",
+    "youthRating": 70,
+    "rankingPts": 1213.78
+  },
+  "Wales": {
+    "teamOverall": 75,
+    "confederationID": "UEFA",
+    "flagCode": "gb-wls",
+    "threeLetterCode": "WAL",
+    "youthRating": 71,
+    "rankingPts": 1524.29
+  },
+  "Yemen": {
+    "teamOverall": 60,
+    "confederationID": "AFC",
+    "flagCode": "ye",
+    "threeLetterCode": "YEM",
+    "youthRating": 55,
+    "rankingPts": 1094.87
+  },
+  "Zambia": {
+    "teamOverall": 67,
+    "confederationID": "CAF",
+    "flagCode": "zm",
+    "threeLetterCode": "ZAM",
+    "youthRating": 61,
+    "rankingPts": 1325.11
+  },
+  "Zimbabwe": {
+    "teamOverall": 68,
+    "confederationID": "CAF",
+    "flagCode": "zw",
+    "threeLetterCode": "ZIM",
+    "youthRating": 44,
+    "rankingPts": 1124.77
+  }
+}

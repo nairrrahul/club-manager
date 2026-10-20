@@ -1,0 +1,52 @@
+{
+  "1": {
+    "ENG": 40,
+    "GB": 7,
+    "UEFA": 27,
+    "CONMEBOL": 12,
+    "CONCACAF": 6,
+    "AFC": 3,
+    "OFC": 1,
+    "CAF": 4
+  },
+  "2": {
+    "ENG": 52,
+    "GB": 10,
+    "UEFA": 19,
+    "CONMEBOL": 6,
+    "CONCACAF": 5,
+    "AFC": 3,
+    "OFC": 1,
+    "CAF": 4
+  },
+  "3": {
+    "ENG": 62,
+    "GB": 12,
+    "UEFA": 13,
+    "CONMEBOL": 3,
+    "CONCACAF": 4,
+    "AFC": 2,
+    "OFC": 1,
+    "CAF": 3
+  },
+  "4": {
+    "ENG": 70,
+    "GB": 13,
+    "UEFA": 9,
+    "CONMEBOL": 2,
+    "CONCACAF": 3,
+    "AFC": 1,
+    "OFC": 1,
+    "CAF": 1
+  },
+  "5": {
+    "ENG": 78,
+    "GB": 12,
+    "UEFA": 6,
+    "CONMEBOL": 1,
+    "CONCACAF": 1,
+    "AFC": 1,
+    "OFC": 0,
+    "CAF": 1
+  }
+}

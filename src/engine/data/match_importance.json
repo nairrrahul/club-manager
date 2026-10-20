@@ -1,0 +1,9 @@
+{
+  "friendly": 10,
+  "nationsLeague": 15,
+  "qualifier": 25,
+  "continentalGroup": 35,
+  "continentalKnockout": 40,
+  "worldCupGroup": 50,
+  "worldCupKnockout": 60
+}

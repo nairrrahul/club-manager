@@ -1,0 +1,23 @@
+{
+  "ENG": { "UCL": 5, "UEL": 2, "UECL": 1 },
+  "FRA": { "UCL": 4, "UEL": 2, "UECL": 1 },
+  "GER": { "UCL": 4, "UEL": 2, "UECL": 1 },
+  "ESP": { "UCL": 5, "UEL": 2, "UECL": 1 },
+  "ITA": { "UCL": 4, "UEL": 2, "UECL": 1 },
+  "NED": { "UCL": 2, "UEL": 2, "UECL": 1 },
+  "POR": { "UCL": 2, "UEL": 2, "UECL": 1 },
+  "BEL": { "UCL": 1, "UEL": 2, "UECL": 1 },
+  "CZE": { "UCL": 1, "UEL": 1, "UECL": 2 },
+  "TUR": { "UCL": 2, "UEL": 2, "UECL": 1 },
+  "UKR": { "UCL": 1, "UEL": 2, "UECL": 1 },
+  "SCO": { "UCL": 1, "UEL": 2, "UECL": 2 },
+  "SUI": { "UCL": 1, "UEL": 2, "UECL": 2 },
+  "OTHER": { "UCL": 3, "UEL": 11, "UECL": 6 },
+  "OTHER_UECL": { "UCL": 0, "UEL": 0, "UECL": 14 },
+  "guaranteedUCL": {
+    "FRA": ["PSG"],
+    "ESP": ["Barcelona", "Real Madrid", "Atletico Madrid"],
+    "GER": ["Bayern", "Dortmund"],
+    "ITA": ["Inter Milan"]
+  }
+}

@@ -1,0 +1,698 @@
+[
+  {
+    "ID": 1,
+    "Team": "Arsenal",
+    "Overall": 84,
+    "Tier": 1
+  },
+  {
+    "ID": 2,
+    "Team": "Aston Villa",
+    "Overall": 81,
+    "Tier": 1
+  },
+  {
+    "ID": 3,
+    "Team": "Blackburn Rovers",
+    "Overall": 69,
+    "Tier": 2
+  },
+  {
+    "ID": 4,
+    "Team": "Bolton Wanderers",
+    "Overall": 67,
+    "Tier": 2
+  },
+  {
+    "ID": 5,
+    "Team": "Chelsea",
+    "Overall": 81,
+    "Tier": 1
+  },
+  {
+    "ID": 6,
+    "Team": "Everton",
+    "Overall": 78,
+    "Tier": 1
+  },
+  {
+    "ID": 7,
+    "Team": "Leeds United",
+    "Overall": 76,
+    "Tier": 1
+  },
+  {
+    "ID": 8,
+    "Team": "Liverpool",
+    "Overall": 84,
+    "Tier": 1
+  },
+  {
+    "ID": 9,
+    "Team": "Manchester City",
+    "Overall": 84,
+    "Tier": 1
+  },
+  {
+    "ID": 10,
+    "Team": "Manchester United",
+    "Overall": 80,
+    "Tier": 1
+  },
+  {
+    "ID": 11,
+    "Team": "Middlesbrough",
+    "Overall": 72,
+    "Tier": 2
+  },
+  {
+    "ID": 12,
+    "Team": "Newcastle United",
+    "Overall": 81,
+    "Tier": 1
+  },
+  {
+    "ID": 13,
+    "Team": "Nottingham Forest",
+    "Overall": 79,
+    "Tier": 1
+  },
+  {
+    "ID": 14,
+    "Team": "Queens Park Rangers",
+    "Overall": 70,
+    "Tier": 2
+  },
+  {
+    "ID": 15,
+    "Team": "Southampton",
+    "Overall": 72,
+    "Tier": 2
+  },
+  {
+    "ID": 16,
+    "Team": "Tottenham Hotspur",
+    "Overall": 80,
+    "Tier": 1
+  },
+  {
+    "ID": 17,
+    "Team": "West Ham United",
+    "Overall": 77,
+    "Tier": 2
+  },
+  {
+    "ID": 18,
+    "Team": "Birmingham City",
+    "Overall": 72,
+    "Tier": 2
+  },
+  {
+    "ID": 19,
+    "Team": "Charlton Athletic",
+    "Overall": 69,
+    "Tier": 2
+  },
+  {
+    "ID": 20,
+    "Team": "Derby County",
+    "Overall": 70,
+    "Tier": 2
+  },
+  {
+    "ID": 21,
+    "Team": "Grimsby Town",
+    "Overall": 62,
+    "Tier": 4
+  },
+  {
+    "ID": 22,
+    "Team": "Ipswich Town",
+    "Overall": 73,
+    "Tier": 1
+  },
+  {
+    "ID": 23,
+    "Team": "Leicester City",
+    "Overall": 71,
+    "Tier": 3
+  },
+  {
+    "ID": 24,
+    "Team": "Millwall",
+    "Overall": 71,
+    "Tier": 2
+  },
+  {
+    "ID": 25,
+    "Team": "Sunderland",
+    "Overall": 77,
+    "Tier": 1
+  },
+  {
+    "ID": 26,
+    "Team": "West Bromwich Albion",
+    "Overall": 70,
+    "Tier": 2
+  },
+  {
+    "ID": 27,
+    "Team": "Wolverhampton Wanderers",
+    "Overall": 75,
+    "Tier": 2
+  },
+  {
+    "ID": 28,
+    "Team": "Crewe Alexandra",
+    "Overall": 61,
+    "Tier": 4
+  },
+  {
+    "ID": 29,
+    "Team": "Shrewsbury Town",
+    "Overall": 61,
+    "Tier": 4
+  },
+  {
+    "ID": 30,
+    "Team": "Barnet",
+    "Overall": 62,
+    "Tier": 4
+  },
+  {
+    "ID": 31,
+    "Team": "Doncaster Rovers",
+    "Overall": 64,
+    "Tier": 3
+  },
+  {
+    "ID": 32,
+    "Team": "Exeter City",
+    "Overall": 63,
+    "Tier": 4
+  },
+  {
+    "ID": 33,
+    "Team": "Fulham",
+    "Overall": 78,
+    "Tier": 1
+  },
+  {
+    "ID": 34,
+    "Team": "Lincoln City",
+    "Overall": 66,
+    "Tier": 2
+  },
+  {
+    "ID": 35,
+    "Team": "Stevenage",
+    "Overall": 65,
+    "Tier": 3
+  },
+  {
+    "ID": 36,
+    "Team": "Barrow",
+    "Overall": 62,
+    "Tier": 5
+  },
+  {
+    "ID": 37,
+    "Team": "Portsmouth",
+    "Overall": 69,
+    "Tier": 2
+  },
+  {
+    "ID": 38,
+    "Team": "Norwich City",
+    "Overall": 70,
+    "Tier": 2
+  },
+  {
+    "ID": 39,
+    "Team": "Reading",
+    "Overall": 66,
+    "Tier": 3
+  },
+  {
+    "ID": 40,
+    "Team": "Sheffield United",
+    "Overall": 71,
+    "Tier": 2
+  },
+  {
+    "ID": 41,
+    "Team": "Watford",
+    "Overall": 70,
+    "Tier": 2
+  },
+  {
+    "ID": 42,
+    "Team": "Burnley",
+    "Overall": 75,
+    "Tier": 2
+  },
+  {
+    "ID": 43,
+    "Team": "Rotherham United",
+    "Overall": 64,
+    "Tier": 4
+  },
+  {
+    "ID": 44,
+    "Team": "Milton Keynes Dons",
+    "Overall": 65,
+    "Tier": 3
+  },
+  {
+    "ID": 45,
+    "Team": "Crystal Palace",
+    "Overall": 79,
+    "Tier": 1
+  },
+  {
+    "ID": 46,
+    "Team": "Coventry City",
+    "Overall": 73,
+    "Tier": 1
+  },
+  {
+    "ID": 47,
+    "Team": "Preston North End",
+    "Overall": 70,
+    "Tier": 2
+  },
+  {
+    "ID": 48,
+    "Team": "Gillingham",
+    "Overall": 62,
+    "Tier": 4
+  },
+  {
+    "ID": 49,
+    "Team": "Walsall",
+    "Overall": 62,
+    "Tier": 4
+  },
+  {
+    "ID": 50,
+    "Team": "Bradford City",
+    "Overall": 65,
+    "Tier": 3
+  },
+  {
+    "ID": 51,
+    "Team": "Stoke City",
+    "Overall": 70,
+    "Tier": 2
+  },
+  {
+    "ID": 52,
+    "Team": "Sheffield Wednesday",
+    "Overall": 67,
+    "Tier": 3
+  },
+  {
+    "ID": 53,
+    "Team": "Brighton & Hove Albion",
+    "Overall": 78,
+    "Tier": 1
+  },
+  {
+    "ID": 54,
+    "Team": "Wigan Athletic",
+    "Overall": 64,
+    "Tier": 3
+  },
+  {
+    "ID": 55,
+    "Team": "Bristol City",
+    "Overall": 71,
+    "Tier": 2
+  },
+  {
+    "ID": 56,
+    "Team": "Oldham Athletic",
+    "Overall": 61,
+    "Tier": 4
+  },
+  {
+    "ID": 57,
+    "Team": "Luton Town",
+    "Overall": 68,
+    "Tier": 3
+  },
+  {
+    "ID": 58,
+    "Team": "Chesterfield",
+    "Overall": 63,
+    "Tier": 4
+  },
+  {
+    "ID": 59,
+    "Team": "Brentford",
+    "Overall": 78,
+    "Tier": 1
+  },
+  {
+    "ID": 60,
+    "Team": "Blackpool",
+    "Overall": 66,
+    "Tier": 3
+  },
+  {
+    "ID": 61,
+    "Team": "Port Vale",
+    "Overall": 64,
+    "Tier": 4
+  },
+  {
+    "ID": 62,
+    "Team": "Plymouth Argyle",
+    "Overall": 66,
+    "Tier": 3
+  },
+  {
+    "ID": 63,
+    "Team": "Northampton Town",
+    "Overall": 63,
+    "Tier": 4
+  },
+  {
+    "ID": 64,
+    "Team": "Stockport County",
+    "Overall": 66,
+    "Tier": 3
+  },
+  {
+    "ID": 65,
+    "Team": "Barnsley",
+    "Overall": 65,
+    "Tier": 3
+  },
+  {
+    "ID": 66,
+    "Team": "Wycombe Wanderers",
+    "Overall": 66,
+    "Tier": 3
+  },
+  {
+    "ID": 67,
+    "Team": "Swindon Town",
+    "Overall": 62,
+    "Tier": 4
+  },
+  {
+    "ID": 68,
+    "Team": "Cheltenham Town",
+    "Overall": 62,
+    "Tier": 4
+  },
+  {
+    "ID": 69,
+    "Team": "Notts County",
+    "Overall": 63,
+    "Tier": 3
+  },
+  {
+    "ID": 70,
+    "Team": "Peterborough United",
+    "Overall": 64,
+    "Tier": 3
+  },
+  {
+    "ID": 71,
+    "Team": "Huddersfield Town",
+    "Overall": 67,
+    "Tier": 3
+  },
+  {
+    "ID": 72,
+    "Team": "Mansfield Town",
+    "Overall": 64,
+    "Tier": 3
+  },
+  {
+    "ID": 73,
+    "Team": "AFC Bournemouth",
+    "Overall": 78,
+    "Tier": 1
+  },
+  {
+    "ID": 74,
+    "Team": "Cambridge United",
+    "Overall": 63,
+    "Tier": 3
+  },
+  {
+    "ID": 75,
+    "Team": "Wrexham",
+    "Overall": 70,
+    "Tier": 2
+  },
+  {
+    "ID": 76,
+    "Team": "Oxford United",
+    "Overall": 69,
+    "Tier": 3
+  },
+  {
+    "ID": 77,
+    "Team": "Hull City",
+    "Overall": 71,
+    "Tier": 1
+  },
+  {
+    "ID": 78,
+    "Team": "Leyton Orient",
+    "Overall": 65,
+    "Tier": 3
+  },
+  {
+    "ID": 79,
+    "Team": "Swansea City",
+    "Overall": 71,
+    "Tier": 2
+  },
+  {
+    "ID": 80,
+    "Team": "Cardiff City",
+    "Overall": 68,
+    "Tier": 2
+  },
+  {
+    "ID": 81,
+    "Team": "Bristol Rovers",
+    "Overall": 62,
+    "Tier": 4
+  },
+  {
+    "ID": 82,
+    "Team": "Burton Albion",
+    "Overall": 63,
+    "Tier": 3
+  },
+  {
+    "ID": 83,
+    "Team": "Tranmere Rovers",
+    "Overall": 62,
+    "Tier": 4
+  },
+  {
+    "ID": 84,
+    "Team": "Accrington Stanley",
+    "Overall": 60,
+    "Tier": 4
+  },
+  {
+    "ID": 85,
+    "Team": "Crawley Town",
+    "Overall": 62,
+    "Tier": 4
+  },
+  {
+    "ID": 86,
+    "Team": "Harrogate Town",
+    "Overall": 61,
+    "Tier": 5
+  },
+  {
+    "ID": 87,
+    "Team": "Newport County",
+    "Overall": 60,
+    "Tier": 4
+  },
+  {
+    "ID": 88,
+    "Team": "AFC Wimbledon",
+    "Overall": 63,
+    "Tier": 3
+  },
+  {
+    "ID": 89,
+    "Team": "Fleetwood Town",
+    "Overall": 62,
+    "Tier": 4
+  },
+  {
+    "ID": 90,
+    "Team": "Bromley",
+    "Overall": 62,
+    "Tier": 3
+  },
+  {
+    "ID": 91,
+    "Team": "Salford City",
+    "Overall": 63,
+    "Tier": 4
+  },
+  {
+    "ID": 92,
+    "Team": "Colchester United",
+    "Overall": 62,
+    "Tier": 4
+  },
+  {
+    "ID": 93,
+    "Team": "York City",
+    "Overall": 62,
+    "Tier": 4
+  },
+  {
+    "ID": 94,
+    "Team": "Rochdale",
+    "Overall": 62,
+    "Tier": 4
+  },
+  {
+    "ID": 95,
+    "Team": "Hornchurch",
+    "Overall": 49,
+    "Tier": 5
+  },
+  {
+    "ID": 96,
+    "Team": "Sutton United",
+    "Overall": 57,
+    "Tier": 5
+  },
+  {
+    "ID": 97,
+    "Team": "Southend United",
+    "Overall": 57,
+    "Tier": 5
+  },
+  {
+    "ID": 98,
+    "Team": "Hartlepool",
+    "Overall": 56,
+    "Tier": 5
+  },
+  {
+    "ID": 99,
+    "Team": "Worthing",
+    "Overall": 50,
+    "Tier": 5
+  },
+  {
+    "ID": 100,
+    "Team": "Forest Green Rovers",
+    "Overall": 52,
+    "Tier": 5
+  },
+  {
+    "ID": 101,
+    "Team": "Eastleigh",
+    "Overall": 50,
+    "Tier": 5
+  },
+  {
+    "ID": 102,
+    "Team": "Aldershot Town",
+    "Overall": 55,
+    "Tier": 5
+  },
+  {
+    "ID": 103,
+    "Team": "Tamworth",
+    "Overall": 51,
+    "Tier": 5
+  },
+  {
+    "ID": 104,
+    "Team": "Boreham Wood",
+    "Overall": 57,
+    "Tier": 5
+  },
+  {
+    "ID": 105,
+    "Team": "Wealdstone",
+    "Overall": 50,
+    "Tier": 5
+  },
+  {
+    "ID": 106,
+    "Team": "AFC Fylde",
+    "Overall": 53,
+    "Tier": 5
+  },
+  {
+    "ID": 107,
+    "Team": "Yeovil Town",
+    "Overall": 52,
+    "Tier": 5
+  },
+  {
+    "ID": 108,
+    "Team": "Halifax Town",
+    "Overall": 51,
+    "Tier": 5
+  },
+  {
+    "ID": 109,
+    "Team": "Carlisle",
+    "Overall": 58,
+    "Tier": 5
+  },
+  {
+    "ID": 110,
+    "Team": "Gateshead",
+    "Overall": 55,
+    "Tier": 5
+  },
+  {
+    "ID": 111,
+    "Team": "Boston United",
+    "Overall": 57,
+    "Tier": 5
+  },
+  {
+    "ID": 112,
+    "Team": "Altrincham",
+    "Overall": 52,
+    "Tier": 5
+  },
+  {
+    "ID": 113,
+    "Team": "Solihull Moors",
+    "Overall": 52,
+    "Tier": 5
+  },
+  {
+    "ID": 114,
+    "Team": "Woking",
+    "Overall": 57,
+    "Tier": 5
+  },
+  {
+    "ID": 115,
+    "Team": "Kidderminster Harriers",
+    "Overall": 50,
+    "Tier": 5
+  },
+  {
+    "ID": 116,
+    "Team": "Scunthorpe United",
+    "Overall": 55,
+    "Tier": 5
+  }
+]
