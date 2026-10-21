@@ -159,7 +159,7 @@ export interface ClubWorldCupMatchSnap {
 
 export interface ClubWorldCupGroupSnap {
   name: string;
-  table: { pos: number; team: TeamRef; GP: number; W: number; D: number; L: number; GF: number; GA: number; GD: number; PTS: number }[];
+  table: { pos: number; team: TeamRef & { countrycode: string | null }; GP: number; W: number; D: number; L: number; GF: number; GA: number; GD: number; PTS: number }[];
   fixtures: { round: number; matches: ClubWorldCupMatchSnap[] }[];
 }
 
@@ -222,7 +222,7 @@ function snapshotClubWorldCup(cup: ClubWorldCup | null): ClubWorldCupSnap | null
       name: group.name,
       table: group.table.map((row, index) => ({
         pos: index + 1,
-        team: ref(row.team),
+        team: { ...ref(row.team), countrycode: row.team.countrycode ?? "ENG" },
         GP: row.GP,
         W: row.W,
         D: row.D,

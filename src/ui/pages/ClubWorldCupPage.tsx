@@ -6,6 +6,7 @@ import { seasonDisplay } from "../../engine/constants";
 import { CupBracketTree } from "../components/brackets";
 import { Empty, PageHeader, Panel, SeasonSelect, Tabs, TeamLink } from "../components/common";
 import { MatchLine } from "../components/tables";
+import { FlagIcon } from "../components/FlagIcon";
 import type { ClubWorldCupSnap } from "../../engine/snapshots";
 import type { CupSnap } from "../../engine/snapshots";
 import { formatScore } from "../format";
@@ -49,7 +50,12 @@ function GroupTable(props: { group: ClubWorldCupSnap["groups"][number]; highligh
             {props.group.table.map(row => (
               <tr key={row.team.id} className={row.team.id === props.highlightID ? "bg-navy-600" : ""}>
                 <td className="num">{row.pos}</td>
-                <td><TeamLink team={row.team} /></td>
+                <td>
+                  <span className="inline-flex items-center gap-2">
+                    <FlagIcon code={row.team.countrycode} />
+                    <TeamLink team={row.team} />
+                  </span>
+                </td>
                 <td className="num">{row.GP}</td><td className="num">{row.W}</td>
                 <td className="num">{row.D}</td><td className="num">{row.L}</td>
                 <td className="num">{row.GF}</td><td className="num">{row.GA}</td>

@@ -57,18 +57,36 @@ function SendScout() {
               {REGIONS.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
             </select>
           </label>
-          <label className="block text-sm">
-            <span className="text-navy-300 text-xs uppercase tracking-wider">Country</span>
-            <select
-              className="input w-full mt-1"
-              value={country}
-              disabled={!region}
-              onChange={e => setCountry(e.target.value)}
-            >
-              <option value="">{region ? "Select a country…" : "Choose a region first"}</option>
-              {countries.map(item => <option key={item.code} value={item.code}>{item.name} ({item.code})</option>)}
-            </select>
-          </label>
+          <div className="block text-sm">
+            <label htmlFor="scout-country" className="text-navy-300 text-xs uppercase tracking-wider">Country</label>
+            <span className="mt-1 flex items-center gap-2">
+              <select
+                id="scout-country"
+                className="input w-full"
+                value={country}
+                disabled={!region}
+                onChange={e => setCountry(e.target.value)}
+              >
+                <option value="">{region ? "Select a country…" : "Choose a region first"}</option>
+                {countries.map(item => <option key={item.code} value={item.code}>{item.name} ({item.code})</option>)}
+              </select>
+              <button
+                type="button"
+                className="btn-ghost shrink-0 px-3"
+                aria-label="Randomly select a country"
+                title="Randomly select a region and country"
+                onClick={() => {
+                  const selectedRegion = REGIONS[Math.floor(Math.random() * REGIONS.length)];
+                  const regionCountries = getCountriesByRegion(selectedRegion.id);
+                  const selectedCountry = regionCountries[Math.floor(Math.random() * regionCountries.length)];
+                  setRegion(selectedRegion.id);
+                  setCountry(selectedCountry.code);
+                }}
+              >
+                🎲
+              </button>
+            </span>
+          </div>
         </div>
 
         <div>

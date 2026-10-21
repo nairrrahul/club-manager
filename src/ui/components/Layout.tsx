@@ -20,28 +20,6 @@ function navClass({ isActive }: { isActive: boolean }): string {
   }`;
 }
 
-function ClubWorldCupModeToggle() {
-  const game = useGame();
-  const setExplicit = useGameStore(s => s.explicitClubWorldCup);
-  const manual = game.season.explicitClubWorldCup;
-  if (!game.season.clubWorldCup) return null;
-  return (
-    <button
-      onClick={() => setExplicit(!manual)}
-      title={manual
-        ? "The Club World Cup is simulated manually. Click to simulate it automatically."
-        : "The Club World Cup is simulated automatically. Click to simulate it manually."}
-      className={`flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider border ${
-        manual
-          ? "bg-accent-purple text-white border-accent-purple-light"
-          : "bg-navy-800 text-navy-200 border-navy-600 hover:text-white"
-      }`}
-    >
-      Club World Cup: {manual ? "Manual" : "Auto"}
-    </button>
-  );
-}
-
 function NavSection(props: { title: string; children: ReactNode }) {
   return (
     <div className="mt-4">
@@ -247,68 +225,93 @@ function SimControls() {
   );
 }
 
-/** Auto: windows are played as part of Continue. Manual: you press "Simulate window" during each break. */
-function WindowModeToggle() {
+function SettingsMenu() {
   const game = useGame();
-  const setExplicit = useGameStore(s => s.explicitWindows);
-  const manual = game.season.international.explicitWindows;
-  return (
-    <button
-      onClick={() => setExplicit(!manual)}
-      title={manual
-        ? "International windows are simulated manually. Click to simulate them automatically."
-        : "International windows are simulated automatically when you continue. Click to simulate them manually."}
-      className={`flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider border ${
-        manual
-          ? "bg-accent-purple text-white border-accent-purple-light"
-          : "bg-navy-800 text-navy-200 border-navy-600 hover:text-white"
-      }`}
-    >
-      ✈ Windows: {manual ? "Manual" : "Auto"}
-    </button>
-  );
-}
-
-/** Off (default): unsigned youth-scouting candidates are lost. On: they become free agents. */
-function ScoutFreeAgentToggle() {
-  const game = useGame();
-  const setAutoSend = useGameStore(s => s.autoSendScouts);
-  const on = game.season.freeAgents.autoSendUnsignedScouts === true;
-  return (
-    <button
-      onClick={() => setAutoSend(!on)}
-      title={on
-        ? "Unsigned youth-scouting candidates are sent to the free agents. Click to discard them instead."
-        : "Unsigned youth-scouting candidates are discarded. Click to send them to the free agents instead."}
-      className={`flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider border ${
-        on
-          ? "bg-accent-purple text-white border-accent-purple-light"
-          : "bg-navy-800 text-navy-200 border-navy-600 hover:text-white"
-      }`}
-    >
-      Scouts → FA: {on ? "On" : "Off"}
-    </button>
-  );
-}
-
-function GodModeToggle() {
-  const game = useGame();
+  const setExplicitWindows = useGameStore(s => s.explicitWindows);
+  const setExplicitClubWorldCup = useGameStore(s => s.explicitClubWorldCup);
+  const setAutoSendScouts = useGameStore(s => s.autoSendScouts);
   const godMode = useGameStore(s => s.godMode);
   const locked = useLocation().pathname === "/add-player";
+  const [open, setOpen] = useState(false);
+  const wrapper = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onMouseDown = (event: MouseEvent) => {
+      if (wrapper.current && !wrapper.current.contains(event.target as Node)) setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
   return (
-    <button
-      onClick={() => godMode(!game.godMode)}
-      disabled={locked}
-      title={locked ? "Leave the Add Player page to turn off God Mode" : "Toggle God Mode"}
-      className={`flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider border ${
-        game.godMode
-          ? "bg-accent-yellow text-navy-950 border-accent-yellow"
-          : "bg-navy-800 text-navy-200 border-navy-600"
-      } ${locked ? "opacity-50 cursor-not-allowed" : "hover:text-white"}`}
-    >
-      <span className={`w-2 h-2 rounded-full ${game.godMode ? "bg-navy-950" : "bg-navy-500"}`} />
-      God Mode
-    </button>
+    <div ref={wrapper} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(value => !value)}
+        aria-label="Settings"
+        aria-expanded={open}
+        title="Simulation settings"
+        className="btn-ghost flex items-center justify-center w-10 h-10"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10.3 2.8h3.4l.5 2.1a7.4 7.4 0 0 1 1.6.9l2-.7 1.7 2.9-1.5 1.5a7.2 7.2 0 0 1 0 1.9l1.5 1.5-1.7 2.9-2-.7a7.4 7.4 0 0 1-1.6.9l-.5 2.1h-3.4l-.5-2.1a7.4 7.4 0 0 1-1.6-.9l-2 .7-1.7-2.9L6 11.4a7.2 7.2 0 0 1 0-1.9L4.5 8l1.7-2.9 2 .7a7.4 7.4 0 0 1 1.6-.9l.5-2.1Z" />
+          <circle cx="12" cy="10.5" r="2.5" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full z-40 mt-2 w-72 rounded-lg border border-navy-600 bg-navy-900 p-3 shadow-xl">
+          <div className="px-2 pb-2 text-[10px] font-bold uppercase tracking-widest text-navy-400">Settings</div>
+          <label className="flex items-start gap-2 rounded px-2 py-2 text-sm hover:bg-navy-800">
+            <input
+              type="checkbox"
+              className="mt-0.5 accent-accent-purple"
+              checked={game.season.international.explicitWindows}
+              onChange={event => setExplicitWindows(event.target.checked)}
+            />
+            <span>Manually simulate international windows</span>
+          </label>
+          <label className="flex items-start gap-2 rounded px-2 py-2 text-sm hover:bg-navy-800">
+            <input
+              type="checkbox"
+              className="mt-0.5 accent-accent-purple"
+              checked={game.season.explicitClubWorldCup}
+              onChange={event => setExplicitClubWorldCup(event.target.checked)}
+            />
+            <span>Manually simulate the Club World Cup</span>
+          </label>
+          <label className="flex items-start gap-2 rounded px-2 py-2 text-sm hover:bg-navy-800">
+            <input
+              type="checkbox"
+              className="mt-0.5 accent-accent-purple"
+              checked={game.season.freeAgents.autoSendUnsignedScouts === true}
+              onChange={event => setAutoSendScouts(event.target.checked)}
+            />
+            <span>Send unsigned scouting candidates to free agents</span>
+          </label>
+          <label className={`flex items-start gap-2 rounded px-2 py-2 text-sm hover:bg-navy-800 ${locked ? "opacity-50" : ""}`}>
+            <input
+              type="checkbox"
+              className="mt-0.5 accent-accent-yellow"
+              checked={game.godMode}
+              disabled={locked}
+              onChange={event => godMode(event.target.checked)}
+            />
+            <span>
+              God Mode enabled
+              {locked && <span className="block text-xs text-navy-400">Leave Add Player to change this.</span>}
+            </span>
+          </label>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -467,11 +470,8 @@ export function Layout(props: { children: ReactNode }) {
       <div className="flex-1 min-w-0 flex flex-col">
         <header className="shrink-0 flex flex-wrap items-center justify-between gap-3 px-6 py-3 bg-navy-900 border-b border-navy-700">
           <SearchBar />
-          <div className="flex items-center gap-4">
-            <WindowModeToggle />
-            <ClubWorldCupModeToggle />
-            <ScoutFreeAgentToggle />
-            <GodModeToggle />
+          <div className="flex items-center gap-2">
+            <SettingsMenu />
             <SimControls />
           </div>
         </header>
