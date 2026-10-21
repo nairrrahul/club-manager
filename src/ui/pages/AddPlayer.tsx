@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { useGameStore } from "../../store/gameStore";
 import type { GodAddPlayerInput } from "../../engine/game";
 import { ADD_PLAYER_AGE_MAX, ADD_PLAYER_AGE_MIN, TEAM_DIRECTORY } from "../../engine/game";
+import { MAX_GOD_MODE_POTENTIAL } from "../../engine/playerSquad";
 import { LEAGUE_NAMES } from "../../engine/constants";
 import { POSITION_ORDER } from "../../engine/formation";
 import { getNationName, nationInfo } from "../../engine/nations";
@@ -58,12 +59,12 @@ export default function AddPlayer() {
     }))
     .filter(group => group.clubs.length > 0);
   const europeanCountries = [...new Set(clubs
-    .filter(club => club.kind === "EUR")
+    .filter(club => club.kind !== "ENG")
     .map(club => club.countrycode))]
     .sort((a, b) => getNationName(a).localeCompare(getNationName(b)))
     .map(code => ({
       label: getNationName(code),
-      clubs: clubs.filter(club => club.kind === "EUR" && club.countrycode === code)
+      clubs: clubs.filter(club => club.kind !== "ENG" && club.countrycode === code)
         .sort((a, b) => a.name.localeCompare(b.name))
     }));
 
@@ -132,11 +133,11 @@ export default function AddPlayer() {
             </label>
             <label className="block text-sm text-navy-200">
               Overall
-              <input className="input w-full mt-1" type="number" min="20" max="99" step="1" value={form.overall} onChange={event => update("overall", event.target.value)} required />
+              <input className="input w-full mt-1" type="number" min="20" max={MAX_GOD_MODE_POTENTIAL} step="1" value={form.overall} onChange={event => update("overall", event.target.value)} required />
             </label>
             <label className="block text-sm text-navy-200">
               Potential
-              <input className="input w-full mt-1" type="number" min="20" max="99" step="1" value={form.potential} onChange={event => update("potential", event.target.value)} required />
+              <input className="input w-full mt-1" type="number" min="20" max={MAX_GOD_MODE_POTENTIAL} step="1" value={form.potential} onChange={event => update("potential", event.target.value)} required />
             </label>
             <label className="block text-sm text-navy-200">
               Nationality

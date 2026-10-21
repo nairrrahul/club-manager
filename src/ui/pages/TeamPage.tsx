@@ -168,7 +168,7 @@ function FixturesTab(props: { teamID: number; isEnglish: boolean }) {
           <Empty>
             {props.isEnglish
               ? "No fixtures recorded for this season."
-              : "This club did not take part in a European competition this season."}
+              : "This club did not take part in a competition this season."}
           </Empty>
         ) : (
           <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
@@ -280,7 +280,7 @@ export default function TeamPage() {
         subtitle={
           isEnglish
             ? `${profile.league ? LEAGUE_NAMES[profile.league.tier] : ""}${profile.isManaged ? " · Your club" : ""}`
-            : <span className="inline-flex items-center gap-2">European club · <NationTag code={profile.countrycode} /></span>
+            : <span className="inline-flex items-center gap-2">Club · <NationTag code={profile.countrycode} /></span>
         }
         right={profile.isManaged ? <Link to="/squad" className="btn-primary">View squad</Link> : undefined}
       />
@@ -344,9 +344,10 @@ export default function TeamPage() {
               )}
               {!isEnglish && <Stat label="Country" value={<NationTag code={profile.countrycode} />} />}
               <Stat
-                label="European football"
+                label={profile.kind === "CON" ? "Continental football" : "European football"}
                 value={profile.europe.length > 0 ? profile.europe.map(code => COMPETITION_NAMES[code]).join(", ") : "Not competing"}
               />
+              {profile.clubWorldCup && <Stat label="Club World Cup" value="Participating" />}
               {isEnglish && <Stat label="Domestic cup" value="FA Cup" />}
             </div>
             {profile.europe.map(code => (
@@ -354,6 +355,11 @@ export default function TeamPage() {
                 <Link className="link text-sm text-accent-purple-light" to={`/europe/${code}`}>View {COMPETITION_NAMES[code]} →</Link>
               </div>
             ))}
+            {profile.clubWorldCup && (
+              <div className="px-5 pb-4">
+                <Link className="link text-sm text-accent-purple-light" to="/club-world-cup">View Club World Cup →</Link>
+              </div>
+            )}
             {profile.league && (
               <div className="px-5 pb-4">
                 <Link className="link text-sm text-accent-purple-light" to={`/league/${profile.league.tier}`}>View {LEAGUE_NAMES[profile.league.tier]} table →</Link>

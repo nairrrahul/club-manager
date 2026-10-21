@@ -36,6 +36,8 @@ import {
   createInternationalState, startWindowIfDue, autoSimulateWindowIfDue, hasPendingWindow
 } from "./international";
 import type { InternationalState } from "./international";
+import { createClubWorldCup, simulateClubWorldCup } from "./clubWorldCup";
+import type { ClubWorldCup } from "./clubWorldCup";
 import { refreshAllClubOveralls } from "./squadStrength";
 import { snapshotSeason } from "./snapshots";
 import { nextPlayerID } from "./playerIds";
@@ -67,6 +69,8 @@ export interface Season {
   freeAgents: FreeAgentState;
   /** Web UI addition: national teams, rankings, international windows. */
   international: InternationalState;
+  clubWorldCup: ClubWorldCup | null;
+  explicitClubWorldCup: boolean;
 }
 
 function separateByTier(teams: Team[]): Record<string, Team[]> {
@@ -157,7 +161,9 @@ export function createSeason(
     archives,
     notices: [],
     freeAgents,
-    international
+    international,
+    clubWorldCup: null,
+    explicitClubWorldCup: false
   };
 }
 
@@ -215,8 +221,20 @@ export function simulateMatchday(season: Season): Season {
 
   // An international window opens after certain matchdays (call-ups made, fixtures drawn).
   startWindowIfDue(season);
+  autoSimulateClubWorldCupIfDue(season);
 
   return season;
+}
+
+function autoSimulateClubWorldCupIfDue(season: Season): void {
+  if (
+    season.clubWorldCup &&
+    !season.clubWorldCup.completed &&
+    season.matchday >= 21 &&
+    !season.explicitClubWorldCup
+  ) {
+    simulateClubWorldCup(season);
+  }
 }
 
 export function simulateMatchdays(season: Season, count: number): Season {
@@ -232,6 +250,10 @@ export function simulateMatchdays(season: Season, count: number): Season {
   startWindowIfDue(season);
 
   for (let i = 0; i < matchdaysToSimulate; i++) {
+    if (season.clubWorldCup && !season.clubWorldCup.completed && season.matchday >= 21) {
+      if (season.explicitClubWorldCup) break;
+      simulateClubWorldCup(season);
+    }
     if (hasPendingWindow(season)) {
       // With explicit windows the user must simulate the window before the next matchday.
       if (season.international.explicitWindows) break;
@@ -320,12 +342,15 @@ export function applySeasonOverallChanges(season: Season): OverallChange[] {
       if (team.BaseOverall < 75 && randNum < 5) {
         change += 5;
         reasons.push("Tycoon Takeover");
+        applyOwnershipRatingChange(team, "tycoon");
       } else if (team.BaseOverall < 80 && randNum >= 5 && randNum < 100) {
         change += 2;
         reasons.push("New, Steady Ownership Group");
+        applyOwnershipRatingChange(team, "steady");
       } else if (team.BaseOverall < 80 && randNum >= 100 && randNum < 200) {
         change -= 1;
         reasons.push("New, Bad Ownership Group");
+        applyOwnershipRatingChange(team, "bad");
       }
 
       if (Number(tier) === 1 && entry.PTS > 100) {
@@ -395,6 +420,35 @@ export function applySeasonOverallChanges(season: Season): OverallChange[] {
 
   season.seasonOverallChanges = changes;
   return changes;
+}
+
+type OwnershipChange = "tycoon" | "steady" | "bad";
+
+function applyOwnershipRatingChange(team: Team, ownership: OwnershipChange): void {
+  const ratings: (keyof Pick<Team, "facilityRating" | "scoutingRating" | "scoutingExperience">)[] = [
+    "facilityRating", "scoutingRating", "scoutingExperience"
+  ];
+
+  if (ownership === "tycoon") {
+    const roll = Math.random();
+    const increase = roll < 0.3 ? 2 : roll < 0.9 ? 1 : 0;
+    for (const rating of ratings) {
+      team[rating] = Math.max(1, Math.min(5, team[rating] + increase));
+    }
+    return;
+  }
+
+  const chance = ownership === "steady" ? 0.6 : 0.5;
+  if (Math.random() >= chance) return;
+
+  for (let index = 0; index < 2; index++) {
+    const selected = index + Math.floor(Math.random() * (ratings.length - index));
+    [ratings[index], ratings[selected]] = [ratings[selected], ratings[index]];
+  }
+  const adjustment = ownership === "steady" ? 1 : -1;
+  for (const rating of ratings.slice(0, 2)) {
+    team[rating] = Math.max(1, Math.min(5, team[rating] + adjustment));
+  }
 }
 
 function getTeamSeasonStatus(currentTier: number, nextTier: number): TeamStatus {
@@ -495,6 +549,7 @@ export function recordSeasonHistory(season: Season): SeasonHistoryEntry {
 }
 
 export function advanceToNextSeason(season: Season, managerTeam: Team | null = null): Season {
+  autoSimulateClubWorldCupIfDue(season);
   const nextTeamsByTier = prepareSeasonTransition(season);
 
   // Web UI addition: archive the full, completed season (fixtures, tables, brackets)
@@ -540,7 +595,9 @@ export function advanceToNextSeason(season: Season, managerTeam: Team | null = n
 
   const nextSeason = createSeason(nextTeamsByTier, history, nextYear, archives, season.freeAgents, season.international);
   nextSeason.managerTeam = managerTeam;
+  nextSeason.explicitClubWorldCup = season.explicitClubWorldCup;
   nextSeason.europeanCompetitions = createEuropeanCompetitions(season, history);
+  nextSeason.clubWorldCup = createClubWorldCup(season, nextYear);
   if (nextSeason.europeanCompetitions) {
     for (const competition of Object.values(nextSeason.europeanCompetitions)) {
       competition.seasonLabel = nextSeason.season;

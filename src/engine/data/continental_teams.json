@@ -1,0 +1,246 @@
+{
+  "CONMEBOL": [
+    {
+      "id": 253,
+      "team": "Flamengo",
+      "overall": 76,
+      "countrycode": "BRA"
+    },
+    {
+      "id": 254,
+      "team": "Palmeiras",
+      "overall": 75,
+      "countrycode": "BRA"
+    },
+    {
+      "id": 255,
+      "team": "Botafogo",
+      "overall": 74,
+      "countrycode": "BRA"
+    },
+    {
+      "id": 256,
+      "team": "Fluminense",
+      "overall": 72,
+      "countrycode": "BRA"
+    },
+    {
+      "id": 257,
+      "team": "River Plate",
+      "overall": 76,
+      "countrycode": "ARG"
+    },
+    {
+      "id": 258,
+      "team": "Boca Juniors",
+      "overall": 75,
+      "countrycode": "ARG"
+    },
+    {
+      "id": 259,
+      "team": "Estudiantes",
+      "overall": 74,
+      "countrycode": "ARG"
+    },
+    {
+      "id": 260,
+      "team": "Gremio",
+      "overall": 72,
+      "countrycode": "BRA"
+    }
+  ],
+  "CONCACAF": [
+    {
+      "id": 261,
+      "team": "Pachuca",
+      "overall": 71,
+      "countrycode": "MEX"
+    },
+    {
+      "id": 262,
+      "team": "Cruz Azul",
+      "overall": 73,
+      "countrycode": "MEX"
+    },
+    {
+      "id": 263,
+      "team": "Leon",
+      "overall": 69,
+      "countrycode": "MEX"
+    },
+    {
+      "id": 264,
+      "team": "Seattle Sounders",
+      "overall": 71,
+      "countrycode": "USA"
+    },
+    {
+      "id": 265,
+      "team": "Inter Miami",
+      "overall": 73,
+      "countrycode": "USA"
+    },
+    {
+      "id": 266,
+      "team": "Philadelphia Union",
+      "overall": 72,
+      "countrycode": "USA"
+    },
+    {
+      "id": 267,
+      "team": "LA FC",
+      "overall": 71,
+      "countrycode": "USA"
+    },
+    {
+      "id": 268,
+      "team": "Club America",
+      "overall": 74,
+      "countrycode": "MEX"
+    },
+    {
+      "id": 269,
+      "team": "Chivas Guadalajara",
+      "overall": 72,
+      "countrycode": "MEX"
+    },
+    {
+      "id": 270,
+      "team": "Toluca",
+      "overall": 74,
+      "countrycode": "MEX"
+    }
+  ],
+  "CAF": [
+    {
+      "id": 271,
+      "team": "Mamelodi Sundowns",
+      "overall": 72,
+      "countrycode": "RSA"
+    },
+    {
+      "id": 272,
+      "team": "Pyramids FC",
+      "overall": 69,
+      "countrycode": "EGY"
+    },
+    {
+      "id": 273,
+      "team": "Al Ahly",
+      "overall": 72,
+      "countrycode": "EGY"
+    },
+    {
+      "id": 274,
+      "team": "Wydad AC",
+      "overall": 66,
+      "countrycode": "MAR"
+    },
+    {
+      "id": 275,
+      "team": "Esperance de Tunis",
+      "overall": 67,
+      "countrycode": "TUN"
+    },
+    {
+      "id": 276,
+      "team": "RS Berkane",
+      "overall": 67,
+      "countrycode": "MAR"
+    },
+    {
+      "id": 277,
+      "team": "Orlando Pirates",
+      "overall": 69,
+      "countrycode": "RSA"
+    },
+    {
+      "id": 278,
+      "team": "AS FAR",
+      "overall": 67,
+      "countrycode": "MAR"
+    }
+  ],
+  "OFC": [
+    {
+      "id": 279,
+      "team": "Auckland City",
+      "overall": 59,
+      "countrycode": "NZL"
+    },
+    {
+      "id": 280,
+      "team": "Auckland FC",
+      "overall": 62,
+      "countrycode": "NZL"
+    },
+    {
+      "id": 281,
+      "team": "South Melbourne",
+      "overall": 61,
+      "countrycode": "AUS"
+    },
+    {
+      "id": 282,
+      "team": "Bula FC",
+      "overall": 56,
+      "countrycode": "FIJ"
+    }
+  ],
+  "AFC": [
+    {
+      "id": 283,
+      "team": "Al Ahli",
+      "overall": 74,
+      "countrycode": "KSA"
+    },
+    {
+      "id": 284,
+      "team": "Al Ain",
+      "overall": 70,
+      "countrycode": "UAE"
+    },
+    {
+      "id": 285,
+      "team": "Al Hilal",
+      "overall": 73,
+      "countrycode": "KSA"
+    },
+    {
+      "id": 286,
+      "team": "Ulsan Hyundai",
+      "overall": 73,
+      "countrycode": "KOR"
+    },
+    {
+      "id": 287,
+      "team": "Urawa Red Diamonds",
+      "overall": 72,
+      "countrycode": "JPN"
+    },
+    {
+      "id": 288,
+      "team": "Vissel Kobe",
+      "overall": 71,
+      "countrycode": "JPN"
+    },
+    {
+      "id": 289,
+      "team": "Al Sadd",
+      "overall": 70,
+      "countrycode": "QAT"
+    },
+    {
+      "id": 290,
+      "team": "Al Nassr",
+      "overall": 71,
+      "countrycode": "KSA"
+    },
+    {
+      "id": 291,
+      "team": "Shanghai Shenhua",
+      "overall": 67,
+      "countrycode": "CHN"
+    }
+  ]
+}

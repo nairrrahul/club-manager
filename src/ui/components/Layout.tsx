@@ -10,7 +10,7 @@ import type { SearchResult } from "../search";
 import { Modal, NationTag, PlayerLink, PosBadge } from "./common";
 import { getYouthPlayersAgingOut } from "../../engine/playerSquad";
 import { LoadGameButton, SaveGameButton } from "./SaveLoad";
-import { getPendingWindow } from "../../engine/game";
+import { getPendingClubWorldCup, getPendingWindow } from "../../engine/game";
 
 function navClass({ isActive }: { isActive: boolean }): string {
   return `flex items-center gap-2 px-4 py-1.5 text-sm border-l-4 transition-colors ${
@@ -18,6 +18,28 @@ function navClass({ isActive }: { isActive: boolean }): string {
       ? "bg-navy-700 border-accent-yellow text-white font-semibold"
       : "border-transparent text-navy-200 hover:bg-navy-800 hover:text-white"
   }`;
+}
+
+function ClubWorldCupModeToggle() {
+  const game = useGame();
+  const setExplicit = useGameStore(s => s.explicitClubWorldCup);
+  const manual = game.season.explicitClubWorldCup;
+  if (!game.season.clubWorldCup) return null;
+  return (
+    <button
+      onClick={() => setExplicit(!manual)}
+      title={manual
+        ? "The Club World Cup is simulated manually. Click to simulate it automatically."
+        : "The Club World Cup is simulated automatically. Click to simulate it manually."}
+      className={`flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider border ${
+        manual
+          ? "bg-accent-purple text-white border-accent-purple-light"
+          : "bg-navy-800 text-navy-200 border-navy-600 hover:text-white"
+      }`}
+    >
+      Club World Cup: {manual ? "Manual" : "Auto"}
+    </button>
+  );
 }
 
 function NavSection(props: { title: string; children: ReactNode }) {
@@ -61,6 +83,7 @@ function Sidebar() {
         </NavSection>
         <NavSection title="Cups">
           <NavLink to="/cup" className={navClass}>{CUP_NAME}</NavLink>
+          <NavLink to="/club-world-cup" className={navClass}>Club World Cup</NavLink>
         </NavSection>
         <NavSection title="Europe">
           {Object.entries(COMPETITION_NAMES).map(([code, name]) => (
@@ -159,11 +182,15 @@ function SimControls() {
   const finish = useGameStore(s => s.finish);
   const nextSeason = useGameStore(s => s.nextSeason);
   const simulateWindow = useGameStore(s => s.simulateWindow);
+  const simulateClubWorldCup = useGameStore(s => s.simulateClubWorldCup);
   const [count, setCount] = useState("5");
   const { season } = game;
   // With manual windows, an open window must be simulated before play can continue.
   const pendingWindow = getPendingWindow(game);
   const waitingForWindow = pendingWindow !== null && pendingWindow.explicit;
+  const pendingClubWorldCup = getPendingClubWorldCup(game);
+  const waitingForClubWorldCup = pendingClubWorldCup !== null && pendingClubWorldCup.explicit;
+  const waitingForEvent = waitingForWindow || waitingForClubWorldCup;
   const complete = isSeasonComplete(season);
   const playoffsDone = season.promotionPlayoffs !== null;
 
@@ -176,6 +203,7 @@ function SimControls() {
         <div className="text-sm font-semibold tabular-nums">
           Matchday {season.matchday}<span className="text-navy-300">/{SEASON_END_MATCHDAY}</span>
           {waitingForWindow && <span className="ml-2 text-accent-yellow text-xs font-bold uppercase tracking-wider">International break</span>}
+          {waitingForClubWorldCup && <span className="ml-2 text-accent-yellow text-xs font-bold uppercase tracking-wider">Club World Cup</span>}
         </div>
       </div>
       {waitingForWindow && (
@@ -184,7 +212,13 @@ function SimControls() {
           <Link to="/international" className="btn-ghost">View window</Link>
         </>
       )}
-      {!waitingForWindow && !complete && (
+      {waitingForClubWorldCup && (
+        <>
+          <button className="btn-yellow" onClick={simulateClubWorldCup}>Simulate Club World Cup ▸</button>
+          <Link to="/club-world-cup" className="btn-ghost">View tournament</Link>
+        </>
+      )}
+      {!waitingForEvent && !complete && (
         <>
           <button className="btn-primary" onClick={() => advance(1)}>Continue ▸</button>
           <div className="flex items-center">
@@ -203,10 +237,10 @@ function SimControls() {
           </button>
         </>
       )}
-      {!waitingForWindow && complete && !playoffsDone && (
+      {!waitingForEvent && complete && !playoffsDone && (
         <button className="btn-yellow" onClick={finish}>Play promotion play-offs</button>
       )}
-      {!waitingForWindow && complete && playoffsDone && (
+      {!waitingForEvent && complete && playoffsDone && (
         <button className="btn-yellow" onClick={nextSeason}>Start next season ▸</button>
       )}
     </div>
@@ -435,6 +469,7 @@ export function Layout(props: { children: ReactNode }) {
           <SearchBar />
           <div className="flex items-center gap-4">
             <WindowModeToggle />
+            <ClubWorldCupModeToggle />
             <ScoutFreeAgentToggle />
             <GodModeToggle />
             <SimControls />

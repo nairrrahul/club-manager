@@ -6,6 +6,9 @@ export interface RawTeam {
   Overall: number;
   Tier: number;
   BaseOverall?: number;
+  facilityRating?: number;
+  youthScouting?: number;
+  youthExperience?: number;
 }
 
 export class Team {
@@ -52,7 +55,10 @@ export class Team {
   upsetLossStreak!: number;
   seasonOverallChange!: number;
 
-  constructor({ ID, Team: name, Overall, Tier, BaseOverall = Overall }: RawTeam) {
+  constructor({
+    ID, Team: name, Overall, Tier, BaseOverall = Overall,
+    facilityRating = 3, youthScouting = 3, youthExperience = 3
+  }: RawTeam) {
     this.ID = ID;
     this.Team = name;
     this.BaseOverall = BaseOverall;
@@ -61,9 +67,9 @@ export class Team {
     this.formation = "4-4-2";
     this.seasonHistory = [];
 
-    this.facilityRating = 3;
-    this.scoutingRating = 3;
-    this.scoutingExperience = 3;
+    this.facilityRating = facilityRating;
+    this.scoutingRating = youthScouting;
+    this.scoutingExperience = youthExperience;
     this.seniorSquad = null;
     this.youthAcademySquad = null;
     this.maxSeniorSquadSize = 40;

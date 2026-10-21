@@ -8,6 +8,8 @@ import { tier_information } from "./promotionRelegation";
 import type { Team } from "./team";
 import type { MatchResult } from "./types";
 import type { Season } from "./season";
+import { CLUB_WORLD_CUP_NAME } from "./clubWorldCup";
+import type { ClubWorldCup } from "./clubWorldCup";
 
 // ---------------------------------------------------------------------------
 // Plain-data snapshot types. Snapshots never reference live engine objects, so a
@@ -148,6 +150,29 @@ export interface EuroSnap {
   runnerUp: TeamRef | null;
 }
 
+export interface ClubWorldCupMatchSnap {
+  home: TeamRef;
+  away: TeamRef;
+  score: ScoreSnap | null;
+  winner: TeamRef | null;
+}
+
+export interface ClubWorldCupGroupSnap {
+  name: string;
+  table: { pos: number; team: TeamRef; GP: number; W: number; D: number; L: number; GF: number; GA: number; GD: number; PTS: number }[];
+  fixtures: { round: number; matches: ClubWorldCupMatchSnap[] }[];
+}
+
+export interface ClubWorldCupSnap {
+  year: number;
+  label: string;
+  complete: boolean;
+  groups: ClubWorldCupGroupSnap[];
+  knockout: { label: string; matches: ClubWorldCupMatchSnap[] }[] | null;
+  winner: TeamRef | null;
+  runnerUp: TeamRef | null;
+}
+
 export interface SeasonArchive {
   year: number;
   label: string;
@@ -156,6 +181,7 @@ export interface SeasonArchive {
   leagues: Record<number, LeagueSnap>;
   cup: CupSnap;
   european: Record<string, EuroSnap> | null;
+  clubWorldCup?: ClubWorldCupSnap | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -175,6 +201,53 @@ function scoreOf(result: MatchResult | null | undefined): ScoreSnap | null {
     score.pa = awayPens.filter(p => p === "O").length;
   }
   return score;
+}
+
+function snapshotClubWorldCupMatch(
+  home: Team,
+  away: Team,
+  result: MatchResult | null,
+  winner: Team | null = null
+): ClubWorldCupMatchSnap {
+  return { home: ref(home), away: ref(away), score: scoreOf(result), winner: winner ? ref(winner) : null };
+}
+
+function snapshotClubWorldCup(cup: ClubWorldCup | null): ClubWorldCupSnap | null {
+  if (!cup) return null;
+  return {
+    year: cup.year,
+    label: cup.seasonLabel,
+    complete: cup.completed,
+    groups: cup.groups.map(group => ({
+      name: group.name,
+      table: group.table.map((row, index) => ({
+        pos: index + 1,
+        team: ref(row.team),
+        GP: row.GP,
+        W: row.W,
+        D: row.D,
+        L: row.L,
+        GF: row.GF,
+        GA: row.GA,
+        GD: row.GD,
+        PTS: row.PTS
+      })),
+      fixtures: group.fixtures.map((round, index) => ({
+        round: index + 1,
+        matches: round.map(fixture => snapshotClubWorldCupMatch(
+          fixture.homeTeam, fixture.awayTeam, fixture.result
+        ))
+      }))
+    })),
+    knockout: cup.knockout?.map(round => ({
+      label: round.label,
+      matches: round.matches.map(match => snapshotClubWorldCupMatch(
+        match.homeTeam, match.awayTeam, match.result, match.winner
+      ))
+    })) ?? null,
+    winner: cup.winner ? ref(cup.winner) : null,
+    runnerUp: cup.runnerUp ? ref(cup.runnerUp) : null
+  };
 }
 
 function matchSnap(result: MatchResult): MatchSnap {
@@ -400,7 +473,8 @@ export function snapshotSeason(season: Season): SeasonArchive {
     seasonComplete: season.matchday >= SEASON_END_MATCHDAY,
     leagues,
     cup: snapshotCup(season),
-    european: snapshotEuropean(season)
+    european: snapshotEuropean(season),
+    clubWorldCup: snapshotClubWorldCup(season.clubWorldCup)
   };
 }
 
@@ -410,7 +484,7 @@ export function snapshotSeason(season: Season): SeasonArchive {
 
 export interface TeamFixture {
   matchday: number;
-  /** League tier number, or "CUP" / "UCL" / "UEL" / "UECL". */
+  /** League tier number, or a competition code such as "CUP", "UCL", or "CWC". */
   competitionCode: string;
   competition: string;
   /** Route of the competition's page (league, FA Cup, European competition). */
@@ -429,7 +503,7 @@ export interface TeamFixture {
   note?: string;
 }
 
-const COMPETITION_ORDER: Record<string, number> = { LEAGUE: 0, CUP: 1, UCL: 2, UEL: 3, UECL: 4 };
+const COMPETITION_ORDER: Record<string, number> = { LEAGUE: 0, CUP: 1, UCL: 2, UEL: 3, UECL: 4, CWC: 5 };
 
 function toResult(
   score: ScoreSnap | null,
@@ -584,6 +658,41 @@ export function buildTeamFixtures(arch: SeasonArchive, teamID: number): TeamFixt
     }
   }
 
+  for (const group of arch.clubWorldCup?.groups ?? []) {
+    for (const round of group.fixtures) {
+      for (const match of round.matches) {
+        if (match.home.id !== teamID && match.away.id !== teamID) continue;
+        const isHome = match.home.id === teamID;
+        fixtures.push({
+          matchday: 21,
+          competitionCode: "CWC",
+          competition: CLUB_WORLD_CUP_NAME,
+          link: "/club-world-cup",
+          stage: `Group ${group.name} · Matchday ${round.round}`,
+          opponent: isHome ? match.away : match.home,
+          home: isHome,
+          result: toResult(match.score, isHome)
+        });
+      }
+    }
+  }
+  for (const round of arch.clubWorldCup?.knockout ?? []) {
+    for (const match of round.matches) {
+      if (match.home.id !== teamID && match.away.id !== teamID) continue;
+      const isHome = match.home.id === teamID;
+      fixtures.push({
+        matchday: 21,
+        competitionCode: "CWC",
+        competition: CLUB_WORLD_CUP_NAME,
+        link: "/club-world-cup",
+        stage: round.label,
+        opponent: isHome ? match.away : match.home,
+        home: isHome,
+        result: toResult(match.score, isHome, match.winner?.id ?? null, teamID)
+      });
+    }
+  }
+
   return fixtures.sort((a, b) =>
     a.matchday - b.matchday ||
     (COMPETITION_ORDER[a.competitionCode === "LEAGUE" || /^\d+$/.test(a.competitionCode) ? "LEAGUE" : a.competitionCode] ?? 9) -
@@ -620,6 +729,14 @@ export function buildTrophies(archives: SeasonArchive[], teamID: number): Trophy
       if (comp.complete && comp.winner?.id === teamID) {
         trophies.push({ year: arch.year, season: arch.label, kind: code, name: `${comp.name} Winners` });
       }
+    }
+    if (arch.clubWorldCup?.complete && arch.clubWorldCup.winner?.id === teamID) {
+      trophies.push({
+        year: arch.year,
+        season: arch.label,
+        kind: "CWC",
+        name: `${CLUB_WORLD_CUP_NAME} Winners`
+      });
     }
   }
 

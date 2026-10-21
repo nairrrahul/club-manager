@@ -16,6 +16,8 @@ const nationInfo = nationInfoRaw as unknown as Record<string, { confederationID:
 const YOUTH_SQUAD_SIZE = 15;
 const SENIOR_SQUAD_SIZE = 40;
 const CONTRACT_EXPIRY = 2030;
+export const MAX_PLAYER_POTENTIAL = 95;
+export const MAX_GOD_MODE_POTENTIAL = 99;
 const NATIONALITY_CODE_ALIASES: Record<string, string> = { DRC: "COD" };
 const ENGLAND_CODE = "ENG";
 const GB_CODES = ["NIR", "SCO", "WAL"];
@@ -119,7 +121,7 @@ function getAgeMultiplier(age: number): number {
 }
 
 function generatePotential(teamOverall: number): number {
-  return Math.max(50, Math.min(99, Math.round(teamOverall + 10 + randomNormal() * 4.5)));
+  return Math.max(50, Math.min(MAX_PLAYER_POTENTIAL, Math.round(teamOverall + 10 + randomNormal() * 4.5)));
 }
 
 function generateInitialOverall(potential: number, age: number): number {

@@ -3,7 +3,8 @@ import {
   createGame, simulate, finishSeason, startNextSeason, promotePlayer, releaseSenior, releaseYouth,
   setFormation, setXIMode, setXISlot, sendScout, signScouted, setGodMode, setGodRating,
   godChangePosition, canStartNextSeason, signFreeAgent, simulateWindow, setExplicitWindows,
-  toggleShortlist, setAutoSendScouts, godAddPlayer, findPlayer
+  toggleShortlist, setAutoSendScouts, godAddPlayer, findPlayer, simulateClubWorldCup,
+  setExplicitClubWorldCup
 } from "../engine/game";
 import type { ActionResult, Game, GodAddPlayerInput, SeasonSummary } from "../engine/game";
 import { gameFromSave, gameToSave, saveFileName, verifySave } from "../engine/save";
@@ -57,8 +58,10 @@ interface GameStore {
   /** Unsigned youth-scouting candidates become free agents instead of being discarded. */
   autoSendScouts: (enabled: boolean) => void;
   simulateWindow: () => void;
+  simulateClubWorldCup: () => void;
   /** true = windows must be simulated explicitly; false = they are played automatically when continuing. */
   explicitWindows: (explicit: boolean) => void;
+  explicitClubWorldCup: (explicit: boolean) => void;
 
   godMode: (enabled: boolean) => void;
   godRating: (which: "scouting" | "experience" | "training", rating: number) => void;
@@ -173,7 +176,9 @@ export const useGameStore = create<GameStore>()((set, get) => {
     toggleShortlist: id => { act(game => toggleShortlist(game, id)); },
     autoSendScouts: enabled => { act(game => setAutoSendScouts(game, enabled)); },
     simulateWindow: () => { act(game => simulateWindow(game)); },
+    simulateClubWorldCup: () => { act(game => simulateClubWorldCup(game)); },
     explicitWindows: explicit => { act(game => setExplicitWindows(game, explicit)); },
+    explicitClubWorldCup: explicit => { act(game => setExplicitClubWorldCup(game, explicit)); },
 
     godMode: enabled => {
       act(game => { setGodMode(game, enabled); return { ok: true, message: enabled ? "God Mode enabled." : "God Mode disabled." }; });

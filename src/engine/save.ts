@@ -9,6 +9,7 @@ import { refreshAllClubOveralls } from "./squadStrength";
 import { collectSeasonPlayers } from "./playerIds";
 import { refreshStartingXI } from "./playerSquad";
 import { TEAM_DIRECTORY } from "./game";
+import { createClubWorldCup, simulateClubWorldCup } from "./clubWorldCup";
 import type { Player, PlayerStint } from "./types";
 
 /**
@@ -36,9 +37,10 @@ export const SAVE_FORMAT = "soccer-season-simulator-save";
  * v5: clubs have playerBonus (overall added by exceptional players they signed); recomputed on load.
  * v6: player.isShortlisted (missing = false) and freeAgents.autoSendUnsignedScouts (missing = false).
  * v7: club-player source, duplicate player-ID repair, and positional club overall recalculation.
+ * v8: adds Club World Cup state and automatic/manual simulation preference.
  *     Older saves are migrated on load.
  */
-export const SAVE_VERSION = 7;
+export const SAVE_VERSION = 8;
 
 export interface SaveMeta {
   team: string;
@@ -505,6 +507,11 @@ export function gameFromSave(file: SaveFile): Game {
       }
     }
     refreshAllClubOveralls(loadedSeason);
+  }
+  if (loadedSeason && file.version < 8) {
+    loadedSeason.explicitClubWorldCup = false;
+    loadedSeason.clubWorldCup = createClubWorldCup(loadedSeason, loadedSeason.year);
+    if (loadedSeason.clubWorldCup && loadedSeason.matchday >= 21) simulateClubWorldCup(loadedSeason);
   }
   const { season, managerTeam, godMode } = validateRoot(root);
   return { season, managerTeam, godMode, version: 0, liveCache: null };

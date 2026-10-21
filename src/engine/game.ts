@@ -7,7 +7,7 @@ import type { Season } from "./season";
 import {
   initializeManagerTeam, promoteYouthPlayer, releaseSeniorPlayer, releaseYouthPlayer,
   calculateTeamOverall, getYouthPlayersAgingOut, changePlayerPosition, changeFormation,
-  setStartingXIMode, setStartingXISlot, getPlayer
+  setStartingXIMode, setStartingXISlot, getPlayer, MAX_GOD_MODE_POTENTIAL
 } from "./playerSquad";
 import { sendYouthScout, signScoutedPlayer } from "./youthScouting";
 import { europeanTeamPool } from "./europeanCompetitions";
@@ -32,6 +32,8 @@ import { generateNameForNationalities } from "./nameGenerator";
 import { isValidNationCode } from "./nations";
 import { openStint } from "./playerHistory";
 import { nextPlayerID, assertUniquePlayerID } from "./playerIds";
+import { continentalTeams, simulateClubWorldCup as playClubWorldCup } from "./clubWorldCup";
+import type { ClubWorldCup } from "./clubWorldCup";
 
 export interface Game {
   season: Season;
@@ -73,9 +75,12 @@ const fail = (error: string): ActionResult => ({ ok: false, error });
 export interface TeamDirectoryEntry {
   id: number;
   name: string;
-  kind: "ENG" | "EUR";
+  kind: "ENG" | "EUR" | "CON";
   countrycode: string;
   baseOverall: number;
+  facilityRating: number;
+  youthScouting: number;
+  youthExperience: number;
 }
 
 const rawTeams = teamsJson as RawTeam[];
@@ -83,13 +88,41 @@ const rawTeams = teamsJson as RawTeam[];
 export const TEAM_DIRECTORY: Map<number, TeamDirectoryEntry> = new Map();
 for (const team of rawTeams) {
   TEAM_DIRECTORY.set(team.ID, {
-    id: team.ID, name: team.Team, kind: "ENG", countrycode: "ENG", baseOverall: team.Overall
+    id: team.ID,
+    name: team.Team,
+    kind: "ENG",
+    countrycode: "ENG",
+    baseOverall: team.Overall,
+    facilityRating: team.facilityRating ?? 3,
+    youthScouting: team.youthScouting ?? 3,
+    youthExperience: team.youthExperience ?? 3
   });
 }
 for (const teams of Object.values(europeanTeamPool)) {
   for (const team of teams) {
     TEAM_DIRECTORY.set(team.id, {
-      id: team.id, name: team.team, kind: "EUR", countrycode: team.countrycode, baseOverall: team.overall
+      id: team.id,
+      name: team.team,
+      kind: "EUR",
+      countrycode: team.countrycode,
+      baseOverall: team.overall,
+      facilityRating: team.facilityRating ?? 3,
+      youthScouting: team.youthScouting ?? 3,
+      youthExperience: team.youthExperience ?? 3
+    });
+  }
+}
+for (const teams of Object.values(continentalTeams)) {
+  for (const team of teams) {
+    TEAM_DIRECTORY.set(team.id, {
+      id: team.id,
+      name: team.team,
+      kind: "CON",
+      countrycode: team.countrycode,
+      baseOverall: team.overall,
+      facilityRating: team.facilityRating ?? 3,
+      youthScouting: team.youthScouting ?? 3,
+      youthExperience: team.youthExperience ?? 3
     });
   }
 }
@@ -127,10 +160,12 @@ export function getAllSeasonViews(game: Game): SeasonArchive[] {
   return [...game.season.archives, getLiveSnapshot(game)];
 }
 
-/** Live Team object for any team in the current world (English clubs and current European guests). */
+/** Live Team object for English clubs and teams participating in this season's competitions. */
 export function getLiveTeam(game: Game, teamID: number): Team | null {
   const english = getTeamFromSeason(game.season, teamID);
   if (english) return english;
+  const worldCupTeam = game.season.clubWorldCup?.teams.find(team => team.ID === teamID);
+  if (worldCupTeam) return worldCupTeam;
   for (const competition of Object.values(game.season.europeanCompetitions ?? {})) {
     const team = competition.teams.find(candidate => candidate.ID === teamID);
     if (team) return team;
@@ -144,7 +179,13 @@ export function getTeamProfile(game: Game, teamID: number) {
 
   const live = getLiveTeam(game, teamID);
   const base = live ?? new Team({
-    ID: entry.id, Team: entry.name, Overall: entry.baseOverall, Tier: 0
+    ID: entry.id,
+    Team: entry.name,
+    Overall: entry.baseOverall,
+    Tier: 0,
+    facilityRating: entry.facilityRating,
+    youthScouting: entry.youthScouting,
+    youthExperience: entry.youthExperience
   });
 
   let league: { tier: number; position: number } | null = null;
@@ -163,6 +204,7 @@ export function getTeamProfile(game: Game, teamID: number) {
   for (const [code, competition] of Object.entries(game.season.europeanCompetitions ?? {})) {
     if (competition.teams.some(team => team.ID === teamID)) europe.push(code);
   }
+  const clubWorldCup = game.season.clubWorldCup?.teams.some(team => team.ID === teamID) ?? false;
 
   return {
     id: entry.id,
@@ -179,6 +221,7 @@ export function getTeamProfile(game: Game, teamID: number) {
     isManaged: teamID === game.managerTeam.ID,
     league,
     europe,
+    clubWorldCup,
     seasonHistory: base.seasonHistory
   };
 }
@@ -204,7 +247,9 @@ export function simulate(game: Game, count: number): ActionResult {
   let message = `Simulated ${played} matchday${played === 1 ? "" : "s"}. Current matchday: ${season.matchday}.`;
   // Stopping for an international window is not announced (the controls change instead).
   const stoppedForWindow = season.international.explicitWindows && hasPendingWindow(season);
-  if (!isSeasonComplete(season) && season.matchday !== before + actual && !stoppedForWindow) {
+  const stoppedForClubWorldCup = season.explicitClubWorldCup && season.clubWorldCup !== null &&
+    !season.clubWorldCup.completed && season.matchday >= 21;
+  if (!isSeasonComplete(season) && season.matchday !== before + actual && !stoppedForWindow && !stoppedForClubWorldCup) {
     message += " Simulation stopped because a youth scouting mission is returning.";
   } else if (isSeasonComplete(season)) {
     message += " Season complete.";
@@ -222,6 +267,7 @@ export function finishSeason(game: Game): ActionResult {
     return ok("Season and promotion playoffs complete.");
   }
   if (season.international.explicitWindows && hasPendingWindow(season)) return ok();
+  if (season.explicitClubWorldCup && season.clubWorldCup && !season.clubWorldCup.completed) return ok();
   return ok(`Simulation stopped at matchday ${season.matchday} because a youth scouting mission returned.`);
 }
 
@@ -245,6 +291,9 @@ export function canStartNextSeason(game: Game): { ok: boolean; reason?: string; 
   }
   if (season.international.explicitWindows && hasPendingWindow(season)) {
     return { ok: false, reason: "Simulate the international window before starting the next season.", agingOut };
+  }
+  if (season.explicitClubWorldCup && season.clubWorldCup && !season.clubWorldCup.completed) {
+    return { ok: false, reason: "Simulate the Club World Cup before starting the next season.", agingOut };
   }
   return { ok: true, agingOut };
 }
@@ -404,11 +453,11 @@ export function godAddPlayer(
     return fail(`Age must be an integer from ${ADD_PLAYER_AGE_MIN} to ${ADD_PLAYER_AGE_MAX}.`);
   }
   if (!POSITION_ORDER.includes(input.position)) return fail("Choose a valid player position.");
-  if (!Number.isInteger(input.overall) || input.overall < 20 || input.overall > 99) {
-    return fail("Overall must be an integer from 20 to 99.");
+  if (!Number.isInteger(input.overall) || input.overall < 20 || input.overall > MAX_GOD_MODE_POTENTIAL) {
+    return fail(`Overall must be an integer from 20 to ${MAX_GOD_MODE_POTENTIAL}.`);
   }
-  if (!Number.isInteger(input.potential) || input.potential < 20 || input.potential > 99) {
-    return fail("Potential must be an integer from 20 to 99.");
+  if (!Number.isInteger(input.potential) || input.potential < 20 || input.potential > MAX_GOD_MODE_POTENTIAL) {
+    return fail(`Potential must be an integer from 20 to ${MAX_GOD_MODE_POTENTIAL}.`);
   }
   if (input.potential < input.overall) return fail("Potential must be greater than or equal to overall.");
   if (typeof input.primaryNationality !== "string") return fail("Choose a valid primary nationality.");
@@ -564,6 +613,26 @@ export function simulateWindow(game: Game): ActionResult {
 export function setExplicitWindows(game: Game, explicit: boolean): ActionResult {
   game.season.international.explicitWindows = explicit;
   return ok();
+}
+
+export function setExplicitClubWorldCup(game: Game, explicit: boolean): ActionResult {
+  game.season.explicitClubWorldCup = explicit;
+  return ok();
+}
+
+export function simulateClubWorldCup(game: Game): ActionResult {
+  const cup = game.season.clubWorldCup;
+  if (!cup || cup.completed || game.season.matchday < 21) {
+    return fail("The Club World Cup is not ready to simulate.");
+  }
+  if (!playClubWorldCup(game.season)) return fail("The Club World Cup could not be simulated.");
+  return ok("The Club World Cup has been completed.");
+}
+
+export function getPendingClubWorldCup(game: Game): { cup: ClubWorldCup; explicit: boolean } | null {
+  const cup = game.season.clubWorldCup;
+  if (!cup || cup.completed || game.season.matchday < 21) return null;
+  return { cup, explicit: game.season.explicitClubWorldCup };
 }
 
 /** The open window, and whether the user must simulate it themselves. */

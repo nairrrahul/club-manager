@@ -43,7 +43,7 @@ export function clubRestingOverall(clubPlayers: ClubPlayers, teamID: number, bas
 /**
  * Recomputes the player bonus and the in-season overall (base + player bonus + form, rounded) of
  * every non-managed club that is currently part of the simulation (English clubs and this
- * season's European entrants).
+ * season's European and Club World Cup entrants).
  */
 export function refreshAllClubOveralls(season: Season): void {
   const managerID = season.managerTeam?.ID;
@@ -60,6 +60,7 @@ export function refreshAllClubOveralls(season: Season): void {
   for (const competition of Object.values(season.europeanCompetitions ?? {})) {
     competition.teams.filter(team => team.isEuropeanGuest).forEach(refresh);
   }
+  for (const team of season.clubWorldCup?.teams ?? []) refresh(team);
 }
 
 /** Refreshes one live club (e.g. right after it signs a player). */
@@ -78,4 +79,6 @@ export function refreshClubOverall(season: Season, teamID: number): void {
     const team = competition.teams.find(candidate => candidate.ID === teamID);
     if (team) apply(team);
   }
+  const worldCupTeam = season.clubWorldCup?.teams.find(team => team.ID === teamID);
+  if (worldCupTeam) apply(worldCupTeam);
 }

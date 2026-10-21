@@ -17,6 +17,9 @@ export interface EuropeanPoolTeam {
   team: string;
   overall: number;
   countrycode: string;
+  facilityRating?: number;
+  youthScouting?: number;
+  youthExperience?: number;
 }
 
 export const europeanTeamPool = europeanTeamPoolRaw as Record<string, EuropeanPoolTeam[]>;
@@ -113,7 +116,10 @@ function createEuropeanTeam(raw: EuropeanPoolTeam): Team {
     Team: raw.team,
     Overall: raw.overall,
     BaseOverall: raw.overall,
-    Tier: 0
+    Tier: 0,
+    facilityRating: raw.facilityRating,
+    youthScouting: raw.youthScouting,
+    youthExperience: raw.youthExperience
   });
 
   team.countrycode = raw.countrycode;

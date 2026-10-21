@@ -1,6 +1,7 @@
 import { createFreeAgentPlayer, calculateTeamOverall, createRegenPlayer } from "./playerSquad";
 import { applyPlayerGrowth } from "./playerGrowth";
 import { europeanTeamPool } from "./europeanCompetitions";
+import { continentalTeams } from "./clubWorldCup";
 import { nationInfo } from "./nations";
 import { seasonDisplay } from "./constants";
 import { transferPlayer } from "./playerHistory";
@@ -47,6 +48,7 @@ export function generateClubRegens(season: Season, year = season.year): Player[]
   for (const competition of Object.values(season.europeanCompetitions ?? {})) {
     for (const team of competition.teams) liveTeams.set(team.ID, team);
   }
+  for (const team of season.clubWorldCup?.teams ?? []) liveTeams.set(team.ID, team);
 
   const englishTeams = Object.values(season.leagueStates).flatMap(league => league.teams);
   const clubs = [
@@ -64,9 +66,22 @@ export function generateClubRegens(season: Season, year = season.year): Player[]
         id: team.id,
         name: team.team,
         countryCode: team.countrycode,
-        scoutingRating: live?.scoutingRating ?? 3,
+        scoutingRating: live?.scoutingRating ?? team.youthScouting ?? 3,
         potentialShift: REGEN_RATING_SHIFT *
-          ((live?.facilityRating ?? 3) - 3 + (live?.scoutingExperience ?? 3) - 3)
+          ((live?.facilityRating ?? team.facilityRating ?? 3) - 3 +
+            (live?.scoutingExperience ?? team.youthExperience ?? 3) - 3)
+      };
+    })),
+    ...Object.values(continentalTeams).flatMap(teams => teams.map(team => {
+      const live = liveTeams.get(team.id);
+      return {
+        id: team.id,
+        name: team.team,
+        countryCode: team.countrycode,
+        scoutingRating: live?.scoutingRating ?? team.youthScouting ?? 3,
+        potentialShift: REGEN_RATING_SHIFT *
+          ((live?.facilityRating ?? team.facilityRating ?? 3) - 3 +
+            (live?.scoutingExperience ?? team.youthExperience ?? 3) - 3)
       };
     }))
   ];
