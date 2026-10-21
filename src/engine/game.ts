@@ -514,6 +514,41 @@ export function findPlayer(game: Game, playerID: string): FoundPlayer | null {
   return null;
 }
 
+export interface PlayerSearchEntry {
+  player: Player;
+  clubID: number | null;
+  clubName: string;
+  leagueTier: number | null;
+}
+
+/** Searchable players currently in the game world and their current club/league. */
+export function getPlayerSearchPlayers(game: Game): PlayerSearchEntry[] {
+  const leagueByTeam = new Map<number, number>();
+  for (const league of Object.values(game.season.leagueStates)) {
+    for (const team of league.teams) leagueByTeam.set(team.ID, league.tier);
+  }
+
+  const entries: PlayerSearchEntry[] = [];
+  const add = (player: Player, clubID: number | null): void => {
+    const club = clubID === null ? null : TEAM_DIRECTORY.get(clubID);
+    entries.push({
+      player,
+      clubID,
+      clubName: club?.name ?? "Free Agents",
+      leagueTier: clubID === null ? null : leagueByTeam.get(clubID) ?? null
+    });
+  };
+
+  for (const player of [...(game.managerTeam.seniorSquad ?? []), ...(game.managerTeam.youthAcademySquad ?? [])]) {
+    add(player, game.managerTeam.ID);
+  }
+  for (const entry of game.season.freeAgents.available) add(entry.player, null);
+  for (const clubEntries of Object.values(game.season.freeAgents.clubPlayers)) {
+    for (const entry of clubEntries) add(entry.player, entry.teamID);
+  }
+  return entries;
+}
+
 // ---------------------------------------------------------------------------
 // International football
 // ---------------------------------------------------------------------------

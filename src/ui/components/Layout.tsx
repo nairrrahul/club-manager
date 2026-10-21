@@ -44,8 +44,11 @@ function Sidebar() {
           <NavLink to="/academy" className={navClass}>Youth Academy</NavLink>
           <NavLink to="/scouting" className={navClass}>Scouting</NavLink>
           <NavLink to="/free-agents" className={navClass}>Free Agents</NavLink>
-          <NavLink to="/shortlist" className={navClass}>Shortlist</NavLink>
           <NavLink to={`/team/${game.managerTeam.ID}`} className={navClass}>Club Info</NavLink>
+        </NavSection>
+        <NavSection title="Shortlist">
+          <NavLink to="/shortlist" className={navClass}>Shortlist</NavLink>
+          <NavLink to="/player-search" className={navClass}>Player Search</NavLink>
         </NavSection>
         <NavSection title="Leagues">
           {Object.entries(LEAGUE_NAMES).map(([tier, name]) => (

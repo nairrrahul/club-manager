@@ -16,6 +16,7 @@ Run `npm run typecheck` to check TypeScript or `npm run build` to create a produ
 ## Game features
 
 - Manage a club's senior squad, academy, formation, starting XI, scouting, and free-agent signings.
+- Search active players by name, nationality, league, club, overall, potential, and age.
 - Other clubs independently generate one 17–20-year-old regen with a 70% chance at the start of each season.
   Regens join their club's player list and develop with its facilities.
 - Free-agent signing opportunities prefer eligible clubs from the player's primary nationality: those clubs receive

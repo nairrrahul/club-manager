@@ -13,6 +13,7 @@ import TeamPage from "./ui/pages/TeamPage";
 import Scouting from "./ui/pages/Scouting";
 import FreeAgents from "./ui/pages/FreeAgents";
 import Shortlist from "./ui/pages/Shortlist";
+import PlayerSearch from "./ui/pages/PlayerSearch";
 import Rankings from "./ui/pages/Rankings";
 import NationPage from "./ui/pages/NationPage";
 import International from "./ui/pages/International";
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/scouting" element={<Scouting />} />
         <Route path="/free-agents" element={<FreeAgents />} />
         <Route path="/shortlist" element={<Shortlist />} />
+        <Route path="/player-search" element={<PlayerSearch />} />
         <Route path="/rankings" element={<Rankings />} />
         <Route path="/nation/:code" element={<NationPage />} />
         <Route path="/international" element={<International />} />
