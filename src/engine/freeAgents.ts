@@ -49,6 +49,9 @@ export function generateClubRegens(season: Season, year = season.year): Player[]
     for (const team of competition.teams) liveTeams.set(team.ID, team);
   }
   for (const team of season.clubWorldCup?.teams ?? []) liveTeams.set(team.ID, team);
+  for (const tournament of Object.values(season.continentalTournaments ?? {})) {
+    for (const team of tournament.teams) liveTeams.set(team.ID, team);
+  }
 
   const englishTeams = Object.values(season.leagueStates).flatMap(league => league.teams);
   const clubs = [

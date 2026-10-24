@@ -6,6 +6,7 @@ import { Team } from "./team";
 import type { EuropeanCompetition } from "./europeanCompetitions";
 import type { Season } from "./season";
 import type { FinalHistory, MatchResult, TableEntry } from "./types";
+import type { ContinentalTournament } from "./continentalTournaments";
 
 export const CLUB_WORLD_CUP_START_YEAR = 2028;
 export const CLUB_WORLD_CUP_NAME = "Club World Cup";
@@ -102,36 +103,44 @@ function cloneTeam(source: Team): Team {
   return team;
 }
 
-function createContinentalTeam(raw: ClubWorldCupTeam): Team {
-  const team = new Team({
-    ID: raw.id,
-    Team: raw.team,
-    Overall: raw.overall,
-    BaseOverall: raw.overall,
-    Tier: 0,
-    facilityRating: raw.facilityRating,
-    youthScouting: raw.youthScouting,
-    youthExperience: raw.youthExperience
-  });
-  team.countrycode = raw.countrycode;
-  return team;
-}
-
 function chooseOne<T>(values: T[]): T {
   if (values.length === 0) throw new Error("The Club World Cup cannot draw a required confederation team.");
   return values[Math.floor(Math.random() * values.length)];
 }
 
-function drawConfederationTeams(excludedIDs: Set<number>): { team: Team; confederation: string }[] {
+type CompletedContinentalTournament = ContinentalTournament & { winner: Team; runnerUp: Team };
+
+function getContinentalTournament(
+  season: Season,
+  confederation: string
+): CompletedContinentalTournament {
+  const tournament = season.continentalTournaments?.[confederation];
+  const winner = tournament?.winner;
+  const runnerUp = tournament?.runnerUp;
+  if (!tournament?.completed || !winner || !runnerUp) {
+    throw new Error(
+      `${confederation} continental tournament must be complete before the ${CLUB_WORLD_CUP_NAME} entrants are drawn.`
+    );
+  }
+  return { ...tournament, winner, runnerUp };
+}
+
+function drawConfederationTeams(
+  previousSeason: Season,
+  excludedIDs: Set<number>
+): { team: Team; confederation: string }[] {
   return CLUB_WORLD_CUP_CONFEDERATIONS.map(confederation => {
-    const available = continentalTeams[confederation] ?? [];
-    const raw = chooseOne(available.filter(team => !excludedIDs.has(team.id)));
-    excludedIDs.add(raw.id);
-    return { team: createContinentalTeam(raw), confederation };
+    const tournament = getContinentalTournament(previousSeason, confederation);
+    if (excludedIDs.has(tournament.winner.ID)) {
+      throw new Error(`${confederation}'s continental champion is already selected for the Club World Cup.`);
+    }
+    excludedIDs.add(tournament.winner.ID);
+    return { team: tournament.winner, confederation };
   });
 }
 
 function drawAdditionalConfederationTeam(
+  previousSeason: Season,
   entries: { team: Team; confederation: string }[],
   excludedIDs: Set<number>
 ): { team: Team; confederation: string } {
@@ -142,12 +151,12 @@ function drawAdditionalConfederationTeam(
   }
   const availableConfederations = CLUB_WORLD_CUP_CONFEDERATIONS.filter(
     confederation => (counts.get(confederation) ?? 0) < 2 &&
-      (continentalTeams[confederation] ?? []).some(team => !excludedIDs.has(team.id))
+      !excludedIDs.has(getContinentalTournament(previousSeason, confederation).runnerUp.ID)
   );
   const confederation = chooseOne([...availableConfederations]);
-  const raw = chooseOne((continentalTeams[confederation] ?? []).filter(team => !excludedIDs.has(team.id)));
-  excludedIDs.add(raw.id);
-  return { team: createContinentalTeam(raw), confederation };
+  const runnerUp = getContinentalTournament(previousSeason, confederation).runnerUp;
+  excludedIDs.add(runnerUp.ID);
+  return { team: runnerUp, confederation };
 }
 
 function getTeamConfederation(team: Team): string {
@@ -288,19 +297,15 @@ export function createClubWorldCup(previousSeason: Season, year = previousSeason
   }
 
   const excludedIDs = new Set([championsLeagueWinner.ID]);
-  const baseTeams = drawConfederationTeams(excludedIDs);
+  const baseTeams = drawConfederationTeams(previousSeason, excludedIDs);
   const randomPick = baseTeams.find(entry => entry.team.ID === pastWinner.ID);
   if (randomPick) {
-    const confederation = randomPick.confederation;
-    excludedIDs.add(pastWinner.ID);
-    for (const entry of baseTeams) if (entry !== randomPick) excludedIDs.add(entry.team.ID);
-    const replacement = chooseOne((continentalTeams[confederation] ?? []).filter(team => !excludedIDs.has(team.id)));
-    randomPick.team = createContinentalTeam(replacement);
-    excludedIDs.add(replacement.id);
+    randomPick.team = getContinentalTournament(previousSeason, randomPick.confederation).runnerUp;
+    excludedIDs.add(randomPick.team.ID);
   }
 
   excludedIDs.add(pastWinner.ID);
-  baseTeams.push(drawAdditionalConfederationTeam(baseTeams, excludedIDs));
+  baseTeams.push(drawAdditionalConfederationTeam(previousSeason, baseTeams, excludedIDs));
   const entrants = [
     cloneTeam(championsLeagueWinner),
     ...baseTeams.map(entry => entry.team),

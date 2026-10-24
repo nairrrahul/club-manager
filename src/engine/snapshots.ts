@@ -6,10 +6,11 @@ import {
 import { LEAGUE_NAMES, CUP_NAME, SEASON_END_MATCHDAY, seasonDisplay } from "./constants";
 import { tier_information } from "./promotionRelegation";
 import type { Team } from "./team";
-import type { MatchResult } from "./types";
+import type { BracketMatch, MatchResult } from "./types";
 import type { Season } from "./season";
 import { CLUB_WORLD_CUP_NAME } from "./clubWorldCup";
 import type { ClubWorldCup } from "./clubWorldCup";
+import type { ContinentalTournament } from "./continentalTournaments";
 
 // ---------------------------------------------------------------------------
 // Plain-data snapshot types. Snapshots never reference live engine objects, so a
@@ -19,6 +20,7 @@ import type { ClubWorldCup } from "./clubWorldCup";
 export interface TeamRef {
   id: number;
   name: string;
+  countrycode?: string | null;
 }
 
 export interface ScoreSnap {
@@ -87,6 +89,9 @@ export interface CupMatchSnap {
   score: ScoreSnap | null;
   winner: TeamRef | null;
   bye: boolean;
+  legs?: [ScoreSnap | null, ScoreSnap | null];
+  aggregate?: { h: number; a: number } | null;
+  tiebreak?: ScoreSnap | null;
 }
 
 export interface CupRoundSnap {
@@ -173,6 +178,28 @@ export interface ClubWorldCupSnap {
   runnerUp: TeamRef | null;
 }
 
+export interface ContinentalTournamentMatchSnap {
+  id: string;
+  home: TeamRef | null;
+  away: TeamRef | null;
+  legs: [ScoreSnap | null, ScoreSnap | null] | null;
+  result: ScoreSnap | null;
+  aggregate: { h: number; a: number } | null;
+  tiebreak: ScoreSnap | null;
+  winner: TeamRef | null;
+  bye: boolean;
+}
+
+export interface ContinentalTournamentSnap {
+  year: number;
+  label: string;
+  confederation: string;
+  complete: boolean;
+  rounds: { label: string; matchday: number; matches: ContinentalTournamentMatchSnap[] }[];
+  winner: TeamRef | null;
+  runnerUp: TeamRef | null;
+}
+
 export interface SeasonArchive {
   year: number;
   label: string;
@@ -182,6 +209,7 @@ export interface SeasonArchive {
   cup: CupSnap;
   european: Record<string, EuroSnap> | null;
   clubWorldCup?: ClubWorldCupSnap | null;
+  continentalTournaments?: Record<string, ContinentalTournamentSnap>;
 }
 
 // ---------------------------------------------------------------------------
@@ -248,6 +276,59 @@ function snapshotClubWorldCup(cup: ClubWorldCup | null): ClubWorldCupSnap | null
     winner: cup.winner ? ref(cup.winner) : null,
     runnerUp: cup.runnerUp ? ref(cup.runnerUp) : null
   };
+}
+
+function continentalRoundLabel(tournament: ContinentalTournament, roundIndex: number): string {
+  const round = tournament.bracket.rounds[roundIndex];
+  if (roundIndex === tournament.bracket.rounds.length - 1) return "Final";
+  if (roundIndex === 0 && tournament.teams.length < tournament.bracket.size) return "Preliminary round";
+  if (round.length === 2) return "Semi-finals";
+  if (round.length === 4) return "Quarter-finals";
+  if (round.length === 8) return "Round of 16";
+  if (round.length === 16) return "Round of 32";
+  return `Round ${roundIndex + 1}`;
+}
+
+function snapshotContinentalMatch(match: BracketMatch): ContinentalTournamentMatchSnap {
+  const home = match.player1?.team ?? null;
+  const away = match.player2?.team ?? null;
+  const aggregate = match.legs?.length === 2 ? getAggregateGoals(match) : null;
+  return {
+    id: match.id,
+    home: home ? { ...ref(home), countrycode: home.countrycode ?? null } : null,
+    away: away ? { ...ref(away), countrycode: away.countrycode ?? null } : null,
+    legs: match.legs?.length === 2
+      ? [scoreOf(match.legs[0].result), scoreOf(match.legs[1].result)]
+      : null,
+    result: aggregate
+      ? { h: aggregate.team1, a: aggregate.team2 }
+      : scoreOf(match.result),
+    aggregate: aggregate ? { h: aggregate.team1, a: aggregate.team2 } : null,
+    tiebreak: scoreOf(match.tiebreak),
+    winner: match.winner ? ref(match.winner) : null,
+    bye: (home === null) !== (away === null)
+  };
+}
+
+function snapshotContinentalTournaments(
+  tournaments: Record<string, ContinentalTournament>
+): Record<string, ContinentalTournamentSnap> {
+  return Object.fromEntries(Object.entries(tournaments).map(([confederation, tournament]) => [
+    confederation,
+    {
+      year: tournament.year,
+      label: tournament.seasonLabel,
+      confederation,
+      complete: tournament.completed,
+      rounds: tournament.bracket.rounds.map((round, index) => ({
+        label: continentalRoundLabel(tournament, index),
+        matchday: index === tournament.bracket.rounds.length - 1 ? 32 : 31,
+        matches: round.map(snapshotContinentalMatch)
+      })),
+      winner: tournament.winner ? ref(tournament.winner) : null,
+      runnerUp: tournament.runnerUp ? ref(tournament.runnerUp) : null
+    }
+  ]));
 }
 
 function matchSnap(result: MatchResult): MatchSnap {
@@ -474,7 +555,8 @@ export function snapshotSeason(season: Season): SeasonArchive {
     leagues,
     cup: snapshotCup(season),
     european: snapshotEuropean(season),
-    clubWorldCup: snapshotClubWorldCup(season.clubWorldCup)
+    clubWorldCup: snapshotClubWorldCup(season.clubWorldCup),
+    continentalTournaments: snapshotContinentalTournaments(season.continentalTournaments)
   };
 }
 

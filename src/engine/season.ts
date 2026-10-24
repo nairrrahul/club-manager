@@ -38,6 +38,10 @@ import {
 import type { InternationalState } from "./international";
 import { createClubWorldCup, simulateClubWorldCup } from "./clubWorldCup";
 import type { ClubWorldCup } from "./clubWorldCup";
+import {
+  createContinentalTournaments, CONTINENTAL_TOURNAMENT_MATCHDAY, simulateContinentalTournaments
+} from "./continentalTournaments";
+import type { ContinentalTournament } from "./continentalTournaments";
 import { refreshAllClubOveralls } from "./squadStrength";
 import { snapshotSeason } from "./snapshots";
 import { nextPlayerID } from "./playerIds";
@@ -71,6 +75,7 @@ export interface Season {
   international: InternationalState;
   clubWorldCup: ClubWorldCup | null;
   explicitClubWorldCup: boolean;
+  continentalTournaments: Record<string, ContinentalTournament>;
 }
 
 function separateByTier(teams: Team[]): Record<string, Team[]> {
@@ -163,7 +168,8 @@ export function createSeason(
     freeAgents,
     international,
     clubWorldCup: null,
-    explicitClubWorldCup: false
+    explicitClubWorldCup: false,
+    continentalTournaments: createContinentalTournaments(startYear)
   };
 }
 
@@ -222,6 +228,7 @@ export function simulateMatchday(season: Season): Season {
   // An international window opens after certain matchdays (call-ups made, fixtures drawn).
   startWindowIfDue(season);
   autoSimulateClubWorldCupIfDue(season);
+  autoSimulateContinentalTournamentsIfDue(season);
 
   return season;
 }
@@ -234,6 +241,12 @@ function autoSimulateClubWorldCupIfDue(season: Season): void {
     !season.explicitClubWorldCup
   ) {
     simulateClubWorldCup(season);
+  }
+}
+
+function autoSimulateContinentalTournamentsIfDue(season: Season): void {
+  if (season.matchday >= CONTINENTAL_TOURNAMENT_MATCHDAY) {
+    simulateContinentalTournaments(season.continentalTournaments, season.matchday);
   }
 }
 
@@ -550,6 +563,7 @@ export function recordSeasonHistory(season: Season): SeasonHistoryEntry {
 
 export function advanceToNextSeason(season: Season, managerTeam: Team | null = null): Season {
   autoSimulateClubWorldCupIfDue(season);
+  autoSimulateContinentalTournamentsIfDue(season);
   const nextTeamsByTier = prepareSeasonTransition(season);
 
   // Web UI addition: archive the full, completed season (fixtures, tables, brackets)

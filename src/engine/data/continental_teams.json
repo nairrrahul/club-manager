@@ -47,6 +47,30 @@
       "team": "Gremio",
       "overall": 72,
       "countrycode": "BRA"
+    },
+    {
+      "id": 301,
+      "team": "Nacional",
+      "overall": 73,
+      "countrycode": "URU"
+    },
+    {
+      "id": 302,
+      "team": "Penarol",
+      "overall": 71,
+      "countrycode": "URU"
+    },
+    {
+      "id": 303,
+      "team": "Independiente del Valle",
+      "overall": 74,
+      "countrycode": "ECU"
+    },
+    {
+      "id": 304,
+      "team": "Colo Colo",
+      "overall": 72,
+      "countrycode": "CHI"
     }
   ],
   "CONCACAF": [
@@ -109,6 +133,18 @@
       "team": "Toluca",
       "overall": 74,
       "countrycode": "MEX"
+    },
+    {
+      "id": 299,
+      "team": "Alajuelense",
+      "overall": 67,
+      "countrycode": "CRC"
+    },
+    {
+      "id": 300,
+      "team": "Saprissa",
+      "overall": 67,
+      "countrycode": "CRC"
     }
   ],
   "CAF": [
@@ -159,13 +195,37 @@
       "team": "AS FAR",
       "overall": 67,
       "countrycode": "MAR"
+    },
+    {
+      "id": 295,
+      "team": "TP Mazembe",
+      "overall": 63,
+      "countrycode": "COD"
+    },
+    {
+      "id": 296,
+      "team": "Hearts of Oak",
+      "overall": 59,
+      "countrycode": "GHA"
+    },
+    {
+      "id": 297,
+      "team": "ASEC Mimosas",
+      "overall": 68,
+      "countrycode": "CIV"
+    },
+    {
+      "id": 298,
+      "team": "MC Alger",
+      "overall": 61,
+      "countrycode": "ALG"
     }
   ],
   "OFC": [
     {
       "id": 279,
       "team": "Auckland City",
-      "overall": 59,
+      "overall": 60,
       "countrycode": "NZL"
     },
     {
@@ -241,6 +301,24 @@
       "team": "Shanghai Shenhua",
       "overall": 67,
       "countrycode": "CHN"
+    },
+    {
+      "id": 292,
+      "team": "Tractor",
+      "overall": 65,
+      "countrycode": "IRN"
+    },
+    {
+      "id": 293,
+      "team": "Melbourne City",
+      "overall": 70,
+      "countrycode": "AUS"
+    },
+    {
+      "id": 294,
+      "team": "Pakhtakor",
+      "overall": 64,
+      "countrycode": "UZB"
     }
   ]
 }

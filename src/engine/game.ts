@@ -166,6 +166,10 @@ export function getLiveTeam(game: Game, teamID: number): Team | null {
   if (english) return english;
   const worldCupTeam = game.season.clubWorldCup?.teams.find(team => team.ID === teamID);
   if (worldCupTeam) return worldCupTeam;
+  for (const tournament of Object.values(game.season.continentalTournaments ?? {})) {
+    const team = tournament.teams.find(candidate => candidate.ID === teamID);
+    if (team) return team;
+  }
   for (const competition of Object.values(game.season.europeanCompetitions ?? {})) {
     const team = competition.teams.find(candidate => candidate.ID === teamID);
     if (team) return team;
