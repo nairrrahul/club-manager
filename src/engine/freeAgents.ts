@@ -49,6 +49,9 @@ export function generateClubRegens(season: Season, year = season.year): Player[]
     for (const team of competition.teams) liveTeams.set(team.ID, team);
   }
   for (const team of season.clubWorldCup?.teams ?? []) liveTeams.set(team.ID, team);
+  for (const tournament of Object.values(season.continentalTournaments ?? {})) {
+    for (const team of tournament.teams) liveTeams.set(team.ID, team);
+  }
 
   const englishTeams = Object.values(season.leagueStates).flatMap(league => league.teams);
   const clubs = [
@@ -173,6 +176,9 @@ export function developFreeAgentWorld(season: Season, newYear: number): void {
   const facilityByTeam = new Map<number, number>();
   for (const league of Object.values(season.leagueStates)) {
     for (const team of league.teams) facilityByTeam.set(team.ID, team.facilityRating);
+  }
+  for (const teams of Object.values(europeanTeamPool)) {
+    for (const team of teams) facilityByTeam.set(team.id, team.facilityRating ?? 3);
   }
   for (const [teamID, entries] of Object.entries(state.clubPlayers)) {
     const facility = facilityByTeam.get(Number(teamID)) ?? 3;

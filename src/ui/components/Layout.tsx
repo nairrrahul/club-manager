@@ -61,7 +61,8 @@ function Sidebar() {
         </NavSection>
         <NavSection title="Cups">
           <NavLink to="/cup" className={navClass}>{CUP_NAME}</NavLink>
-          <NavLink to="/club-world-cup" className={navClass}>Club World Cup</NavLink>
+          <NavLink to="/club-world-cup" end className={navClass}>Club World Cup</NavLink>
+          <NavLink to="/club-world-cup/continental" className={navClass}>Continental Tournaments</NavLink>
         </NavSection>
         <NavSection title="Europe">
           {Object.entries(COMPETITION_NAMES).map(([code, name]) => (

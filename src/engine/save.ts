@@ -10,6 +10,10 @@ import { collectSeasonPlayers } from "./playerIds";
 import { refreshStartingXI } from "./playerSquad";
 import { TEAM_DIRECTORY } from "./game";
 import { createClubWorldCup, simulateClubWorldCup } from "./clubWorldCup";
+import {
+  CONTINENTAL_TOURNAMENT_MATCHDAY, CONTINENTAL_TOURNAMENT_START_YEAR,
+  createContinentalTournaments, simulateContinentalTournaments
+} from "./continentalTournaments";
 import type { Player, PlayerStint } from "./types";
 
 /**
@@ -38,9 +42,11 @@ export const SAVE_FORMAT = "soccer-season-simulator-save";
  * v6: player.isShortlisted (missing = false) and freeAgents.autoSendUnsignedScouts (missing = false).
  * v7: club-player source, duplicate player-ID repair, and positional club overall recalculation.
  * v8: adds Club World Cup state and automatic/manual simulation preference.
- *     Older saves are migrated on load.
+ * v9: adds continental knockout tournaments and their history.
+ * v10: stores continental tournaments using the shared seeded knockout bracket.
+ * v11: schedules each continental knockout round on its own matchday.
  */
-export const SAVE_VERSION = 8;
+export const SAVE_VERSION = 11;
 
 export interface SaveMeta {
   team: string;
@@ -510,8 +516,69 @@ export function gameFromSave(file: SaveFile): Game {
   }
   if (loadedSeason && file.version < 8) {
     loadedSeason.explicitClubWorldCup = false;
+    loadedSeason.continentalTournaments = createContinentalTournaments(loadedSeason.year);
+    if (loadedSeason.matchday >= CONTINENTAL_TOURNAMENT_MATCHDAY) {
+      simulateContinentalTournaments(loadedSeason.continentalTournaments, loadedSeason.matchday);
+    } else if (loadedSeason.year >= CONTINENTAL_TOURNAMENT_START_YEAR + 1) {
+      simulateContinentalTournaments(loadedSeason.continentalTournaments, CONTINENTAL_TOURNAMENT_MATCHDAY);
+    }
     loadedSeason.clubWorldCup = createClubWorldCup(loadedSeason, loadedSeason.year);
     if (loadedSeason.clubWorldCup && loadedSeason.matchday >= 21) simulateClubWorldCup(loadedSeason);
+  }
+  if (loadedSeason && file.version < 9 && loadedSeason.continentalTournaments === undefined) {
+    loadedSeason.continentalTournaments = createContinentalTournaments(loadedSeason.year);
+    if (loadedSeason.matchday >= CONTINENTAL_TOURNAMENT_MATCHDAY) {
+      simulateContinentalTournaments(loadedSeason.continentalTournaments, loadedSeason.matchday);
+    }
+  }
+  if (loadedSeason && file.version === 9) {
+    loadedSeason.continentalTournaments = createContinentalTournaments(loadedSeason.year);
+    if (loadedSeason.matchday >= CONTINENTAL_TOURNAMENT_MATCHDAY) {
+      simulateContinentalTournaments(loadedSeason.continentalTournaments, loadedSeason.matchday);
+    }
+  }
+  if (loadedSeason && file.version < 11) {
+    for (const tournament of Object.values(loadedSeason.continentalTournaments ?? {})) {
+      const firstUnplayedRound = tournament.bracket.rounds.findIndex(
+        (_, roundIndex) => CONTINENTAL_TOURNAMENT_MATCHDAY + roundIndex > loadedSeason.matchday
+      );
+      tournament.bracket.rounds.forEach((round, roundIndex) => {
+        const roundMatchday = CONTINENTAL_TOURNAMENT_MATCHDAY + roundIndex;
+        for (const match of round) {
+          if (match.legs?.length === 2) {
+            match.legs[0].matchday = roundMatchday;
+            match.legs[1].matchday = roundMatchday;
+          }
+          if (firstUnplayedRound !== -1 && roundIndex >= firstUnplayedRound) {
+            if (roundIndex > 0) {
+              match.player1 = null;
+              match.player2 = null;
+            }
+            match.winner = null;
+            match.result = undefined;
+            match.legs = undefined;
+            match.tiebreak = undefined;
+          }
+        }
+      });
+      if (firstUnplayedRound !== -1) {
+        tournament.bracket.activeRound = firstUnplayedRound;
+        tournament.completed = false;
+        tournament.winner = null;
+        tournament.runnerUp = null;
+      }
+    }
+    for (const archive of loadedSeason.archives) {
+      for (const tournament of Object.values(archive.continentalTournaments ?? {})) {
+        tournament.rounds.forEach((round, roundIndex) => {
+          const roundMatchday = CONTINENTAL_TOURNAMENT_MATCHDAY + roundIndex;
+          round.matchday = roundMatchday;
+          for (const match of round.matches) {
+            if (match.legMatchdays) match.legMatchdays = [roundMatchday, roundMatchday];
+          }
+        });
+      }
+    }
   }
   const { season, managerTeam, godMode } = validateRoot(root);
   return { season, managerTeam, godMode, version: 0, liveCache: null };

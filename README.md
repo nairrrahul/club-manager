@@ -20,6 +20,10 @@ Run `npm run typecheck` to check TypeScript or `npm run build` to create a produ
 - New games initialize English clubs from their configured training, youth scouting, and youth
   experience ratings. Ownership events can improve or reduce those ratings, within the 1–5 range.
   Generated player potential is capped at 95.
+- Continental club tournaments begin in 2027–28. Each non-UEFA confederation runs a randomly drawn,
+  automatically simulated knockout with two-legged ties and a one-match final. Each round is played
+  on its own matchday, starting at matchday 31. All five champions qualify for the following
+  season's Club World Cup, along with one runner-up selected from the confederations.
 - The Club World Cup starts in 2028–29 with eight clubs, a group stage, and semi-finals/final. It can
   be simulated automatically or paused for manual simulation between matchdays 21 and 22. Its
   continental clubs also receive annual regens and have club pages.
@@ -34,5 +38,6 @@ Run `npm run typecheck` to check TypeScript or `npm run build` to create a produ
 
 ## Saves
 
-Save files use format version 8. Older saves are migrated when loaded, including club-player source defaults,
-duplicate player-ID repair, recalculation of positional club bonuses, and Club World Cup state initialization.
+Save files use format version 10. Older saves are migrated when loaded, including club-player source defaults,
+duplicate player-ID repair, recalculation of positional club bonuses, and Club World Cup and continental
+tournament state initialization.

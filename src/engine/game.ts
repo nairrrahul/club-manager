@@ -166,6 +166,10 @@ export function getLiveTeam(game: Game, teamID: number): Team | null {
   if (english) return english;
   const worldCupTeam = game.season.clubWorldCup?.teams.find(team => team.ID === teamID);
   if (worldCupTeam) return worldCupTeam;
+  for (const tournament of Object.values(game.season.continentalTournaments ?? {})) {
+    const team = tournament.teams.find(candidate => candidate.ID === teamID);
+    if (team) return team;
+  }
   for (const competition of Object.values(game.season.europeanCompetitions ?? {})) {
     const team = competition.teams.find(candidate => candidate.ID === teamID);
     if (team) return team;
@@ -211,7 +215,9 @@ export function getTeamProfile(game: Game, teamID: number) {
     name: entry.name,
     kind: entry.kind,
     countrycode: entry.countrycode,
-    baseOverall: base.BaseOverall,
+    baseOverall: live
+      ? Math.round(base.BaseOverall + (base.playerBonus ?? 0))
+      : clubRestingOverall(game.season.freeAgents.clubPlayers, entry.id, entry.baseOverall),
     // In-season overall (base + player-based bonus + form, whole number). A club that is not part of
     // this season's simulation has no form, so its resting overall is shown.
     overall: live ? base.Overall : clubRestingOverall(game.season.freeAgents.clubPlayers, entry.id, entry.baseOverall),

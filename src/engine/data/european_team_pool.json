@@ -1,166 +1,1254 @@
 {
   "FRA": [
-    { "id": 117, "team": "PSG", "overall": 85, "countrycode": "FRA" },
-    { "id": 118, "team": "Lille", "overall": 78, "countrycode": "FRA" },
-    { "id": 119, "team": "Lens", "overall": 77, "countrycode": "FRA" },
-    { "id": 120, "team": "Lyon", "overall": 79, "countrycode": "FRA" },
-    { "id": 121, "team": "Marseille", "overall": 77, "countrycode": "FRA" },
-    { "id": 122, "team": "Monaco", "overall": 78, "countrycode": "FRA" },
-    { "id": 123, "team": "Strasbourg", "overall": 75, "countrycode": "FRA" },
-    { "id": 124, "team": "Stade Rennais", "overall": 77, "countrycode": "FRA" },
-    { "id": 125, "team": "Toulouse", "overall": 72, "countrycode": "FRA" },
-    { "id": 126, "team": "Lorient", "overall": 73, "countrycode": "FRA" }
+    {
+      "id": 117,
+      "team": "PSG",
+      "overall": 85,
+      "countrycode": "FRA",
+      "facilityRating": 5,
+      "youthScouting": 5,
+      "youthExperience": 5
+    },
+    {
+      "id": 118,
+      "team": "Lille",
+      "overall": 78,
+      "countrycode": "FRA",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 119,
+      "team": "Lens",
+      "overall": 77,
+      "countrycode": "FRA",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 120,
+      "team": "Lyon",
+      "overall": 79,
+      "countrycode": "FRA",
+      "facilityRating": 4,
+      "youthScouting": 5,
+      "youthExperience": 5
+    },
+    {
+      "id": 121,
+      "team": "Marseille",
+      "overall": 77,
+      "countrycode": "FRA",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 122,
+      "team": "Monaco",
+      "overall": 78,
+      "countrycode": "FRA",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 123,
+      "team": "Strasbourg",
+      "overall": 75,
+      "countrycode": "FRA",
+      "facilityRating": 3,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 124,
+      "team": "Stade Rennais",
+      "overall": 77,
+      "countrycode": "FRA",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 125,
+      "team": "Toulouse",
+      "overall": 72,
+      "countrycode": "FRA",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 126,
+      "team": "Lorient",
+      "overall": 73,
+      "countrycode": "FRA",
+      "facilityRating": 3,
+      "youthScouting": 3,
+      "youthExperience": 3
+    }
   ],
   "GER": [
-    { "id": 127, "team": "Bayern", "overall": 84, "countrycode": "GER" },
-    { "id": 128, "team": "Dortmund", "overall": 81, "countrycode": "GER" },
-    { "id": 129, "team": "Leipzig", "overall": 79, "countrycode": "GER" },
-    { "id": 130, "team": "Leverkusen", "overall": 79, "countrycode": "GER" },
-    { "id": 131, "team": "Hoffenheim", "overall": 77, "countrycode": "GER" },
-    { "id": 132, "team": "Frankfurt", "overall": 75, "countrycode": "GER" },
-    { "id": 133, "team": "Stuttgart", "overall": 78, "countrycode": "GER" },
-    { "id": 134, "team": "Gladbach", "overall": 75, "countrycode": "GER" },
-    { "id": 135, "team": "Mainz", "overall": 76, "countrycode": "GER" },
-    { "id": 136, "team": "Freiburg", "overall": 76, "countrycode": "GER" }
+    {
+      "id": 127,
+      "team": "Bayern",
+      "overall": 84,
+      "countrycode": "GER",
+      "facilityRating": 5,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 128,
+      "team": "Dortmund",
+      "overall": 81,
+      "countrycode": "GER",
+      "facilityRating": 5,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 129,
+      "team": "Leipzig",
+      "overall": 79,
+      "countrycode": "GER",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 130,
+      "team": "Leverkusen",
+      "overall": 79,
+      "countrycode": "GER",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 131,
+      "team": "Hoffenheim",
+      "overall": 77,
+      "countrycode": "GER",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 132,
+      "team": "Frankfurt",
+      "overall": 75,
+      "countrycode": "GER",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 133,
+      "team": "Stuttgart",
+      "overall": 78,
+      "countrycode": "GER",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 134,
+      "team": "Gladbach",
+      "overall": 75,
+      "countrycode": "GER",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 135,
+      "team": "Mainz",
+      "overall": 76,
+      "countrycode": "GER",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 136,
+      "team": "Freiburg",
+      "overall": 76,
+      "countrycode": "GER",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    }
   ],
   "ESP": [
-    { "id": 137, "team": "Real Madrid", "overall": 85, "countrycode": "ESP" },
-    { "id": 138, "team": "Barcelona", "overall": 85, "countrycode": "ESP" },
-    { "id": 139, "team": "Atletico Madrid", "overall": 83, "countrycode": "ESP" },
-    { "id": 140, "team": "Villarreal", "overall": 79, "countrycode": "ESP" },
-    { "id": 141, "team": "Real Betis", "overall": 79, "countrycode": "ESP" },
-    { "id": 142, "team": "Sevilla", "overall": 75, "countrycode": "ESP" },
-    { "id": 143, "team": "Real Sociedad", "overall": 78, "countrycode": "ESP" },
-    { "id": 144, "team": "Rayo Vallecano", "overall": 77, "countrycode": "ESP" },
-    { "id": 145, "team": "Celta Vigo", "overall": 77, "countrycode": "ESP" },
-    { "id": 146, "team": "Getafe", "overall": 75, "countrycode": "ESP" },
-    { "id": 147, "team": "Athletic Bilbao", "overall": 79, "countrycode": "ESP" }
+    {
+      "id": 137,
+      "team": "Real Madrid",
+      "overall": 85,
+      "countrycode": "ESP",
+      "facilityRating": 5,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 138,
+      "team": "Barcelona",
+      "overall": 85,
+      "countrycode": "ESP",
+      "facilityRating": 5,
+      "youthScouting": 5,
+      "youthExperience": 5
+    },
+    {
+      "id": 139,
+      "team": "Atletico Madrid",
+      "overall": 83,
+      "countrycode": "ESP",
+      "facilityRating": 5,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 140,
+      "team": "Villarreal",
+      "overall": 79,
+      "countrycode": "ESP",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 141,
+      "team": "Real Betis",
+      "overall": 79,
+      "countrycode": "ESP",
+      "facilityRating": 4,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 142,
+      "team": "Sevilla",
+      "overall": 75,
+      "countrycode": "ESP",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 143,
+      "team": "Real Sociedad",
+      "overall": 78,
+      "countrycode": "ESP",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 144,
+      "team": "Rayo Vallecano",
+      "overall": 77,
+      "countrycode": "ESP",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 145,
+      "team": "Celta Vigo",
+      "overall": 77,
+      "countrycode": "ESP",
+      "facilityRating": 4,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 146,
+      "team": "Getafe",
+      "overall": 75,
+      "countrycode": "ESP",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 147,
+      "team": "Athletic Bilbao",
+      "overall": 79,
+      "countrycode": "ESP",
+      "facilityRating": 5,
+      "youthScouting": 4,
+      "youthExperience": 4
+    }
   ],
   "ITA": [
-    { "id": 148, "team": "Inter Milan", "overall": 82, "countrycode": "ITA" },
-    { "id": 149, "team": "AC Milan", "overall": 80, "countrycode": "ITA" },
-    { "id": 150, "team": "Napoli", "overall": 81, "countrycode": "ITA" },
-    { "id": 151, "team": "Juventus", "overall": 80, "countrycode": "ITA" },
-    { "id": 152, "team": "Roma", "overall": 80, "countrycode": "ITA" },
-    { "id": 153, "team": "Lazio", "overall": 77, "countrycode": "ITA" },
-    { "id": 154, "team": "Como", "overall": 77, "countrycode": "ITA" },
-    { "id": 155, "team": "Atalanta", "overall": 79, "countrycode": "ITA" },
-    { "id": 156, "team": "Bologna", "overall": 76, "countrycode": "ITA" }
+    {
+      "id": 148,
+      "team": "Inter Milan",
+      "overall": 82,
+      "countrycode": "ITA",
+      "facilityRating": 5,
+      "youthScouting": 5,
+      "youthExperience": 5
+    },
+    {
+      "id": 149,
+      "team": "AC Milan",
+      "overall": 80,
+      "countrycode": "ITA",
+      "facilityRating": 5,
+      "youthScouting": 5,
+      "youthExperience": 5
+    },
+    {
+      "id": 150,
+      "team": "Napoli",
+      "overall": 81,
+      "countrycode": "ITA",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 151,
+      "team": "Juventus",
+      "overall": 80,
+      "countrycode": "ITA",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 152,
+      "team": "Roma",
+      "overall": 80,
+      "countrycode": "ITA",
+      "facilityRating": 5,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 153,
+      "team": "Lazio",
+      "overall": 77,
+      "countrycode": "ITA",
+      "facilityRating": 5,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 154,
+      "team": "Como",
+      "overall": 77,
+      "countrycode": "ITA",
+      "facilityRating": 3,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 155,
+      "team": "Atalanta",
+      "overall": 79,
+      "countrycode": "ITA",
+      "facilityRating": 5,
+      "youthScouting": 5,
+      "youthExperience": 5
+    },
+    {
+      "id": 156,
+      "team": "Bologna",
+      "overall": 76,
+      "countrycode": "ITA",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    }
   ],
   "NED": [
-    { "id": 157, "team": "PSV", "overall": 77, "countrycode": "NED" },
-    { "id": 158, "team": "Ajax", "overall": 77, "countrycode": "NED" },
-    { "id": 159, "team": "Feyenoord", "overall": 75, "countrycode": "NED" },
-    { "id": 160, "team": "AZ Alkmaar", "overall": 73, "countrycode": "NED" },
-    { "id": 161, "team": "NEC Nijmegen", "overall": 72, "countrycode": "NED" },
-    { "id": 162, "team": "Twente", "overall": 71, "countrycode": "NED" },
-    { "id": 163, "team": "Utrecht", "overall": 70, "countrycode": "NED" },
-    { "id": 164, "team": "Heerenveen", "overall": 68, "countrycode": "NED" }
+    {
+      "id": 157,
+      "team": "PSV",
+      "overall": 77,
+      "countrycode": "NED",
+      "facilityRating": 5,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 158,
+      "team": "Ajax",
+      "overall": 77,
+      "countrycode": "NED",
+      "facilityRating": 5,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 159,
+      "team": "Feyenoord",
+      "overall": 75,
+      "countrycode": "NED",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 160,
+      "team": "AZ Alkmaar",
+      "overall": 73,
+      "countrycode": "NED",
+      "facilityRating": 5,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 161,
+      "team": "NEC Nijmegen",
+      "overall": 72,
+      "countrycode": "NED",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 162,
+      "team": "Twente",
+      "overall": 71,
+      "countrycode": "NED",
+      "facilityRating": 4,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 163,
+      "team": "Utrecht",
+      "overall": 70,
+      "countrycode": "NED",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 164,
+      "team": "Heerenveen",
+      "overall": 68,
+      "countrycode": "NED",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    }
   ],
   "POR": [
-    { "id": 165, "team": "Porto", "overall": 79, "countrycode": "POR" },
-    { "id": 166, "team": "Benfica", "overall": 78, "countrycode": "POR" },
-    { "id": 167, "team": "Sporting", "overall": 77, "countrycode": "POR" },
-    { "id": 168, "team": "Braga", "overall": 74, "countrycode": "POR" },
-    { "id": 169, "team": "Famalicao", "overall": 70, "countrycode": "POR" },
-    { "id": 170, "team": "Gil Vicente", "overall": 68, "countrycode": "POR" },
-    { "id": 171, "team": "Moreirense", "overall": 68, "countrycode": "POR" }
+    {
+      "id": 165,
+      "team": "Porto",
+      "overall": 79,
+      "countrycode": "POR",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 166,
+      "team": "Benfica",
+      "overall": 78,
+      "countrycode": "POR",
+      "facilityRating": 5,
+      "youthScouting": 5,
+      "youthExperience": 5
+    },
+    {
+      "id": 167,
+      "team": "Sporting",
+      "overall": 77,
+      "countrycode": "POR",
+      "facilityRating": 5,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 168,
+      "team": "Braga",
+      "overall": 74,
+      "countrycode": "POR",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 169,
+      "team": "Famalicao",
+      "overall": 70,
+      "countrycode": "POR",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 170,
+      "team": "Gil Vicente",
+      "overall": 68,
+      "countrycode": "POR",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 171,
+      "team": "Moreirense",
+      "overall": 68,
+      "countrycode": "POR",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
+    }
   ],
   "BEL": [
-    { "id": 172, "team": "Club Brugge", "overall": 74, "countrycode": "BEL" },
-    { "id": 173, "team": "Union SG", "overall": 72, "countrycode": "BEL" },
-    { "id": 174, "team": "Gent", "overall": 72, "countrycode": "BEL" },
-    { "id": 175, "team": "Anderlecht", "overall": 72, "countrycode": "BEL" },
-    { "id": 176, "team": "Sint-Truiden", "overall": 70, "countrycode": "BEL" },
-    { "id": 177, "team": "Genk", "overall": 72, "countrycode": "BEL" },
-    { "id": 178, "team": "Standard Liege", "overall": 69, "countrycode": "BEL" }
+    {
+      "id": 172,
+      "team": "Club Brugge",
+      "overall": 74,
+      "countrycode": "BEL",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 173,
+      "team": "Union SG",
+      "overall": 72,
+      "countrycode": "BEL",
+      "facilityRating": 3,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 174,
+      "team": "Gent",
+      "overall": 72,
+      "countrycode": "BEL",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 175,
+      "team": "Anderlecht",
+      "overall": 72,
+      "countrycode": "BEL",
+      "facilityRating": 5,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 176,
+      "team": "Sint-Truiden",
+      "overall": 70,
+      "countrycode": "BEL",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 177,
+      "team": "Genk",
+      "overall": 72,
+      "countrycode": "BEL",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 178,
+      "team": "Standard Liege",
+      "overall": 69,
+      "countrycode": "BEL",
+      "facilityRating": 5,
+      "youthScouting": 3,
+      "youthExperience": 3
+    }
   ],
   "CZE": [
-    { "id": 179, "team": "Slavia Prague", "overall": 74, "countrycode": "CZE" },
-    { "id": 180, "team": "Sparta Prague", "overall": 73, "countrycode": "CZE" },
-    { "id": 181, "team": "Viktoria Plzen", "overall": 72, "countrycode": "CZE" },
-    { "id": 182, "team": "Jablonec", "overall": 66, "countrycode": "CZE" },
-    { "id": 183, "team": "Hradec Kralove", "overall": 67, "countrycode": "CZE" }
+    {
+      "id": 179,
+      "team": "Slavia Prague",
+      "overall": 74,
+      "countrycode": "CZE",
+      "facilityRating": 4,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 180,
+      "team": "Sparta Prague",
+      "overall": 73,
+      "countrycode": "CZE",
+      "facilityRating": 4,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 181,
+      "team": "Viktoria Plzen",
+      "overall": 72,
+      "countrycode": "CZE",
+      "facilityRating": 4,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 182,
+      "team": "Jablonec",
+      "overall": 66,
+      "countrycode": "CZE",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 183,
+      "team": "Hradec Kralove",
+      "overall": 67,
+      "countrycode": "CZE",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
+    }
   ],
   "TUR": [
-    { "id": 184, "team": "Fenerbahce", "overall": 79, "countrycode": "TUR" },
-    { "id": 185, "team": "Galatasaray", "overall": 79, "countrycode": "TUR" },
-    { "id": 186, "team": "Besiktas", "overall": 76, "countrycode": "TUR" },
-    { "id": 187, "team": "Trabzonspor", "overall": 75, "countrycode": "TUR" },
-    { "id": 188, "team": "Basaksehir", "overall": 71, "countrycode": "TUR" },
-    { "id": 189, "team": "Goztepe", "overall": 69, "countrycode": "TUR" }
+    {
+      "id": 184,
+      "team": "Fenerbahce",
+      "overall": 79,
+      "countrycode": "TUR",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 185,
+      "team": "Galatasaray",
+      "overall": 79,
+      "countrycode": "TUR",
+      "facilityRating": 3,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 186,
+      "team": "Besiktas",
+      "overall": 76,
+      "countrycode": "TUR",
+      "facilityRating": 3,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 187,
+      "team": "Trabzonspor",
+      "overall": 75,
+      "countrycode": "TUR",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 188,
+      "team": "Basaksehir",
+      "overall": 71,
+      "countrycode": "TUR",
+      "facilityRating": 2,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 189,
+      "team": "Goztepe",
+      "overall": 69,
+      "countrycode": "TUR",
+      "facilityRating": 2,
+      "youthScouting": 1,
+      "youthExperience": 1
+    }
   ],
   "UKR": [
-    { "id": 190, "team": "Shakhtar Donetsk", "overall": 74, "countrycode": "UKR" },
-    { "id": 191, "team": "Dynamo Kyiv", "overall": 74, "countrycode": "UKR" },
-    { "id": 192, "team": "Zhytomyr", "overall": 64, "countrycode": "UKR" },
-    { "id": 193, "team": "Metalist Kharkiv", "overall": 63, "countrycode": "UKR" },
-    { "id": 194, "team": "LNZ Cherkasy", "overall": 63, "countrycode": "UKR" }
+    {
+      "id": 190,
+      "team": "Shakhtar Donetsk",
+      "overall": 74,
+      "countrycode": "UKR",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 191,
+      "team": "Dynamo Kyiv",
+      "overall": 74,
+      "countrycode": "UKR",
+      "facilityRating": 5,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 192,
+      "team": "Zhytomyr",
+      "overall": 64,
+      "countrycode": "UKR",
+      "facilityRating": 2,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 193,
+      "team": "Metalist Kharkiv",
+      "overall": 63,
+      "countrycode": "UKR",
+      "facilityRating": 2,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 194,
+      "team": "LNZ Cherkasy",
+      "overall": 63,
+      "countrycode": "UKR",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
+    }
   ],
   "SCO": [
-    { "id": 195, "team": "Celtic", "overall": 74, "countrycode": "SCO" },
-    { "id": 196, "team": "Rangers", "overall": 73, "countrycode": "SCO" },
-    { "id": 197, "team": "Hearts", "overall": 70, "countrycode": "SCO" },
-    { "id": 198, "team": "Aberdeen", "overall": 67, "countrycode": "SCO" },
-    { "id": 199, "team": "Motherwell", "overall": 70, "countrycode": "SCO" },
-    { "id": 200, "team": "Hibernian", "overall": 68, "countrycode": "SCO" },
-    { "id": 201, "team": "Falkirk", "overall": 65, "countrycode": "SCO" }
+    {
+      "id": 195,
+      "team": "Celtic",
+      "overall": 74,
+      "countrycode": "SCO",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 196,
+      "team": "Rangers",
+      "overall": 73,
+      "countrycode": "SCO",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 197,
+      "team": "Hearts",
+      "overall": 70,
+      "countrycode": "SCO",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 198,
+      "team": "Aberdeen",
+      "overall": 67,
+      "countrycode": "SCO",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 199,
+      "team": "Motherwell",
+      "overall": 70,
+      "countrycode": "SCO",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 200,
+      "team": "Hibernian",
+      "overall": 68,
+      "countrycode": "SCO",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 201,
+      "team": "Falkirk",
+      "overall": 65,
+      "countrycode": "SCO",
+      "facilityRating": 3,
+      "youthScouting": 1,
+      "youthExperience": 1
+    }
   ],
   "SUI": [
-    { "id": 202, "team": "Young Boys", "overall": 71, "countrycode": "SUI" },
-    { "id": 203, "team": "St Gallen", "overall": 68, "countrycode": "SUI" },
-    { "id": 204, "team": "Lugano", "overall": 69, "countrycode": "SUI" },
-    { "id": 205, "team": "Thun", "overall": 66, "countrycode": "SUI" },
-    { "id": 206, "team": "Sion", "overall": 68, "countrycode": "SUI" },
-    { "id": 207, "team": "Basel", "overall": 69, "countrycode": "SUI" }
+    {
+      "id": 202,
+      "team": "Young Boys",
+      "overall": 71,
+      "countrycode": "SUI",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 203,
+      "team": "St Gallen",
+      "overall": 68,
+      "countrycode": "SUI",
+      "facilityRating": 4,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 204,
+      "team": "Lugano",
+      "overall": 69,
+      "countrycode": "SUI",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 205,
+      "team": "Thun",
+      "overall": 66,
+      "countrycode": "SUI",
+      "facilityRating": 3,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 206,
+      "team": "Sion",
+      "overall": 68,
+      "countrycode": "SUI",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 207,
+      "team": "Basel",
+      "overall": 69,
+      "countrycode": "SUI",
+      "facilityRating": 5,
+      "youthScouting": 3,
+      "youthExperience": 3
+    }
   ],
   "OTHER": [
-    { "id": 208, "team": "Bodo/Glimt", "overall": 74, "countrycode": "NOR" },
-    { "id": 209, "team": "LASK Linz", "overall": 70, "countrycode": "AUT" },
-    { "id": 210, "team": "AEK Athens", "overall": 71, "countrycode": "GRE" },
-    { "id": 211, "team": "Olympiacos", "overall": 75, "countrycode": "GRE" },
-    { "id": 212, "team": "Lech Poznan", "overall": 74, "countrycode": "POL" },
-    { "id": 213, "team": "Dinamo Zagreb", "overall": 74, "countrycode": "CRO" },
-    { "id": 214, "team": "Celje", "overall": 67, "countrycode": "SVN" },
-    { "id": 215, "team": "Slovan Bratislava", "overall": 69, "countrycode": "SVK" },
-    { "id": 216, "team": "Levski Sofia", "overall": 70, "countrycode": "BUL" },
-    { "id": 217, "team": "Sturm Graz", "overall": 71, "countrycode": "AUT" },
-    { "id": 218, "team": "AGF", "overall": 69, "countrycode": "DEN" },
-    { "id": 219, "team": "Midtjylland", "overall": 75, "countrycode": "DEN" },
-    { "id": 220, "team": "Kairat", "overall": 67, "countrycode": "KAZ" },
-    { "id": 221, "team": "Red Star Belgrade", "overall": 73, "countrycode": "SRB" },
-    { "id": 222, "team": "Mjallby", "overall": 67, "countrycode": "SWE" },
-    { "id": 223, "team": "Gornik Zabrze", "overall": 64, "countrycode": "POL" },
-    { "id": 224, "team": "Pafos", "overall": 63, "countrycode": "CYP" },
-    { "id": 225, "team": "Sheriff Tiraspol", "overall": 67, "countrycode": "MDA" },
-    { "id": 226, "team": "Sabah", "overall": 65, "countrycode": "AZE" },
-    { "id": 227, "team": "Qarabag", "overall": 67, "countrycode": "AZE" },
-    { "id": 228, "team": "Hajduk Split", "overall": 71, "countrycode": "CRO" },
-    { "id": 229, "team": "Panathinaikos", "overall": 72, "countrycode": "GRE" },
-    { "id": 230, "team": "Viking", "overall": 72, "countrycode": "NOR" },
-    { "id": 231, "team": "RB Salzburg", "overall": 74, "countrycode": "AUT" },
-    { "id": 232, "team": "PAOK", "overall": 75, "countrycode": "GRE" },
-    { "id": 233, "team": "Legia Warsaw", "overall": 74, "countrycode": "POL" },
-    { "id": 234, "team": "Kobenhavn", "overall": 73, "countrycode": "DEN" }
+    {
+      "id": 208,
+      "team": "Bodo/Glimt",
+      "overall": 74,
+      "countrycode": "NOR",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 209,
+      "team": "LASK Linz",
+      "overall": 70,
+      "countrycode": "AUT",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 210,
+      "team": "AEK Athens",
+      "overall": 71,
+      "countrycode": "GRE",
+      "facilityRating": 3,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 211,
+      "team": "Olympiacos",
+      "overall": 75,
+      "countrycode": "GRE",
+      "facilityRating": 4,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 212,
+      "team": "Lech Poznan",
+      "overall": 74,
+      "countrycode": "POL",
+      "facilityRating": 5,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 213,
+      "team": "Dinamo Zagreb",
+      "overall": 74,
+      "countrycode": "CRO",
+      "facilityRating": 5,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 214,
+      "team": "Celje",
+      "overall": 67,
+      "countrycode": "SVN",
+      "facilityRating": 3,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 215,
+      "team": "Slovan Bratislava",
+      "overall": 69,
+      "countrycode": "SVK",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 216,
+      "team": "Levski Sofia",
+      "overall": 70,
+      "countrycode": "BUL",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 217,
+      "team": "Sturm Graz",
+      "overall": 71,
+      "countrycode": "AUT",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 218,
+      "team": "AGF",
+      "overall": 69,
+      "countrycode": "DEN",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 219,
+      "team": "Midtjylland",
+      "overall": 75,
+      "countrycode": "DEN",
+      "facilityRating": 5,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 220,
+      "team": "Kairat",
+      "overall": 67,
+      "countrycode": "KAZ",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 221,
+      "team": "Red Star Belgrade",
+      "overall": 73,
+      "countrycode": "SRB",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 222,
+      "team": "Mjallby",
+      "overall": 67,
+      "countrycode": "SWE",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 223,
+      "team": "Gornik Zabrze",
+      "overall": 64,
+      "countrycode": "POL",
+      "facilityRating": 3,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 224,
+      "team": "Pafos",
+      "overall": 63,
+      "countrycode": "CYP",
+      "facilityRating": 2,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 225,
+      "team": "Sheriff Tiraspol",
+      "overall": 67,
+      "countrycode": "MDA",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 226,
+      "team": "Sabah",
+      "overall": 65,
+      "countrycode": "AZE",
+      "facilityRating": 3,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 227,
+      "team": "Qarabag",
+      "overall": 67,
+      "countrycode": "AZE",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 228,
+      "team": "Hajduk Split",
+      "overall": 71,
+      "countrycode": "CRO",
+      "facilityRating": 4,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 229,
+      "team": "Panathinaikos",
+      "overall": 72,
+      "countrycode": "GRE",
+      "facilityRating": 3,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 230,
+      "team": "Viking",
+      "overall": 72,
+      "countrycode": "NOR",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 231,
+      "team": "RB Salzburg",
+      "overall": 74,
+      "countrycode": "AUT",
+      "facilityRating": 5,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 232,
+      "team": "PAOK",
+      "overall": 75,
+      "countrycode": "GRE",
+      "facilityRating": 4,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 233,
+      "team": "Legia Warsaw",
+      "overall": 74,
+      "countrycode": "POL",
+      "facilityRating": 5,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 234,
+      "team": "Kobenhavn",
+      "overall": 73,
+      "countrycode": "DEN",
+      "facilityRating": 4,
+      "youthScouting": 2,
+      "youthExperience": 2
+    }
   ],
   "OTHER_UECL": [
-    { "id": 235, "team": "Kauno Zalgiris", "overall": 59, "countrycode": "LTU" },
-    { "id": 236, "team": "Egnatia", "overall": 58, "countrycode": "ALB" },
-    { "id": 237, "team": "Iberia 1999", "overall": 60, "countrycode": "GEO" },
-    { "id": 238, "team": "KI Klaksvik", "overall": 62, "countrycode": "FRO" },
-    { "id": 239, "team": "Hammarby IF", "overall": 71, "countrycode": "SWE" },
-    { "id": 240, "team": "Nordsjaelland", "overall": 72, "countrycode": "DEN" },
-    { "id": 241, "team": "Shamrock Rovers", "overall": 65, "countrycode": "IRL" },
-    { "id": 242, "team": "Riga", "overall": 63, "countrycode": "LVA" },
-    { "id": 243, "team": "Universitatea Craiova", "overall": 71, "countrycode": "ROU" },
-    { "id": 244, "team": "Dinamo Tbilisi", "overall": 66, "countrycode": "GEO" },
-    { "id": 245, "team": "Lincoln Red Imps", "overall": 60, "countrycode": "GIB" },
-    { "id": 246, "team": "Borac Banja Luka", "overall": 63, "countrycode": "BIH" },
-    { "id": 247, "team": "Rijeka", "overall": 69, "countrycode": "CRO" },
-    { "id": 248, "team": "Austria Wien", "overall": 74, "countrycode": "AUT" },
-    { "id": 249, "team": "Maccabi Tel Aviv", "overall": 70, "countrycode": "ISR" },
-    { "id": 250, "team": "Tromso", "overall": 69, "countrycode": "NOR" },
-    { "id": 251, "team": "Vikingur Reykjavik", "overall": 63, "countrycode": "ISL" },
-    { "id": 252, "team": "Hapoel Be'er Sheva", "overall": 67, "countrycode": "ISR" }
+    {
+      "id": 235,
+      "team": "Kauno Zalgiris",
+      "overall": 59,
+      "countrycode": "LTU",
+      "facilityRating": 1,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 236,
+      "team": "Egnatia",
+      "overall": 58,
+      "countrycode": "ALB",
+      "facilityRating": 1,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 237,
+      "team": "Iberia 1999",
+      "overall": 60,
+      "countrycode": "GEO",
+      "facilityRating": 3,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 238,
+      "team": "KI Klaksvik",
+      "overall": 62,
+      "countrycode": "FRO",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 239,
+      "team": "Hammarby IF",
+      "overall": 71,
+      "countrycode": "SWE",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 240,
+      "team": "Nordsjaelland",
+      "overall": 72,
+      "countrycode": "DEN",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
+    },
+    {
+      "id": 241,
+      "team": "Shamrock Rovers",
+      "overall": 65,
+      "countrycode": "IRL",
+      "facilityRating": 4,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 242,
+      "team": "Riga",
+      "overall": 63,
+      "countrycode": "LVA",
+      "facilityRating": 3,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 243,
+      "team": "Universitatea Craiova",
+      "overall": 71,
+      "countrycode": "ROU",
+      "facilityRating": 4,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 244,
+      "team": "Dinamo Tbilisi",
+      "overall": 66,
+      "countrycode": "GEO",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 245,
+      "team": "Lincoln Red Imps",
+      "overall": 60,
+      "countrycode": "GIB",
+      "facilityRating": 3,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 246,
+      "team": "Borac Banja Luka",
+      "overall": 63,
+      "countrycode": "BIH",
+      "facilityRating": 3,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 247,
+      "team": "Rijeka",
+      "overall": 69,
+      "countrycode": "CRO",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 248,
+      "team": "Austria Wien",
+      "overall": 74,
+      "countrycode": "AUT",
+      "facilityRating": 5,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 249,
+      "team": "Maccabi Tel Aviv",
+      "overall": 70,
+      "countrycode": "ISR",
+      "facilityRating": 4,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 250,
+      "team": "Tromso",
+      "overall": 69,
+      "countrycode": "NOR",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 251,
+      "team": "Vikingur Reykjavik",
+      "overall": 63,
+      "countrycode": "ISL",
+      "facilityRating": 3,
+      "youthScouting": 1,
+      "youthExperience": 1
+    },
+    {
+      "id": 252,
+      "team": "Malmö FF",
+      "overall": 69,
+      "countrycode": "SWE",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
+    }
   ]
 }

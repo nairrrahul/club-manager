@@ -61,6 +61,9 @@ export function refreshAllClubOveralls(season: Season): void {
     competition.teams.filter(team => team.isEuropeanGuest).forEach(refresh);
   }
   for (const team of season.clubWorldCup?.teams ?? []) refresh(team);
+  for (const tournament of Object.values(season.continentalTournaments ?? {})) {
+    for (const team of tournament.teams) refresh(team);
+  }
 }
 
 /** Refreshes one live club (e.g. right after it signs a player). */
@@ -81,4 +84,8 @@ export function refreshClubOverall(season: Season, teamID: number): void {
   }
   const worldCupTeam = season.clubWorldCup?.teams.find(team => team.ID === teamID);
   if (worldCupTeam) apply(worldCupTeam);
+  for (const tournament of Object.values(season.continentalTournaments ?? {})) {
+    const team = tournament.teams.find(candidate => candidate.ID === teamID);
+    if (team) apply(team);
+  }
 }

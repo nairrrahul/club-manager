@@ -1,4 +1,5 @@
 import { TeamLink } from "./common";
+import { FlagIcon } from "./FlagIcon";
 import { isPenaltiesOnly } from "../../engine/snapshots";
 import type { CupMatchSnap, CupSnap, EuroRoundSnap, EuroTieSnap, TeamRef } from "../../engine/snapshots";
 
@@ -17,7 +18,12 @@ function TeamRow(props: {
       } ${mine ? "outline outline-1 outline-accent-yellow -outline-offset-1" : ""}`}
     >
       <span className="truncate">
-        {props.team ? <TeamLink team={props.team} /> : <span className="text-navy-400">TBD</span>}
+        {props.team ? (
+          <span className="inline-flex items-center gap-1.5">
+            {props.team.countrycode && <FlagIcon code={props.team.countrycode} size={0.85} />}
+            <TeamLink team={props.team} />
+          </span>
+        ) : <span className="text-navy-400">TBD</span>}
       </span>
       <span className="flex gap-2 tabular-nums">
         {props.cells.map((cell, i) => (
@@ -35,7 +41,10 @@ export function CupMatchCard(props: { match: CupMatchSnap; highlightID?: number 
     return (
       <div className="bg-navy-900 border border-navy-700 rounded text-xs w-56">
         <div className="px-2 py-1 flex justify-between">
-          <span className="truncate">{team ? <TeamLink team={team} /> : "TBD"}</span>
+          <span className="truncate inline-flex items-center gap-1.5">
+            {team?.countrycode && <FlagIcon code={team.countrycode} size={0.85} />}
+            {team ? <TeamLink team={team} /> : "TBD"}
+          </span>
           <span className="text-navy-300">BYE</span>
         </div>
       </div>
@@ -44,6 +53,45 @@ export function CupMatchCard(props: { match: CupMatchSnap; highlightID?: number 
   const decided = match.score !== null;
   const homeWon = decided && match.winner?.id === match.home?.id;
   const awayWon = decided && match.winner?.id === match.away?.id;
+  const legs = match.legs;
+  const tiebreak = match.tiebreak;
+  if (legs && match.aggregate) {
+    const homeCells = [
+      legs[0]?.h ?? "·",
+      legs[1]?.a ?? "·",
+      match.aggregate.h
+    ];
+    const awayCells = [
+      legs[0]?.a ?? "·",
+      legs[1]?.h ?? "·",
+      match.aggregate.a
+    ];
+    return (
+      <div className="bg-navy-900 border border-navy-700 rounded text-xs w-60 overflow-hidden">
+        <TeamRow
+          team={match.home}
+          winner={homeWon}
+          decided={decided}
+          cells={homeCells}
+          highlightID={props.highlightID}
+        />
+        <TeamRow
+          team={match.away}
+          winner={awayWon}
+          decided={decided}
+          cells={awayCells}
+          highlightID={props.highlightID}
+        />
+        {tiebreak && (
+          <div className="px-2 py-0.5 text-[10px] text-navy-300 border-t border-navy-700">
+            {isPenaltiesOnly(tiebreak)
+              ? `Penalties ${tiebreak.ph}-${tiebreak.pa}`
+              : `Tiebreak ${tiebreak.h}-${tiebreak.a}${tiebreak.ph !== undefined ? ` (${tiebreak.ph}-${tiebreak.pa} PSO)` : ""}`}
+          </div>
+        )}
+      </div>
+    );
+  }
   const pso = match.score && match.score.ph !== undefined && match.score.pa !== undefined;
   return (
     <div className="bg-navy-900 border border-navy-700 rounded text-xs w-56 overflow-hidden">
@@ -95,7 +143,10 @@ export function EuroTieCard(props: { tie: EuroTieSnap; round: EuroRoundSnap; hig
     return (
       <div className="bg-navy-900 border border-navy-700 rounded text-xs w-60">
         <div className="px-2 py-1 flex justify-between">
-          <span className="truncate">{team ? <TeamLink team={team} /> : "TBD"}</span>
+          <span className="truncate inline-flex items-center gap-1.5">
+            {team?.countrycode && <FlagIcon code={team.countrycode} size={0.85} />}
+            {team ? <TeamLink team={team} /> : "TBD"}
+          </span>
           <span className="text-navy-300">BYE</span>
         </div>
       </div>
