@@ -70,12 +70,12 @@ function getAggregateGoals(match: BracketMatch): { home: number; away: number } 
   };
 }
 
-function simulateTie(match: BracketMatch, team1: Team, team2: Team): void {
+function simulateTie(match: BracketMatch, team1: Team, team2: Team, matchday: number): void {
   const firstLeg = simulateMatch(team1, team2, false, "CONTINENTAL");
   const secondLeg = simulateMatch(team2, team1, false, "CONTINENTAL");
   match.legs = [
-    { matchday: CONTINENTAL_TOURNAMENT_MATCHDAY, result: firstLeg },
-    { matchday: CONTINENTAL_TOURNAMENT_MATCHDAY + 1, result: secondLeg }
+    { matchday, result: firstLeg },
+    { matchday, result: secondLeg }
   ];
   updateFormAfterMatch(firstLeg);
   updateFormAfterMatch(secondLeg);
@@ -145,6 +145,8 @@ export function simulateContinentalTournaments(
     if (tournament.completed) continue;
     const { bracket } = tournament;
     for (let roundIndex = bracket.activeRound; roundIndex < bracket.rounds.length; roundIndex++) {
+      const roundMatchday = CONTINENTAL_TOURNAMENT_MATCHDAY + roundIndex;
+      if (roundMatchday > matchday) break;
       const round = bracket.rounds[roundIndex];
       const isFinal = roundIndex === bracket.rounds.length - 1;
       for (const match of round) {
@@ -155,20 +157,22 @@ export function simulateContinentalTournaments(
           continue;
         }
         if (isFinal) playFinal(match, team1, team2);
-        else simulateTie(match, team1, team2);
+        else simulateTie(match, team1, team2, roundMatchday);
       }
-      if (!isFinal) advanceRound(bracket, round);
+      simulated = true;
+      if (isFinal) {
+        const final = round[0];
+        const finalists = [final.player1?.team, final.player2?.team].filter((team): team is Team => Boolean(team));
+        tournament.winner = final.winner;
+        tournament.runnerUp = finalists.find(team => team.ID !== tournament.winner?.ID) ?? null;
+        if (!tournament.winner || !tournament.runnerUp) {
+          throw new Error(`${tournament.confederation} tournament did not produce a winner and runner-up.`);
+        }
+        tournament.completed = true;
+        break;
+      }
+      advanceRound(bracket, round);
     }
-
-    const final = bracket.rounds.at(-1)?.[0];
-    const finalists = [final?.player1?.team, final?.player2?.team].filter((team): team is Team => Boolean(team));
-    tournament.winner = final?.winner ?? null;
-    tournament.runnerUp = finalists.find(team => team.ID !== tournament.winner?.ID) ?? null;
-    if (!tournament.winner || !tournament.runnerUp) {
-      throw new Error(`${tournament.confederation} tournament did not produce a winner and runner-up.`);
-    }
-    tournament.completed = true;
-    simulated = true;
   }
   return simulated;
 }

@@ -97,21 +97,21 @@ export default function ContinentalTournamentsPage() {
             right={
               tournament.complete
                 ? <span>Champion: {tournament.winner?.name ?? "Unknown"}</span>
-                : <span>Auto-simulates at matchday 31</span>
+                : <span>Auto-simulates from matchday 31</span>
             }
           >
             {tournament.rounds.length > 0 ? (
               <CupBracketTree cup={tournamentToCup(tournament)} highlightID={game.managerTeam.ID} />
             ) : (
               <Empty>
-                This tournament has not been played yet. The knockout and final simulate automatically between matchdays 31 and 32.
+                This tournament has not been played yet. Each knockout round simulates automatically on its own matchday, starting at matchday 31.
               </Empty>
             )}
           </Panel>
         ) : (
           <Panel>
             <Empty>
-              Continental tournaments begin in the 2027-28 season. Each confederation's full club pool enters a randomly drawn knockout, which is simulated automatically at matchday 31.
+              Continental tournaments begin in the 2027-28 season. Each confederation's full club pool enters a randomly drawn knockout, with one round automatically simulated per matchday starting at matchday 31.
             </Empty>
           </Panel>
         )

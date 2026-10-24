@@ -143,7 +143,10 @@ export function EuroTieCard(props: { tie: EuroTieSnap; round: EuroRoundSnap; hig
     return (
       <div className="bg-navy-900 border border-navy-700 rounded text-xs w-60">
         <div className="px-2 py-1 flex justify-between">
-          <span className="truncate">{team ? <TeamLink team={team} /> : "TBD"}</span>
+          <span className="truncate inline-flex items-center gap-1.5">
+            {team?.countrycode && <FlagIcon code={team.countrycode} size={0.85} />}
+            {team ? <TeamLink team={team} /> : "TBD"}
+          </span>
           <span className="text-navy-300">BYE</span>
         </div>
       </div>

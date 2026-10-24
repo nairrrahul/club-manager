@@ -105,7 +105,9 @@ export default function PlayerPage() {
     : location === "youth" ? "Youth academy"
     : location === "free-agent"
       ? (found.freeAgent?.releasedBy ? `Released by ${found.freeAgent.releasedBy}` : "Unattached")
-      : `Signed from free agents (${seasonDisplay(found.club?.signedYear ?? 0)}, matchday ${found.club?.signedMatchday ?? 0})`;
+      : found.club?.source === "regen"
+        ? `Joined ${seasonDisplay(found.club.signedYear)}`
+        : `Signed from free agents (${seasonDisplay(found.club?.signedYear ?? 0)}, matchday ${found.club?.signedMatchday ?? 0})`;
   const progression = player.progression;
   const historyRows = buildHistoryRows(player, game.season.year);
 

@@ -10,6 +10,7 @@ import type { BracketMatch, MatchResult } from "./types";
 import type { Season } from "./season";
 import { CLUB_WORLD_CUP_NAME } from "./clubWorldCup";
 import type { ClubWorldCup } from "./clubWorldCup";
+import { CONTINENTAL_TOURNAMENT_MATCHDAY } from "./continentalTournaments";
 import type { ContinentalTournament } from "./continentalTournaments";
 
 // ---------------------------------------------------------------------------
@@ -183,6 +184,7 @@ export interface ContinentalTournamentMatchSnap {
   home: TeamRef | null;
   away: TeamRef | null;
   legs: [ScoreSnap | null, ScoreSnap | null] | null;
+  legMatchdays: [number, number] | null;
   result: ScoreSnap | null;
   aggregate: { h: number; a: number } | null;
   tiebreak: ScoreSnap | null;
@@ -300,6 +302,9 @@ function snapshotContinentalMatch(match: BracketMatch): ContinentalTournamentMat
     legs: match.legs?.length === 2
       ? [scoreOf(match.legs[0].result), scoreOf(match.legs[1].result)]
       : null,
+    legMatchdays: match.legs?.length === 2
+      ? [match.legs[0].matchday, match.legs[1].matchday]
+      : null,
     result: aggregate
       ? { h: aggregate.team1, a: aggregate.team2 }
       : scoreOf(match.result),
@@ -322,7 +327,7 @@ function snapshotContinentalTournaments(
       complete: tournament.completed,
       rounds: tournament.bracket.rounds.map((round, index) => ({
         label: continentalRoundLabel(tournament, index),
-        matchday: index === tournament.bracket.rounds.length - 1 ? 32 : 31,
+        matchday: CONTINENTAL_TOURNAMENT_MATCHDAY + index,
         matches: round.map(snapshotContinentalMatch)
       })),
       winner: tournament.winner ? ref(tournament.winner) : null,
@@ -431,8 +436,8 @@ function snapshotCup(season: Season): CupSnap {
       const away = match.player2?.team ?? null;
       return {
         id: match.id,
-        home: home ? ref(home) : null,
-        away: away ? ref(away) : null,
+        home: home ? { ...ref(home), countrycode: home.countrycode ?? "ENG" } : null,
+        away: away ? { ...ref(away), countrycode: away.countrycode ?? "ENG" } : null,
         score: scoreOf(match.result),
         winner: match.winner ? ref(match.winner) : null,
         bye: (home === null) !== (away === null)
@@ -504,8 +509,8 @@ function snapshotEuropean(season: Season): Record<string, EuroSnap> | null {
             : null;
           return {
             id: match.id,
-            home: home ? ref(home) : null,
-            away: away ? ref(away) : null,
+            home: home ? { ...ref(home), countrycode: home.countrycode ?? "ENG" } : null,
+            away: away ? { ...ref(away), countrycode: away.countrycode ?? "ENG" } : null,
             bye: (home === null) !== (away === null),
             legs,
             aggregate,
@@ -585,7 +590,7 @@ export interface TeamFixture {
   note?: string;
 }
 
-const COMPETITION_ORDER: Record<string, number> = { LEAGUE: 0, CUP: 1, UCL: 2, UEL: 3, UECL: 4, CWC: 5 };
+const COMPETITION_ORDER: Record<string, number> = { LEAGUE: 0, CUP: 1, UCL: 2, UEL: 3, UECL: 4, CWC: 5, CONTINENTAL: 6 };
 
 function toResult(
   score: ScoreSnap | null,
@@ -775,6 +780,73 @@ export function buildTeamFixtures(arch: SeasonArchive, teamID: number): TeamFixt
     }
   }
 
+  for (const tournament of Object.values(arch.continentalTournaments ?? {})) {
+    for (const round of tournament.rounds) {
+      for (const match of round.matches) {
+        if (!match.home || !match.away || (match.home.id !== teamID && match.away.id !== teamID)) continue;
+        if (match.legs && match.legMatchdays) {
+          const isBracketHome = match.home.id === teamID;
+          const opponent = isBracketHome ? match.away : match.home;
+          match.legs.forEach((score, legIndex) => {
+            if (!score) return;
+            const firstLeg = legIndex === 0;
+            const isHome = firstLeg ? isBracketHome : !isBracketHome;
+            const lastLeg = legIndex === 1;
+            let note: string | undefined;
+            if (lastLeg && match.aggregate) {
+              const goalsFor = isBracketHome ? match.aggregate.h : match.aggregate.a;
+              const goalsAgainst = isBracketHome ? match.aggregate.a : match.aggregate.h;
+              note = `Agg ${goalsFor}-${goalsAgainst}`;
+              if (match.tiebreak) {
+                const penaltiesFor = isBracketHome ? match.tiebreak.ph : match.tiebreak.pa;
+                const penaltiesAgainst = isBracketHome ? match.tiebreak.pa : match.tiebreak.ph;
+                note += ` · penalties ${penaltiesFor}-${penaltiesAgainst}`;
+              }
+            }
+            let result = toResult(score, isHome);
+            if (lastLeg && match.winner) {
+              const won = match.winner.id === teamID;
+              result = {
+                gf: result?.gf ?? 0,
+                ga: result?.ga ?? 0,
+                outcome: won ? "W" : "L",
+                pso: match.tiebreak?.ph !== undefined && match.tiebreak.pa !== undefined
+                  ? {
+                      gf: isBracketHome ? match.tiebreak.ph : match.tiebreak.pa,
+                      ga: isBracketHome ? match.tiebreak.pa : match.tiebreak.ph
+                    }
+                  : undefined
+              };
+            }
+            fixtures.push({
+              matchday: match.legMatchdays![legIndex],
+              competitionCode: "CONTINENTAL",
+              competition: `${tournament.confederation} Championship`,
+              link: "/club-world-cup/continental",
+              stage: `${round.label} (leg ${legIndex + 1})`,
+              opponent,
+              home: isHome,
+              result,
+              note
+            });
+          });
+        } else if (match.result) {
+          const isHome = match.home.id === teamID;
+          fixtures.push({
+            matchday: round.matchday,
+            competitionCode: "CONTINENTAL",
+            competition: `${tournament.confederation} Championship`,
+            link: "/club-world-cup/continental",
+            stage: round.label,
+            opponent: isHome ? match.away : match.home,
+            home: isHome,
+            result: toResult(match.result, isHome, match.winner?.id ?? null, teamID)
+          });
+        }
+      }
+    }
+  }
+
   return fixtures.sort((a, b) =>
     a.matchday - b.matchday ||
     (COMPETITION_ORDER[a.competitionCode === "LEAGUE" || /^\d+$/.test(a.competitionCode) ? "LEAGUE" : a.competitionCode] ?? 9) -
@@ -819,6 +891,16 @@ export function buildTrophies(archives: SeasonArchive[], teamID: number): Trophy
         kind: "CWC",
         name: `${CLUB_WORLD_CUP_NAME} Winners`
       });
+    }
+    for (const [confederation, tournament] of Object.entries(arch.continentalTournaments ?? {})) {
+      if (tournament.complete && tournament.winner?.id === teamID) {
+        trophies.push({
+          year: arch.year,
+          season: arch.label,
+          kind: "CONTINENTAL",
+          name: `${confederation} Championship Winners`
+        });
+      }
     }
   }
 

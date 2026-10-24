@@ -138,8 +138,10 @@ export function getLeaguePrediction(teams: Team[], tier: number): number[] {
 
   return [...teams]
     .sort((a, b) => {
+      const aRating = a.BaseOverall + (a.playerBonus ?? 0);
+      const bRating = b.BaseOverall + (b.playerBonus ?? 0);
       return (
-        b.BaseOverall - a.BaseOverall ||
+        bRating - aRating ||
         getPredictionAverage(a, tier, currentLeagueSize) -
           getPredictionAverage(b, tier, currentLeagueSize) ||
         a.Team.localeCompare(b.Team)

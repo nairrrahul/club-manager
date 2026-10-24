@@ -165,24 +165,37 @@ function Pitch(props: {
             const player = props.slots[slotIndex];
             const selected = props.selected === slotIndex;
             return (
-              <button
+              <div
                 key={slotIndex}
-                disabled={!props.editable}
-                onClick={() => props.onSelect(slotIndex)}
-                className={`flex flex-col items-center w-24 group ${props.editable ? "cursor-pointer" : "cursor-default"}`}
+                className={`flex flex-col items-center w-24 group ${props.editable ? "cursor-pointer" : ""}`}
               >
-                <span className={`rounded-full ${selected ? "ring-4 ring-accent-yellow" : props.editable ? "group-hover:ring-2 ring-accent-purple" : ""}`}>
-                  {player ? <OvrBadge value={player.overall} size="lg" /> : (
-                    <span className="inline-flex w-12 h-12 items-center justify-center rounded-lg bg-navy-700 text-navy-300 text-xl">?</span>
-                  )}
-                </span>
+                {props.editable ? (
+                  <button
+                    type="button"
+                    aria-label={`${player ? `Select ${player.lastName}` : "Select empty"} ${requirements[slotIndex]} slot`}
+                    onClick={() => props.onSelect(slotIndex)}
+                    className={`rounded-full ${selected ? "ring-4 ring-accent-yellow" : "group-hover:ring-2 ring-accent-purple"}`}
+                  >
+                    {player ? <OvrBadge value={player.overall} size="lg" /> : (
+                      <span className="inline-flex w-12 h-12 items-center justify-center rounded-lg bg-navy-700 text-navy-300 text-xl">?</span>
+                    )}
+                  </button>
+                ) : (
+                  <span className="rounded-full">
+                    {player ? <OvrBadge value={player.overall} size="lg" /> : (
+                      <span className="inline-flex w-12 h-12 items-center justify-center rounded-lg bg-navy-700 text-navy-300 text-xl">?</span>
+                    )}
+                  </span>
+                )}
                 <span className="mt-1 text-[11px] font-semibold leading-tight text-center truncate w-full">
-                  {player ? player.lastName : "Empty"}
+                  {player
+                    ? <PlayerLink id={player.id} name={player.lastName} />
+                    : "Empty"}
                 </span>
                 <span className="text-[10px] text-navy-300">
                   {requirements[slotIndex]}{player && player.position !== requirements[slotIndex] ? ` (${player.position})` : ""}
                 </span>
-              </button>
+              </div>
             );
           })}
         </div>

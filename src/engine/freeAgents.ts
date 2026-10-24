@@ -177,6 +177,9 @@ export function developFreeAgentWorld(season: Season, newYear: number): void {
   for (const league of Object.values(season.leagueStates)) {
     for (const team of league.teams) facilityByTeam.set(team.ID, team.facilityRating);
   }
+  for (const teams of Object.values(europeanTeamPool)) {
+    for (const team of teams) facilityByTeam.set(team.id, team.facilityRating ?? 3);
+  }
   for (const [teamID, entries] of Object.entries(state.clubPlayers)) {
     const facility = facilityByTeam.get(Number(teamID)) ?? 3;
     for (const entry of entries) advanceOneYear(entry.player, facility, newYear);
