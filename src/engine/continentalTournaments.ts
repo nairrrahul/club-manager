@@ -5,6 +5,7 @@ import { simulateMatch, simulatePenaltyShootoutOnly, parseKOMatchWinner } from "
 import { getAggregateGoals } from "./europeanCompetitions";
 import { updateFormAfterMatch } from "./form";
 import type { Bracket, BracketMatch, MatchResult } from "./types";
+import { formatSeasonLabel, shuffledCopy } from "./utils";
 
 export const CONTINENTAL_TOURNAMENT_START_YEAR = 2027;
 export const CONTINENTAL_TOURNAMENT_MATCHDAY = 31;
@@ -32,19 +33,6 @@ export interface ContinentalTournament {
 }
 
 const continentalTeams = continentalTeamsRaw as Record<string, RawContinentalTeam[]>;
-
-function seasonLabel(year: number): string {
-  return `${String(year).slice(-2)}-${String(year + 1).slice(-2)}`;
-}
-
-function shuffled<T>(items: T[]): T[] {
-  const result = [...items];
-  for (let index = result.length - 1; index > 0; index--) {
-    const other = Math.floor(Math.random() * (index + 1));
-    [result[index], result[other]] = [result[other], result[index]];
-  }
-  return result;
-}
 
 function createTeam(raw: RawContinentalTeam): Team {
   const team = new Team({
@@ -108,10 +96,10 @@ function createTournament(year: number, confederation: string, rawTeams: RawCont
   const teams = rawTeams.map(createTeam);
   return {
     year,
-    seasonLabel: seasonLabel(year),
+    seasonLabel: formatSeasonLabel(year),
     confederation,
     teams,
-    bracket: scheduleBracket(shuffled(teams), 0),
+    bracket: scheduleBracket(shuffledCopy(teams), 0),
     completed: false,
     winner: null,
     runnerUp: null

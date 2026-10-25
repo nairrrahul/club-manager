@@ -7,6 +7,7 @@ import { simulateMatch, parseKOMatchWinner, simulatePenaltyShootoutOnly } from "
 import { updateFormAfterMatch } from "./form";
 import { getLeagueStandings } from "./league";
 import { clubStarBonus } from "./squadStrength";
+import { shuffledCopy } from "./utils";
 import type {
   Bracket, BracketMatch, FinalHistory, FixtureMatch, MatchResult, SeasonHistoryEntry, TableEntry
 } from "./types";
@@ -67,15 +68,6 @@ export interface EuropeanCompetition {
   completed: boolean;
   history: FinalHistory[];
   seasonLabel?: string;
-}
-
-function shuffle<T>(values: T[]): T[] {
-  const result = [...values];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
 }
 
 function weightedPickIndex(teams: Team[]): number {
@@ -344,7 +336,7 @@ function createPots(teams: Team[]): Team[][] {
   );
 
   return Array.from({ length: 4 }, (_, index) =>
-    shuffle(ranked.slice(index * 9, index * 9 + 9))
+    shuffledCopy(ranked.slice(index * 9, index * 9 + 9))
   );
 }
 
@@ -370,8 +362,8 @@ function buildSwissGraph(pots: Team[][]): Map<number, Set<number>> {
   // create a 2-regular bipartite graph between each pair of pots.
   for (let firstPot = 0; firstPot < pots.length; firstPot++) {
     for (let secondPot = firstPot + 1; secondPot < pots.length; secondPot++) {
-      const first = shuffle(pots[firstPot]);
-      const second = shuffle(pots[secondPot]);
+      const first = shuffledCopy(pots[firstPot]);
+      const second = shuffledCopy(pots[secondPot]);
       for (let index = 0; index < first.length; index++) {
         addEdge(first[index], second[index]);
         addEdge(first[index], second[(index + 1) % second.length]);

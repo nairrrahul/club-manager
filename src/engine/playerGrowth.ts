@@ -1,6 +1,8 @@
 import type { Player, PeakRange, Position } from "./types";
 import type { Team } from "./team";
+import { randInt } from "./utils";
 
+export { randInt } from "./utils";
 const FACILITY_MULTIPLIERS: Record<number, { growth: number; decline: number }> = {
   1: { growth: 0.90, decline: 1.10 },
   2: { growth: 0.95, decline: 1.05 },
@@ -22,10 +24,6 @@ const PEAK_RANGES: Record<string, PeakRange> = {
   DEF: { start: 26, end: 33 },
   GK: { start: 27, end: 34 }
 };
-
-export function randInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
 
 export function getPeakRange(position: Position): PeakRange {
   for (const [category, positions] of Object.entries(POSITION_CATEGORIES)) {

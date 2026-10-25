@@ -110,7 +110,6 @@ function RankingChart(props: { entries: { year: number; label: string; rank: num
 function RankingTab(props: { code: string }) {
   const game = useGame();
   const all = getNationRankingHistory(game.season.international, props.code);
-  console.log(all);
   const withChange = all.map((entry, index) => ({
     ...entry,
     rankChange: index > 0 ? all[index - 1].rank - entry.rank : null,

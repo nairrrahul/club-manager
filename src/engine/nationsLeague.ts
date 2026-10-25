@@ -3,6 +3,7 @@ import teamWindowsRaw from "./data/team_windows.csv?raw";
 import { SEASON_START_YEAR } from "./constants";
 import { getConfederation } from "./nations";
 import { scheduleLeague } from "./scheduler";
+import { shuffledCopy } from "./utils";
 import type { InternationalMatch } from "./international";
 import { Team } from "./team";
 
@@ -140,15 +141,6 @@ export function createNationsLeagueState(): NationsLeagueState {
   return { divisions, pots, editions: [] };
 }
 
-function shuffle<T>(items: T[]): T[] {
-  const shuffled = [...items];
-  for (let index = shuffled.length - 1; index > 0; index--) {
-    const other = Math.floor(Math.random() * (index + 1));
-    [shuffled[index], shuffled[other]] = [shuffled[other], shuffled[index]];
-  }
-  return shuffled;
-}
-
 function buildGroups(pots: Record<string, string[]>): NationsLeagueGroup[] {
   const potEntries = Object.entries(pots).sort(([a], [b]) => Number(a) - Number(b));
   const groupCount = Math.max(...potEntries.map(([, teams]) => teams.length));
@@ -158,7 +150,7 @@ function buildGroups(pots: Record<string, string[]>): NationsLeagueGroup[] {
     teams: [] as string[]
   }));
   for (const [, potTeams] of potEntries) {
-    const drawnTeams = shuffle(potTeams);
+    const drawnTeams = shuffledCopy(potTeams);
     drawnTeams.forEach((team, index) => groups[index].teams.push(team));
   }
   return groups;
@@ -456,7 +448,7 @@ export function finalizeNationsLeagueEdition(state: NationsLeagueState, edition:
       potMembers[potNumber - 1].push(code);
     }
     nextPots[division] = Object.fromEntries(potMembers.map((members, index) => [
-      String(index + 1), shuffle(members)
+      String(index + 1), shuffledCopy(members)
     ]));
   }
   state.divisions[edition.confederation] = nextDivisions;

@@ -6,6 +6,7 @@ import { generatePlayerName, getRandomNationCode, getSecondaryNationality } from
 import { FORMATIONS, POSITION_ORDER, canPlayPosition, getFormationRequirements } from "./formation";
 import type { Team } from "./team";
 import { openStint } from "./playerHistory";
+import { randInt, randomSortCopy } from "./utils";
 import type { PeakRange, Player, PlayerType, Position } from "./types";
 
 const tierPlayerInfo = tierPlayerInfoRaw as Record<string, Record<string, number>>;
@@ -126,10 +127,6 @@ function generatePotential(teamOverall: number): number {
 
 function generateInitialOverall(potential: number, age: number): number {
   return Math.max(1, Math.min(potential, Math.round(potential * getAgeMultiplier(age))));
-}
-
-function shuffle<T>(values: T[]): T[] {
-  return [...values].sort(() => Math.random() - 0.5);
 }
 
 function createPlayer(
@@ -483,7 +480,7 @@ function adjustStartingXIToTarget(team: Team, targetOverall: number): void {
 }
 
 export function generateSquad(team: Team, year: number): Player[] {
-  const positions = shuffle(POSITION_DISTRIBUTION);
+  const positions = randomSortCopy(POSITION_DISTRIBUTION);
   const players = positions.map((position, index) =>
     createPlayer(team, `${team.ID}-${index + 1}`, position)
   );
@@ -634,10 +631,6 @@ export function changePlayerPosition(
 // ---------------------------------------------------------------------------
 // Youth scouting player generation
 // ---------------------------------------------------------------------------
-
-function randInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
 
 function generatePlayerType(potential: number): PlayerType {
   if (potential >= 83) {

@@ -7,6 +7,7 @@ import type { EuropeanCompetition } from "./europeanCompetitions";
 import type { Season } from "./season";
 import type { FinalHistory, MatchResult, TableEntry } from "./types";
 import type { ContinentalTournament } from "./continentalTournaments";
+import { formatSeasonLabel, shuffledCopy } from "./utils";
 
 export const CLUB_WORLD_CUP_START_YEAR = 2028;
 export const CLUB_WORLD_CUP_NAME = "Club World Cup";
@@ -66,10 +67,6 @@ const continentalConfederationByID = new Map(
     teams.map(team => [team.id, confederation] as const)
   )
 );
-
-function seasonLabel(year: number): string {
-  return `${String(year).slice(-2)}-${String(year + 1).slice(-2)}`;
-}
 
 function getWinner(competition: EuropeanCompetition | undefined): Team | null {
   const bracket = competition?.knockout?.bracket;
@@ -163,28 +160,19 @@ function getTeamConfederation(team: Team): string {
   return continentalConfederationByID.get(team.ID) ?? getConfederation(team.countrycode ?? "") ?? "UEFA";
 }
 
-function shuffled<T>(items: T[]): T[] {
-  const result = [...items];
-  for (let index = result.length - 1; index > 0; index--) {
-    const other = Math.floor(Math.random() * (index + 1));
-    [result[index], result[other]] = [result[other], result[index]];
-  }
-  return result;
-}
-
 function drawGroups(teams: Team[]): { pots: Team[][]; groups: [ClubWorldCupGroup, ClubWorldCupGroup] } {
   const ranked = [...teams].sort((a, b) => b.Overall - a.Overall || a.Team.localeCompare(b.Team));
   const pots = [ranked.slice(0, 4), ranked.slice(4)];
   const groups: Team[][] = [[], []];
   const confederations: Set<string>[] = [new Set(), new Set()];
 
-  const drawnPots = pots.map(shuffled);
+  const drawnPots = pots.map(shuffledCopy);
   const placeTeam = (potIndex: number, teamIndex: number): boolean => {
     if (potIndex === drawnPots.length) return groups.every(group => group.length === 4);
     if (teamIndex === drawnPots[potIndex].length) return placeTeam(potIndex + 1, 0);
     const team = drawnPots[potIndex][teamIndex];
     const confederation = getTeamConfederation(team);
-    for (const groupIndex of shuffled([0, 1])) {
+    for (const groupIndex of shuffledCopy([0, 1])) {
       const group = groups[groupIndex];
       if (group.filter(candidate => pots[potIndex].includes(candidate)).length >= 2) continue;
       if (confederations[groupIndex].has(confederation)) continue;
@@ -293,7 +281,7 @@ export function createClubWorldCup(previousSeason: Season, year = previousSeason
   const pastWinner = previousWinner(previousSeason, championsLeagueWinner);
 
   if (!championsLeagueWinner || !pastWinner) {
-    throw new Error(`Club World Cup entrants for ${seasonLabel(year)} require the prior season's Champions League and Europa League winners.`);
+    throw new Error(`Club World Cup entrants for ${formatSeasonLabel(year)} require the prior season's Champions League and Europa League winners.`);
   }
 
   const excludedIDs = new Set([championsLeagueWinner.ID]);
@@ -312,12 +300,12 @@ export function createClubWorldCup(previousSeason: Season, year = previousSeason
     cloneTeam(pastWinner)
   ];
   if (entrants.length !== 8 || new Set(entrants.map(team => team.ID)).size !== 8) {
-    throw new Error(`Club World Cup entrants for ${seasonLabel(year)} are not eight distinct teams.`);
+    throw new Error(`Club World Cup entrants for ${formatSeasonLabel(year)} are not eight distinct teams.`);
   }
   const { pots, groups } = drawGroups(entrants);
   return {
     year,
-    seasonLabel: seasonLabel(year),
+    seasonLabel: formatSeasonLabel(year),
     teams: entrants,
     pots,
     groups,

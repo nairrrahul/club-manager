@@ -1,17 +1,6 @@
 import type { Team } from "./team";
 import type { Bracket, BracketMatch, BracketSlot, FixtureMatch, LeagueSchedule } from "./types";
-
-function shuffle<T>(array: T[]): T[] {
-  // Loop backwards from the last element down to the second element
-  for (let i = array.length - 1; i > 0; i--) {
-    // Pick a random index from 0 to i
-    const j = Math.floor(Math.random() * (i + 1));
-
-    // Swap elements array[i] and array[j] using destructuring
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
+import { shuffleInPlace } from "./utils";
 
 export function scheduleBracket(bracketTeams: Team[], shuffledGroups = 1): Bracket {
   let shuffledTeams: Team[] = [];
@@ -20,7 +9,7 @@ export function scheduleBracket(bracketTeams: Team[], shuffledGroups = 1): Brack
   } else {
     for (let i = 0; i < bracketTeams.length; i += shuffledGroups) {
       const batch = bracketTeams.slice(i, i + shuffledGroups);
-      const shuffledBatch = shuffle(batch);
+      const shuffledBatch = shuffleInPlace(batch);
       shuffledTeams.push(...shuffledBatch);
     }
   }
@@ -134,7 +123,7 @@ function createKnockoutBracket(bracketTeams: Team[]): Bracket {
 }
 
 export function scheduleLeague(teams: Team[]): LeagueSchedule {
-  const modifiedTeams: (Team | "X")[] = shuffle([...teams]);
+  const modifiedTeams: (Team | "X")[] = shuffleInPlace([...teams]);
   const matches: LeagueSchedule = {};
   if (modifiedTeams.length % 2 === 1) {
     modifiedTeams.push("X");
