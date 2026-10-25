@@ -38,17 +38,39 @@ function WindowView(props: { window: WindowRecord }) {
   );
   const nationsLeagueRounds = window.rounds.filter(round => round.kind === "nationsLeague");
 
-  const renderRounds = (rounds: typeof window.rounds) => rounds.map((round, index) => (
-    <Panel
-      key={`${round.label ?? round.kind ?? "friendly"}-${index}`}
-      title={round.label ?? `Friendlies · Set ${index + 1}`}
-      right={round.leftOut ? <span className="text-navy-300 flex items-center gap-1.5">No match: <NationLink code={round.leftOut} /></span> : undefined}
-    >
-      <div className="max-h-[60vh] overflow-y-auto">
-        {round.matches.map((match, i) => <FixtureRow key={i} match={match} />)}
-      </div>
-    </Panel>
-  ));
+  const renderRounds = (rounds: typeof window.rounds, separateByConfederation = false) =>
+    rounds.map((round, index) => {
+      const matchesByConfederation = new Map<string, InternationalMatch[]>();
+      if (separateByConfederation) {
+        for (const match of round.matches) {
+          const confederation = match.nationsLeagueConfederation ?? "Confederation unavailable";
+          const matches = matchesByConfederation.get(confederation) ?? [];
+          matches.push(match);
+          matchesByConfederation.set(confederation, matches);
+        }
+      }
+
+      return (
+        <Panel
+          key={`${round.label ?? round.kind ?? "friendly"}-${index}`}
+          title={round.label ?? `Friendlies · Set ${index + 1}`}
+          right={round.leftOut ? <span className="text-navy-300 flex items-center gap-1.5">No match: <NationLink code={round.leftOut} /></span> : undefined}
+        >
+          <div className="max-h-[60vh] overflow-y-auto">
+            {separateByConfederation ? (
+              [...matchesByConfederation.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([confederation, matches]) => (
+                <section key={confederation}>
+                  <h3 className="px-3 pt-3 pb-1 text-xs font-bold uppercase tracking-wider text-navy-300">{confederation}</h3>
+                  {matches.map((match, matchIndex) => <FixtureRow key={matchIndex} match={match} />)}
+                </section>
+              ))
+            ) : (
+              round.matches.map((match, matchIndex) => <FixtureRow key={matchIndex} match={match} />)
+            )}
+          </div>
+        </Panel>
+      );
+    });
 
   return (
     <div className="space-y-4">
@@ -68,7 +90,7 @@ function WindowView(props: { window: WindowRecord }) {
       {nationsLeagueRounds.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Nations League</h2>
-          {renderRounds(nationsLeagueRounds)}
+          {renderRounds(nationsLeagueRounds, true)}
         </section>
       )}
     </div>

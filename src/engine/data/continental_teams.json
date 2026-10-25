@@ -4,73 +4,118 @@
       "id": 253,
       "team": "Flamengo",
       "overall": 76,
-      "countrycode": "BRA"
+      "countrycode": "BRA",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
     },
     {
       "id": 254,
       "team": "Palmeiras",
       "overall": 75,
-      "countrycode": "BRA"
+      "countrycode": "BRA",
+      "facilityRating": 3,
+      "youthScouting": 5,
+      "youthExperience": 5
     },
     {
       "id": 255,
       "team": "Botafogo",
       "overall": 74,
-      "countrycode": "BRA"
+      "countrycode": "BRA",
+      "facilityRating": 3,
+      "youthScouting": 4,
+      "youthExperience": 4
     },
     {
       "id": 256,
       "team": "Fluminense",
       "overall": 72,
-      "countrycode": "BRA"
+      "countrycode": "BRA",
+      "facilityRating": 3,
+      "youthScouting": 4,
+      "youthExperience": 4
     },
     {
       "id": 257,
       "team": "River Plate",
       "overall": 76,
-      "countrycode": "ARG"
+      "countrycode": "ARG",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
     },
     {
       "id": 258,
       "team": "Boca Juniors",
       "overall": 75,
-      "countrycode": "ARG"
+      "countrycode": "ARG",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
     },
     {
       "id": 259,
       "team": "Estudiantes",
       "overall": 74,
-      "countrycode": "ARG"
+      "countrycode": "ARG",
+      "facilityRating": 3,
+      "youthScouting": 3,
+      "youthExperience": 3
     },
     {
       "id": 260,
       "team": "Gremio",
       "overall": 72,
-      "countrycode": "BRA"
+      "countrycode": "BRA",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
     },
     {
       "id": 301,
       "team": "Nacional",
       "overall": 73,
-      "countrycode": "URU"
+      "countrycode": "URU",
+      "facilityRating": 3,
+      "youthScouting": 3,
+      "youthExperience": 3
     },
     {
       "id": 302,
       "team": "Penarol",
       "overall": 71,
-      "countrycode": "URU"
+      "countrycode": "URU",
+      "facilityRating": 3,
+      "youthScouting": 3,
+      "youthExperience": 3
     },
     {
       "id": 303,
       "team": "Independiente del Valle",
       "overall": 74,
-      "countrycode": "ECU"
+      "countrycode": "ECU",
+      "facilityRating": 2,
+      "youthScouting": 5,
+      "youthExperience": 5
     },
     {
       "id": 304,
       "team": "Colo Colo",
       "overall": 72,
-      "countrycode": "CHI"
+      "countrycode": "CHI",
+      "facilityRating": 3,
+      "youthScouting": 3,
+      "youthExperience": 3
+    },
+    {
+      "id": 315,
+      "team": "America de Cali",
+      "overall": 70,
+      "countrycode": "COL",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
     }
   ],
   "CONCACAF": [
@@ -78,79 +123,118 @@
       "id": 261,
       "team": "Pachuca",
       "overall": 71,
-      "countrycode": "MEX"
+      "countrycode": "MEX",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
     },
     {
       "id": 262,
       "team": "Cruz Azul",
       "overall": 73,
-      "countrycode": "MEX"
+      "countrycode": "MEX",
+      "facilityRating": 4,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 263,
       "team": "Leon",
       "overall": 69,
-      "countrycode": "MEX"
+      "countrycode": "MEX",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
     },
     {
       "id": 264,
       "team": "Seattle Sounders",
       "overall": 71,
-      "countrycode": "USA"
+      "countrycode": "USA",
+      "facilityRating": 3,
+      "youthScouting": 4,
+      "youthExperience": 4
     },
     {
       "id": 265,
       "team": "Inter Miami",
       "overall": 73,
-      "countrycode": "USA"
+      "countrycode": "USA",
+      "facilityRating": 5,
+      "youthScouting": 1,
+      "youthExperience": 1
     },
     {
       "id": 266,
       "team": "Philadelphia Union",
       "overall": 72,
-      "countrycode": "USA"
+      "countrycode": "USA",
+      "facilityRating": 3,
+      "youthScouting": 4,
+      "youthExperience": 4
     },
     {
       "id": 267,
       "team": "LA FC",
       "overall": 71,
-      "countrycode": "USA"
+      "countrycode": "USA",
+      "facilityRating": 4,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 268,
       "team": "Club America",
       "overall": 74,
-      "countrycode": "MEX"
+      "countrycode": "MEX",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
     },
     {
       "id": 269,
       "team": "Chivas Guadalajara",
       "overall": 72,
-      "countrycode": "MEX"
+      "countrycode": "MEX",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
     },
     {
       "id": 270,
       "team": "Toluca",
       "overall": 74,
-      "countrycode": "MEX"
+      "countrycode": "MEX",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 299,
       "team": "Alajuelense",
       "overall": 67,
-      "countrycode": "CRC"
+      "countrycode": "CRC",
+      "facilityRating": 3,
+      "youthScouting": 1,
+      "youthExperience": 1
     },
     {
       "id": 300,
       "team": "Saprissa",
       "overall": 67,
-      "countrycode": "CRC"
+      "countrycode": "CRC",
+      "facilityRating": 2,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 305,
       "team": "Vancouver Whitecaps",
       "overall": 71,
-      "countrycode": "CAN"
+      "countrycode": "CAN",
+      "facilityRating": 3,
+      "youthScouting": 4,
+      "youthExperience": 4
     }
   ],
   "CAF": [
@@ -158,91 +242,136 @@
       "id": 271,
       "team": "Mamelodi Sundowns",
       "overall": 72,
-      "countrycode": "RSA"
+      "countrycode": "RSA",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 272,
       "team": "Pyramids FC",
       "overall": 69,
-      "countrycode": "EGY"
+      "countrycode": "EGY",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 273,
       "team": "Al Ahly",
       "overall": 72,
-      "countrycode": "EGY"
+      "countrycode": "EGY",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
     },
     {
       "id": 274,
       "team": "Wydad AC",
       "overall": 66,
-      "countrycode": "MAR"
+      "countrycode": "MAR",
+      "facilityRating": 4,
+      "youthScouting": 4,
+      "youthExperience": 4
     },
     {
       "id": 275,
       "team": "Esperance de Tunis",
       "overall": 67,
-      "countrycode": "TUN"
+      "countrycode": "TUN",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 276,
       "team": "RS Berkane",
       "overall": 67,
-      "countrycode": "MAR"
+      "countrycode": "MAR",
+      "facilityRating": 2,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 277,
       "team": "Orlando Pirates",
       "overall": 69,
-      "countrycode": "RSA"
+      "countrycode": "RSA",
+      "facilityRating": 2,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 278,
       "team": "AS FAR",
       "overall": 67,
-      "countrycode": "MAR"
+      "countrycode": "MAR",
+      "facilityRating": 2,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 295,
       "team": "TP Mazembe",
       "overall": 63,
-      "countrycode": "COD"
+      "countrycode": "COD",
+      "facilityRating": 3,
+      "youthScouting": 1,
+      "youthExperience": 1
     },
     {
       "id": 296,
       "team": "Hearts of Oak",
       "overall": 59,
-      "countrycode": "GHA"
+      "countrycode": "GHA",
+      "facilityRating": 2,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 297,
       "team": "ASEC Mimosas",
       "overall": 68,
-      "countrycode": "CIV"
+      "countrycode": "CIV",
+      "facilityRating": 2,
+      "youthScouting": 4,
+      "youthExperience": 4
     },
     {
       "id": 298,
       "team": "MC Alger",
       "overall": 61,
-      "countrycode": "ALG"
+      "countrycode": "ALG",
+      "facilityRating": 3,
+      "youthScouting": 1,
+      "youthExperience": 1
     },
     {
       "id": 308,
       "team": "Simba",
-      "overall": 63,
-      "countrycode": "TAN"
+      "overall": 61,
+      "countrycode": "TAN",
+      "facilityRating": 2,
+      "youthScouting": 1,
+      "youthExperience": 1
     },
     {
       "id": 309,
       "team": "Zamalek",
       "overall": 69,
-      "countrycode": "EGY"
+      "countrycode": "EGY",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 310,
       "team": "Stade Malien",
       "overall": 60,
-      "countrycode": "MLI"
+      "countrycode": "MLI",
+      "facilityRating": 2,
+      "youthScouting": 2,
+      "youthExperience": 2
     }
   ],
   "OFC": [
@@ -250,37 +379,55 @@
       "id": 279,
       "team": "Auckland City",
       "overall": 61,
-      "countrycode": "NZL"
+      "countrycode": "NZL",
+      "facilityRating": 2,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 280,
       "team": "Auckland FC",
       "overall": 63,
-      "countrycode": "NZL"
+      "countrycode": "NZL",
+      "facilityRating": 2,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 281,
       "team": "South Melbourne",
       "overall": 62,
-      "countrycode": "AUS"
+      "countrycode": "AUS",
+      "facilityRating": 2,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 282,
       "team": "Bula FC",
       "overall": 56,
-      "countrycode": "FIJ"
+      "countrycode": "FIJ",
+      "facilityRating": 2,
+      "youthScouting": 1,
+      "youthExperience": 1
     },
     {
       "id": 311,
       "team": "Central Coast",
       "overall": 50,
-      "countrycode": "SOL"
+      "countrycode": "SOL",
+      "facilityRating": 1,
+      "youthScouting": 1,
+      "youthExperience": 1
     },
     {
       "id": 312,
       "team": "Vanuatu United",
       "overall": 53,
-      "countrycode": "VAN"
+      "countrycode": "VAN",
+      "facilityRating": 1,
+      "youthScouting": 1,
+      "youthExperience": 1
     }
   ],
   "AFC": [
@@ -288,85 +435,127 @@
       "id": 283,
       "team": "Al Ahli",
       "overall": 74,
-      "countrycode": "KSA"
+      "countrycode": "KSA",
+      "facilityRating": 5,
+      "youthScouting": 1,
+      "youthExperience": 1
     },
     {
       "id": 284,
       "team": "Al Ain",
       "overall": 70,
-      "countrycode": "UAE"
+      "countrycode": "UAE",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 285,
       "team": "Al Hilal",
       "overall": 73,
-      "countrycode": "KSA"
+      "countrycode": "KSA",
+      "facilityRating": 5,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 286,
       "team": "Ulsan Hyundai",
       "overall": 73,
-      "countrycode": "KOR"
+      "countrycode": "KOR",
+      "facilityRating": 3,
+      "youthScouting": 3,
+      "youthExperience": 3
     },
     {
       "id": 287,
       "team": "Urawa Red Diamonds",
       "overall": 72,
-      "countrycode": "JPN"
+      "countrycode": "JPN",
+      "facilityRating": 3,
+      "youthScouting": 3,
+      "youthExperience": 3
     },
     {
       "id": 288,
       "team": "Vissel Kobe",
       "overall": 71,
-      "countrycode": "JPN"
+      "countrycode": "JPN",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
     },
     {
       "id": 289,
       "team": "Al Sadd",
       "overall": 70,
-      "countrycode": "QAT"
+      "countrycode": "QAT",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 290,
       "team": "Al Nassr",
       "overall": 71,
-      "countrycode": "KSA"
+      "countrycode": "KSA",
+      "facilityRating": 4,
+      "youthScouting": 3,
+      "youthExperience": 3
     },
     {
       "id": 291,
       "team": "Shanghai Shenhua",
       "overall": 67,
-      "countrycode": "CHN"
+      "countrycode": "CHN",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 292,
       "team": "Tractor",
       "overall": 65,
-      "countrycode": "IRN"
+      "countrycode": "IRN",
+      "facilityRating": 2,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 293,
       "team": "Melbourne City",
       "overall": 71,
-      "countrycode": "AUS"
+      "countrycode": "AUS",
+      "facilityRating": 3,
+      "youthScouting": 3,
+      "youthExperience": 3
     },
     {
       "id": 294,
       "team": "Pakhtakor",
       "overall": 64,
-      "countrycode": "UZB"
+      "countrycode": "UZB",
+      "facilityRating": 2,
+      "youthScouting": 2,
+      "youthExperience": 2
     },
     {
       "id": 313,
       "team": "Johor DT",
-      "overall": 63,
-      "countrycode": "MAS"
+      "overall": 61,
+      "countrycode": "MAS",
+      "facilityRating": 2,
+      "youthScouting": 1,
+      "youthExperience": 1
     },
     {
       "id": 314,
       "team": "Al Ittihad",
       "overall": 72,
-      "countrycode": "KSA"
+      "countrycode": "KSA",
+      "facilityRating": 4,
+      "youthScouting": 1,
+      "youthExperience": 1
     }
   ]
 }

@@ -5,7 +5,7 @@ import { simulateMatch, simulatePenaltyShootoutOnly, parseKOMatchWinner } from "
 import { getAggregateGoals } from "./europeanCompetitions";
 import { updateFormAfterMatch } from "./form";
 import type { Bracket, BracketMatch, MatchResult } from "./types";
-import { formatSeasonLabel, shuffledCopy } from "./utils";
+import { formatSeasonLabel } from "./utils";
 
 export const CONTINENTAL_TOURNAMENT_START_YEAR = 2027;
 export const CONTINENTAL_TOURNAMENT_MATCHDAY = 31;
@@ -94,12 +94,13 @@ function createTournament(year: number, confederation: string, rawTeams: RawCont
     throw new Error(`${confederation} must have at least two clubs for its continental tournament.`);
   }
   const teams = rawTeams.map(createTeam);
+  const rankedTeams = [...teams].sort((a, b) => b.Overall - a.Overall || a.Team.localeCompare(b.Team));
   return {
     year,
     seasonLabel: formatSeasonLabel(year),
     confederation,
     teams,
-    bracket: scheduleBracket(shuffledCopy(teams), 0),
+    bracket: scheduleBracket(rankedTeams, 5),
     completed: false,
     winner: null,
     runnerUp: null
