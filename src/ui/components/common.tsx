@@ -64,7 +64,7 @@ export function PageHeader(props: { title: ReactNode; subtitle?: ReactNode; righ
 }
 
 export function TeamLink(props: { team: TeamRef | { id: number; name: string }; className?: string; plain?: boolean }) {
-  const managerID = useGameStore.getState().game?.managerTeam.ID;
+  const managerID = useGameStore.getState().game?.managerTeam?.ID;
   const mine = props.team.id === managerID;
   return (
     <Link

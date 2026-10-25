@@ -35,10 +35,9 @@ export function runSearch(game: Game, rawQuery: string): SearchResult[] {
       });
     }
   }
-  const groups: [string, typeof team.seniorSquad][] = [
-    ["Senior squad", team.seniorSquad],
-    ["Youth academy", team.youthAcademySquad]
-  ];
+  const groups: [string, NonNullable<typeof team>["seniorSquad"]][] = team
+    ? [["Senior squad", team.seniorSquad], ["Youth academy", team.youthAcademySquad]]
+    : [];
   for (const [where, squad] of groups) {
     for (const player of squad ?? []) {
       if (player.isRetired) continue;

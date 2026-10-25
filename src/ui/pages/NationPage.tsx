@@ -38,7 +38,7 @@ function PlayersTab(props: { code: string }) {
                 <tr key={player.id}>
                   <td>
                     {/* Players on the managed team cannot be shortlisted. */}
-                    {clubID !== game.managerTeam.ID && <ShortlistButton playerId={player.id} shortlisted={player.isShortlisted === true} />}
+                    {clubID !== game.managerTeam?.ID && <ShortlistButton playerId={player.id} shortlisted={player.isShortlisted === true} />}
                   </td>
                   <td><PosBadge position={player.position} /></td>
                   <td><PlayerLink id={player.id} name={`${player.firstName} ${player.lastName}`} /></td>

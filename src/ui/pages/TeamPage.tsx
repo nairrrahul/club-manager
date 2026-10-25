@@ -112,6 +112,7 @@ function PlayersTab(props: { teamID: number; isManaged: boolean }) {
   const game = useGame();
   if (props.isManaged) {
     const team = game.managerTeam;
+    if (!team) return null;
     return (
       <div className="space-y-6">
         <Panel title={`Senior squad (${team.seniorSquad?.length ?? 0})`}>
@@ -266,7 +267,7 @@ export default function TeamPage() {
   const isEnglish = profile.kind === "ENG";
 
   // Best players of this club: its signed players (for the managed club: senior squad and academy).
-  const clubPlayers: Player[] = profile.isManaged
+  const clubPlayers: Player[] = profile.isManaged && game.managerTeam
     ? [...(game.managerTeam.seniorSquad ?? []), ...(game.managerTeam.youthAcademySquad ?? [])]
     : getClubPlayers(game, teamID).map(entry => entry.player);
   const bestPlayers = [...clubPlayers]

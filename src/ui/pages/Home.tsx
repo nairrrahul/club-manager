@@ -8,7 +8,7 @@ import { EuroTable, LeagueTable } from "../components/tables";
 import { ordinal, formatScore } from "../format";
 import type { EuroSnap, LeagueRow } from "../../engine/snapshots";
 
-function LeagueCard(props: { tier: number; rows: LeagueRow[]; managerID: number }) {
+function LeagueCard(props: { tier: number; rows: LeagueRow[]; managerID?: number }) {
   const top = props.rows.slice(0, 5);
   const mine = props.rows.find(row => row.team.id === props.managerID);
   const display = mine && mine.pos > 5 ? [...top, mine] : top;
@@ -22,7 +22,7 @@ function LeagueCard(props: { tier: number; rows: LeagueRow[]; managerID: number 
   );
 }
 
-function EuropeCard(props: { code: string; comp: EuroSnap | null; managerID: number; year: number }) {
+function EuropeCard(props: { code: string; comp: EuroSnap | null; managerID?: number; year: number }) {
   const name = COMPETITION_NAMES[props.code];
   const header = <Link to={`/europe/${props.code}`} className="hover:text-accent-yellow">{name}</Link>;
   const link = <Link to={`/europe/${props.code}`} className="text-xs text-accent-purple-light hover:underline">Details</Link>;
@@ -86,7 +86,42 @@ export default function Home() {
   const game = useGame();
   const snap = getLiveSnapshot(game);
   const team = game.managerTeam;
-  const managerID = team.ID;
+  const managerID = team?.ID;
+
+  if (!team) {
+    return (
+      <div>
+        <PageHeader
+          title="Observer Mode"
+          subtitle={`Following the simulation · Season ${seasonDisplay(game.season.year)}`}
+        />
+        <div className="panel p-4 mb-6">
+          <div className="text-sm font-semibold">No club is under your control</div>
+          <p className="text-sm text-navy-300 mt-1">
+            All clubs receive seasonal overall changes, develop their players, generate regens, and sign free agents.
+          </p>
+        </div>
+        <div className="grid gap-6 xl:grid-cols-3">
+          <div className="xl:col-span-2">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-navy-300 mb-2">League standings</h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              {[1, 2, 3, 4, 5].map(t => (
+                <LeagueCard key={t} tier={t} rows={snap.leagues[t].rows} />
+              ))}
+            </div>
+          </div>
+          <div>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-navy-300 mb-2">European competitions</h2>
+            <div className="space-y-4">
+              {["UCL", "UEL", "UECL"].map(code => (
+                <EuropeCard key={code} code={code} comp={snap.european?.[code] ?? null} year={game.season.year} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const topSenior = [...(team.seniorSquad ?? [])].sort((a, b) => b.overall - a.overall || b.potential - a.potential).slice(0, 6);
   const topYouth = [...(team.youthAcademySquad ?? [])].sort((a, b) => b.potential - a.potential || b.overall - a.overall).slice(0, 6);

@@ -19,6 +19,7 @@ export default function FreeAgents() {
   const [sort, setSort] = useState<SortState>({ key: "ovr", dir: "desc" });
 
   const team = game.managerTeam;
+  if (!team) return null;
   const squadFull = (team.seniorSquad?.length ?? 0) >= team.maxSeniorSquadSize;
   const agents = getFreeAgents(game);
 

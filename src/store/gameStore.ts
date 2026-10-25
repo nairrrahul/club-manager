@@ -28,7 +28,7 @@ interface GameStore {
   seasonSummary: SeasonSummary | null;
   agingOutOpen: boolean;
 
-  startGame: (teamID: number) => void;
+  startGame: (teamID: number | null) => void;
   notify: (kind: Toast["kind"], text: string) => void;
   /** Builds and verifies a save. Returns null (and raises an error toast) if it cannot be saved losslessly. */
   exportSave: () => { filename: string; json: string } | null;

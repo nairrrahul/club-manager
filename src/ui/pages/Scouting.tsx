@@ -30,6 +30,7 @@ function SendScout() {
   const [region, setRegion] = useState("");
   const [country, setCountry] = useState("");
   const [positions, setPositions] = useState<Position[]>([]);
+  if (!team) return null;
 
   const countries = region ? getCountriesByRegion(region) : [];
   const blockReason = getScoutSendBlockReason(team, game.season.matchday);
@@ -140,6 +141,7 @@ export default function Scouting() {
   const game = useGame();
   const sign = useGameStore(s => s.sign);
   const team = game.managerTeam;
+  if (!team) return null;
   const missions = getUnexpiredMissions(team, game.season.matchday);
   const academyFull = (team.youthAcademySquad?.length ?? 0) >= team.maxYouthAcademySquadSize;
 

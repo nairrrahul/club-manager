@@ -1,7 +1,8 @@
 # Soccer Season Simulator
 
-A browser-based soccer manager game built with React, Vite, TypeScript, and Zustand. Choose an English club and
-play through league seasons, the FA Cup, European competitions, international windows, scouting, and transfers.
+A browser-based soccer manager game built with React, Vite, TypeScript, and Zustand. Manage an English club or
+observe the entire simulation as clubs progress through league seasons, the FA Cup, European competitions,
+international windows, and transfers.
 There is no backend; download and upload JSON save files to preserve a game.
 
 ## Run locally
@@ -16,6 +17,8 @@ Run `npm run typecheck` to check TypeScript or `npm run build` to create a produ
 ## Game features
 
 - Manage a club's senior squad, academy, formation, starting XI, scouting, and free-agent signings.
+- Start in Observer Mode to follow the simulation without a managed club. All clubs receive seasonal
+  overall changes and regens, and can sign free agents.
 - Search active players by name, nationality, league, club, overall, potential, and age.
 - New games initialize English clubs from their configured training, youth scouting, and youth
   experience ratings. Ownership events can improve or reduce those ratings, within the 1–5 range.
@@ -37,10 +40,11 @@ Run `npm run typecheck` to check TypeScript or `npm run build` to create a produ
   editions use the configured draw pots, home-and-away group fixtures, ranking-point importance, and
   promotion/relegation; their standings and edition history are available from the International Windows page.
 - God Mode can add players to free agency or another club through the Add Player page, with potential up
-  to 99. The God Mode toggle remains locked until you leave that page.
+  to 99. It is available in Observer Mode as well, where it is limited to adding players to other clubs
+  or free agency. The God Mode toggle remains locked until you leave that page.
 
 ## Saves
 
-Save files use format version 12. Older saves are migrated when loaded, including club-player source defaults,
-duplicate player-ID repair, recalculation of positional club bonuses, and Club World Cup and continental
-tournament state initialization.
+Save files use format version 14 and record whether the game is in manager or observer mode. Older saves are
+migrated when loaded, including club-player source defaults, duplicate player-ID repair, recalculation of
+positional club bonuses, and Club World Cup and continental tournament state initialization.

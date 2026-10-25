@@ -48,12 +48,14 @@ export const SAVE_FORMAT = "soccer-season-simulator-save";
  * v11: schedules each continental knockout round on its own matchday.
  * v12: adds Nations League divisions, groups, fixtures and history.
  * v13: tracks scheduled and retired players.
+ * v14: stores manager/observer mode and supports games without a managed club.
  */
-export const SAVE_VERSION = 13;
+export const SAVE_VERSION = 14;
 
 export interface SaveMeta {
+  mode: "manager" | "observer";
   team: string;
-  teamID: number;
+  teamID: number | null;
   season: string;
   year: number;
   matchday: number;
@@ -71,7 +73,8 @@ export interface SaveFile {
 
 interface GameRoot {
   season: Season;
-  managerTeam: Team;
+  mode: "manager" | "observer";
+  managerTeam: Team | null;
   godMode: boolean;
 }
 
@@ -293,7 +296,7 @@ export function compareGraphs(a: unknown, b: unknown): string | null {
 // ---------------------------------------------------------------------------
 
 function gameRoot(game: Game): GameRoot {
-  return { season: game.season, managerTeam: game.managerTeam, godMode: game.godMode };
+  return { season: game.season, mode: game.mode, managerTeam: game.managerTeam, godMode: game.godMode };
 }
 
 export function gameToSave(game: Game): SaveFile {
@@ -302,8 +305,9 @@ export function gameToSave(game: Game): SaveFile {
     format: SAVE_FORMAT,
     version: SAVE_VERSION,
     meta: {
-      team: game.managerTeam.Team,
-      teamID: game.managerTeam.ID,
+      mode: game.mode,
+      team: game.managerTeam?.Team ?? "Observer Mode",
+      teamID: game.managerTeam?.ID ?? null,
       season: seasonDisplay(game.season.year),
       year: game.season.year,
       matchday: game.season.matchday,
@@ -344,8 +348,13 @@ function validateRoot(root: unknown): GameRoot {
   const candidate = root as Partial<GameRoot> | null;
   const season = candidate?.season;
   const team = candidate?.managerTeam;
+  const mode = candidate?.mode === "observer" ? "observer" : "manager";
   const valid =
-    !!season && !!team && team instanceof Team &&
+    !!season && (mode === "observer"
+      ? team === null && season.managerTeam === null
+      : !!team && team instanceof Team &&
+        Array.isArray(team.seniorSquad) && Array.isArray(team.youthAcademySquad) &&
+        Object.values(season.leagueStates ?? {}).some(league => league.teams.includes(team))) &&
     typeof season.year === "number" && typeof season.matchday === "number" &&
     !!season.leagueStates && ["1", "2", "3", "4", "5"].every(tier => !!season.leagueStates[tier]) &&
     !!season.cup && Array.isArray(season.archives) && Array.isArray(season.history) &&
@@ -355,11 +364,9 @@ function validateRoot(root: unknown): GameRoot {
     !!season.international && !!season.international.nations && Array.isArray(season.international.windows) &&
     Array.isArray(season.international.rankingHistory) && !!season.international.nationsLeague &&
     !!season.international.nationsLeague.divisions && !!season.international.nationsLeague.pots &&
-    Array.isArray(season.international.nationsLeague.editions) &&
-    Array.isArray(team.seniorSquad) && Array.isArray(team.youthAcademySquad) &&
-    Object.values(season.leagueStates).some(league => league.teams.includes(team));
+    Array.isArray(season.international.nationsLeague.editions);
   if (!valid) throw new Error("The save file is corrupted: the game data is missing or inconsistent.");
-  return { season: season!, managerTeam: team!, godMode: candidate!.godMode === true };
+  return { season: season!, mode, managerTeam: team as Team | null, godMode: candidate!.godMode === true };
 }
 
 /**
@@ -439,6 +446,9 @@ export function gameFromSave(file: SaveFile): Game {
     throw new Error(`The save file could not be read: ${(error as Error).message}`);
   }
   // Migrate older saves to the current format before validating.
+  if (root && typeof root === "object" && !("mode" in root)) {
+    (root as Partial<GameRoot>).mode = "manager";
+  }
   const loadedSeason = (root as Partial<GameRoot> | null)?.season;
   if (loadedSeason && file.version < 2 && loadedSeason.freeAgents === undefined) {
     // v1 -> v2: introduce the free-agent pool (with a first batch for the current season).
@@ -457,7 +467,7 @@ export function gameFromSave(file: SaveFile): Game {
       loadedSeason.international = createInternationalState();
       startWindowIfDue(loadedSeason);
     }
-    const manager = (root as Partial<GameRoot>).managerTeam as Team;
+    const manager = (root as Partial<GameRoot>).managerTeam as Team | null;
     const everyone: Player[] = [
       ...collectAllPlayers(loadedSeason),
       ...(manager?.scoutedPlayers ?? []),
@@ -472,7 +482,7 @@ export function gameFromSave(file: SaveFile): Game {
   }
   if (loadedSeason && file.version < 6) {
     // v5 -> v6: nobody is shortlisted and unsigned scouting candidates are discarded, as before.
-    const manager = (root as Partial<GameRoot>).managerTeam as Team;
+    const manager = (root as Partial<GameRoot>).managerTeam as Team | null;
     const everyone: Player[] = [
       ...collectAllPlayers(loadedSeason),
       ...(manager?.scoutedPlayers ?? []),
@@ -490,7 +500,7 @@ export function gameFromSave(file: SaveFile): Game {
     refreshAllClubOveralls(loadedSeason);
   }
   if (loadedSeason && file.version < 7) {
-    const manager = (root as Partial<GameRoot>).managerTeam as Team;
+    const manager = (root as Partial<GameRoot>).managerTeam as Team | null;
     const used = new Set<string>();
     const duplicated = new Set<string>();
     for (const player of collectSeasonPlayers(loadedSeason)) {
@@ -516,7 +526,7 @@ export function gameFromSave(file: SaveFile): Game {
     }
 
     if (duplicated.size > 0) {
-      refreshStartingXI(manager);
+      if (manager) refreshStartingXI(manager);
       const openWindow = loadedSeason.international.windows.find(window => window.status === "scheduled");
       if (openWindow) {
         for (const code of Object.keys(openWindow.callUps)) {
@@ -593,7 +603,7 @@ export function gameFromSave(file: SaveFile): Game {
     }
   }
   if (loadedSeason && file.version < 13) {
-    const manager = (root as Partial<GameRoot>).managerTeam as Team;
+    const manager = (root as Partial<GameRoot>).managerTeam as Team | null;
     loadedSeason.managerTeam = manager;
     const retiredPlayers = loadedSeason.freeAgents.retiredPlayers;
     for (const player of retiredPlayers) {
@@ -606,8 +616,8 @@ export function gameFromSave(file: SaveFile): Game {
     }
     schedulePlayerRetirements(loadedSeason);
   }
-  const { season, managerTeam, godMode } = validateRoot(root);
-  return { season, managerTeam, godMode, version: 0, liveCache: null };
+  const { season, managerTeam, mode, godMode } = validateRoot(root);
+  return { season, managerTeam, mode, godMode, version: 0, liveCache: null };
 }
 
 /**
@@ -625,6 +635,6 @@ export function verifySave(game: Game, file: SaveFile): string | null {
 }
 
 export function saveFileName(game: Game): string {
-  const team = game.managerTeam.Team.replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const team = (game.managerTeam?.Team ?? "Observer-Mode").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "");
   return `soccer-save_${team}_${seasonDisplay(game.season.year)}_md${game.season.matchday}.json`;
 }

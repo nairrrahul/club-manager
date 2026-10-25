@@ -101,7 +101,7 @@ export default function ContinentalTournamentsPage() {
             }
           >
             {tournament.rounds.length > 0 ? (
-              <CupBracketTree cup={tournamentToCup(tournament)} highlightID={game.managerTeam.ID} />
+              <CupBracketTree cup={tournamentToCup(tournament)} highlightID={game.managerTeam?.ID} />
             ) : (
               <Empty>
                 This tournament has not been played yet. Each knockout round simulates automatically on its own matchday, starting at matchday 31.

@@ -22,6 +22,7 @@ function SquadTable() {
   const [pendingRelease, setPendingRelease] = useState<Player | null>(null);
   // null = the default squad view (by position, then rating).
   const [sort, setSort] = useState<SortState | null>(null);
+  if (!team) return null;
   const inXI = new Set(getStartingXISlots(team).filter(Boolean).map(player => (player as Player).id));
 
   const fullName = (player: Player) => `${player.firstName} ${player.lastName}`;
@@ -213,6 +214,7 @@ function Tactics() {
   const setSlot = useGameStore(s => s.xiSlot);
   const team = game.managerTeam;
   const [selected, setSelected] = useState<number | null>(null);
+  if (!team) return null;
 
   const slots = getStartingXISlots(team);
   const requirements = getFormationRequirements(team.formation);
@@ -349,6 +351,7 @@ function Tactics() {
 export default function Squad() {
   const game = useGame();
   const [tab, setTab] = useState<Tab>("squad");
+  if (!game.managerTeam) return null;
   return (
     <div>
       <PageHeader title="Squad" subtitle={`${game.managerTeam.Team} · ${game.managerTeam.formation}`} />

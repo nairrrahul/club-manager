@@ -32,10 +32,10 @@ export default function App() {
     <Layout>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/squad" element={<Squad />} />
-        <Route path="/academy" element={<Academy />} />
-        <Route path="/scouting" element={<Scouting />} />
-        <Route path="/free-agents" element={<FreeAgents />} />
+        <Route path="/squad" element={game.managerTeam ? <Squad /> : <Navigate to="/" replace />} />
+        <Route path="/academy" element={game.managerTeam ? <Academy /> : <Navigate to="/" replace />} />
+        <Route path="/scouting" element={game.managerTeam ? <Scouting /> : <Navigate to="/" replace />} />
+        <Route path="/free-agents" element={game.managerTeam ? <FreeAgents /> : <Navigate to="/" replace />} />
         <Route path="/shortlist" element={<Shortlist />} />
         <Route path="/player-search" element={<PlayerSearch />} />
         <Route path="/rankings" element={<Rankings />} />

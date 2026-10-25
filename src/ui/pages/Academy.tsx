@@ -9,6 +9,7 @@ export default function Academy() {
   const release = useGameStore(s => s.releaseYouth);
   const team = game.managerTeam;
   const [pendingRelease, setPendingRelease] = useState<Player | null>(null);
+  if (!team) return null;
   const players = [...(team.youthAcademySquad ?? [])].sort((a, b) => b.potential - a.potential || b.overall - a.overall);
   const seniorFull = (team.seniorSquad?.length ?? 0) >= team.maxSeniorSquadSize;
 

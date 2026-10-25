@@ -33,10 +33,18 @@ export default function TeamSelect() {
             <div className="text-xs font-bold uppercase tracking-widest text-accent-yellow">Soccer Season Simulator</div>
             <LoadGameButton className="btn-ghost" label="Load saved game" />
           </div>
-          <h1 className="text-4xl font-bold mt-1">Choose your club</h1>
+          <h1 className="text-4xl font-bold mt-1">Choose how to play</h1>
           <p className="text-navy-200 mt-2 max-w-2xl">
-            Pick any team in the English pyramid to manage. You'll receive a generated 25-player squad and take charge from matchday 0 of the 2026-27 season.
+            Manage a club in the English pyramid with a generated squad, or observe the whole simulation without controlling a club.
           </p>
+        </div>
+
+        <div className="panel p-4 mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-semibold">Observer Mode</h2>
+            <p className="text-sm text-navy-300">No club to manage. Every club develops and signs free agents as the seasons progress.</p>
+          </div>
+          <button className="btn-yellow shrink-0" onClick={() => startGame(null)}>Start observing ▸</button>
         </div>
 
         <div className="flex items-center gap-4 mb-6">

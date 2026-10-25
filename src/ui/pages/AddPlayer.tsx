@@ -48,7 +48,7 @@ export default function AddPlayer() {
 
   if (!game?.godMode) return null;
 
-  const clubs = [...TEAM_DIRECTORY.values()].filter(club => club.id !== game.managerTeam.ID);
+  const clubs = [...TEAM_DIRECTORY.values()].filter(club => club.id !== game.managerTeam?.ID);
   const englishByTier = Object.keys(LEAGUE_NAMES)
     .sort((a, b) => Number(a) - Number(b))
     .map(tier => ({

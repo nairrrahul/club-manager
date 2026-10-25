@@ -38,7 +38,8 @@ import type { ClubWorldCup } from "./clubWorldCup";
 
 export interface Game {
   season: Season;
-  managerTeam: Team;
+  mode: "manager" | "observer";
+  managerTeam: Team | null;
   godMode: boolean;
   /** Bumped by the store after every mutation; used to invalidate caches. */
   version: number;
@@ -130,8 +131,14 @@ for (const teams of Object.values(continentalTeams)) {
 
 // ---------------------------------------------------------------------------
 
-export function createGame(teamID: number): Game {
+export function createGame(teamID: number | null): Game {
   const season = createInitialSeason();
+  if (teamID === null) {
+    generateClubRegens(season);
+    refreshAllClubOveralls(season);
+    schedulePlayerRetirements(season);
+    return { season, mode: "observer", managerTeam: null, godMode: false, version: 0, liveCache: null };
+  }
   const team = getTeamFromSeason(season, teamID);
   if (!team) throw new Error(`No team found with ID ${teamID}.`);
 
@@ -141,7 +148,7 @@ export function createGame(teamID: number): Game {
   refreshAllClubOveralls(season);
   schedulePlayerRetirements(season);
 
-  return { season, managerTeam: team, godMode: false, version: 0, liveCache: null };
+  return { season, mode: "manager", managerTeam: team, godMode: false, version: 0, liveCache: null };
 }
 
 /** Snapshot of the in-progress season (cached per game version). */
@@ -226,7 +233,7 @@ export function getTeamProfile(game: Game, teamID: number) {
     facilityRating: base.facilityRating,
     scoutingRating: base.scoutingRating,
     scoutingExperience: base.scoutingExperience,
-    isManaged: teamID === game.managerTeam.ID,
+    isManaged: teamID === game.managerTeam?.ID,
     league,
     europe,
     clubWorldCup,
@@ -287,7 +294,7 @@ export interface SeasonSummary {
 
 export function canStartNextSeason(game: Game): { ok: boolean; reason?: string; agingOut: Player[] } {
   const { season, managerTeam } = game;
-  const agingOut = getYouthPlayersAgingOut(managerTeam);
+  const agingOut = managerTeam ? getYouthPlayersAgingOut(managerTeam) : [];
   if (!isSeasonComplete(season)) {
     return { ok: false, reason: `Cannot start the next season until matchday ${SEASON_END_MATCHDAY}. Current matchday: ${season.matchday}.`, agingOut };
   }
@@ -315,8 +322,8 @@ export function startNextSeason(game: Game): { result: ActionResult; summary?: S
   autoSimulateWindowIfDue(previous);
   game.season = advanceToNextSeason(previous, game.managerTeam);
 
-  const emergencyPlayers = [...(game.managerTeam.lastSeasonEmergencyPlayers ?? [])];
-  game.managerTeam.lastSeasonEmergencyPlayers = [];
+  const emergencyPlayers = [...(game.managerTeam?.lastSeasonEmergencyPlayers ?? [])];
+  if (game.managerTeam) game.managerTeam.lastSeasonEmergencyPlayers = [];
 
   const summary: SeasonSummary = {
     newSeasonLabel: seasonDisplay(game.season.year),
@@ -339,24 +346,30 @@ export function startNextSeason(game: Game): { result: ActionResult; summary?: S
 // ---------------------------------------------------------------------------
 
 export function promotePlayer(game: Game, playerID: string): ActionResult {
-  const result = promoteYouthPlayer(game.managerTeam, playerID, game.season.year);
+  const team = game.managerTeam;
+  if (!team) return fail("Squad management is unavailable in Observer Mode.");
+  const result = promoteYouthPlayer(team, playerID, game.season.year);
   if (result.error || !result.player) return fail(result.error ?? "Unable to promote player.");
-  calculateTeamOverall(game.managerTeam);
-  return ok(`Promoted ${result.player.firstName} ${result.player.lastName}. Team OVR is now ${game.managerTeam.BaseOverall}.`);
+  calculateTeamOverall(team);
+  return ok(`Promoted ${result.player.firstName} ${result.player.lastName}. Team OVR is now ${team.BaseOverall}.`);
 }
 
 export function releaseSenior(game: Game, playerID: string): ActionResult {
-  const player = releaseSeniorPlayer(game.managerTeam, playerID);
+  const team = game.managerTeam;
+  if (!team) return fail("Squad management is unavailable in Observer Mode.");
+  const player = releaseSeniorPlayer(team, playerID);
   if (!player) return fail(`No senior player found with ID ${playerID}.`);
-  calculateTeamOverall(game.managerTeam);
-  addReleasedPlayer(game.season.freeAgents, player, game.season.year, game.season.matchday, game.managerTeam.Team);
-  return ok(`Released ${player.firstName} ${player.lastName} to the free agents. Team OVR is now ${game.managerTeam.BaseOverall}. They cannot be re-signed for ${RESIGN_BLOCK_SEASONS} seasons.`);
+  calculateTeamOverall(team);
+  addReleasedPlayer(game.season.freeAgents, player, game.season.year, game.season.matchday, team.Team);
+  return ok(`Released ${player.firstName} ${player.lastName} to the free agents. Team OVR is now ${team.BaseOverall}. They cannot be re-signed for ${RESIGN_BLOCK_SEASONS} seasons.`);
 }
 
 export function releaseYouth(game: Game, playerID: string): ActionResult {
-  const player = releaseYouthPlayer(game.managerTeam, playerID);
+  const team = game.managerTeam;
+  if (!team) return fail("Squad management is unavailable in Observer Mode.");
+  const player = releaseYouthPlayer(team, playerID);
   if (!player) return fail(`No youth player found with ID ${playerID}.`);
-  addReleasedPlayer(game.season.freeAgents, player, game.season.year, game.season.matchday, game.managerTeam.Team);
+  addReleasedPlayer(game.season.freeAgents, player, game.season.year, game.season.matchday, team.Team);
   return ok(`Released ${player.firstName} ${player.lastName} from the youth academy to the free agents. They cannot be re-signed for ${RESIGN_BLOCK_SEASONS} seasons.`);
 }
 
@@ -365,9 +378,11 @@ export function releaseYouth(game: Game, playerID: string): ActionResult {
 // ---------------------------------------------------------------------------
 
 export function signFreeAgent(game: Game, playerID: string): ActionResult {
-  const result = signFreeAgentForTeam(game.season, game.managerTeam, playerID);
+  const team = game.managerTeam;
+  if (!team) return fail("Signing players is unavailable in Observer Mode.");
+  const result = signFreeAgentForTeam(game.season, team, playerID);
   if (result.error || !result.player) return fail(result.error ?? "Unable to sign player.");
-  return ok(`Signed ${result.player.firstName} ${result.player.lastName} from the free agents. Team OVR is now ${game.managerTeam.BaseOverall}.`);
+  return ok(`Signed ${result.player.firstName} ${result.player.lastName} from the free agents. Team OVR is now ${team.BaseOverall}.`);
 }
 
 export function getFreeAgents(game: Game): (FreeAgentEntry & { blocked: boolean })[] {
@@ -383,12 +398,15 @@ export function getClubPlayers(game: Game, teamID: number): ClubPlayerEntry[] {
 }
 
 export function setFormation(game: Game, formation: string): ActionResult {
-  const result = changeFormation(game.managerTeam, formation);
+  const team = game.managerTeam;
+  if (!team) return fail("Squad management is unavailable in Observer Mode.");
+  const result = changeFormation(team, formation);
   if (result.error) return fail(result.error);
-  return ok(`Formation changed to ${formation}. Team OVR is now ${game.managerTeam.BaseOverall}.`);
+  return ok(`Formation changed to ${formation}. Team OVR is now ${team.BaseOverall}.`);
 }
 
 export function setXIMode(game: Game, mode: "auto" | "manual"): ActionResult {
+  if (!game.managerTeam) return fail("Squad management is unavailable in Observer Mode.");
   setStartingXIMode(game.managerTeam, mode);
   return ok(mode === "auto"
     ? "Starting XI is now selected automatically by player rating."
@@ -396,9 +414,11 @@ export function setXIMode(game: Game, mode: "auto" | "manual"): ActionResult {
 }
 
 export function setXISlot(game: Game, slotIndex: number, playerID: string): ActionResult {
-  const result = setStartingXISlot(game.managerTeam, slotIndex, playerID);
+  const team = game.managerTeam;
+  if (!team) return fail("Squad management is unavailable in Observer Mode.");
+  const result = setStartingXISlot(team, slotIndex, playerID);
   if (result.error) return fail(result.error);
-  return ok(`Starting XI updated. Team OVR is now ${game.managerTeam.BaseOverall}.`);
+  return ok(`Starting XI updated. Team OVR is now ${team.BaseOverall}.`);
 }
 
 // ---------------------------------------------------------------------------
@@ -406,13 +426,17 @@ export function setXISlot(game: Game, slotIndex: number, playerID: string): Acti
 // ---------------------------------------------------------------------------
 
 export function sendScout(game: Game, countryCode: string, positions: Position[]): ActionResult {
-  const result = sendYouthScout(game.managerTeam, countryCode, game.season.matchday, game.season.year, positions);
+  const team = game.managerTeam;
+  if (!team) return fail("Youth scouting is unavailable in Observer Mode.");
+  const result = sendYouthScout(team, countryCode, game.season.matchday, game.season.year, positions);
   if (result.error || !result.mission) return fail(result.error ?? "Unable to send scout.");
   return ok(`Youth scout sent to ${result.mission.countryCode}. Returns on matchday ${result.mission.returnMatchday}.`);
 }
 
 export function signScouted(game: Game, playerID: string): ActionResult {
-  const result = signScoutedPlayer(game.managerTeam, playerID, game.season.year, game.season.matchday);
+  const team = game.managerTeam;
+  if (!team) return fail("Youth scouting is unavailable in Observer Mode.");
+  const result = signScoutedPlayer(team, playerID, game.season.year, game.season.matchday);
   if (result.error || !result.player) return fail(result.error ?? "Unable to sign player.");
   return ok(`Signed ${result.player.firstName} ${result.player.lastName} to the youth academy.`);
 }
@@ -427,27 +451,31 @@ export function setGodMode(game: Game, enabled: boolean): void {
 
 export function setGodRating(game: Game, which: "scouting" | "experience" | "training", rating: number): ActionResult {
   if (!game.godMode) return fail("God Mode is not enabled.");
+  const team = game.managerTeam;
+  if (!team) return fail("Club ratings are unavailable in Observer Mode.");
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) return fail("Rating must be an integer from 1 to 5.");
   if (which === "scouting") {
-    game.managerTeam.scoutingRating = rating;
+    team.scoutingRating = rating;
     return ok(`Youth scouting rating set to ${rating}.`);
   }
   if (which === "experience") {
-    game.managerTeam.scoutingExperience = rating;
+    team.scoutingExperience = rating;
     return ok(`Youth scouting experience rating set to ${rating}.`);
   }
-  game.managerTeam.facilityRating = rating;
+  team.facilityRating = rating;
   return ok(`Training rating set to ${rating}.`);
 }
 
 export function godChangePosition(game: Game, playerID: string, position: Position): ActionResult {
   if (!game.godMode) return fail("God Mode is not enabled.");
-  const result = changePlayerPosition(game.managerTeam, playerID, position);
+  const team = game.managerTeam;
+  if (!team) return fail("Club player editing is unavailable in Observer Mode.");
+  const result = changePlayerPosition(team, playerID, position);
   if (result.error || !result.player) return fail(result.error ?? "Unable to change position.");
   let message = `Changed ${result.player.firstName} ${result.player.lastName} from ${result.oldPosition} to ${result.player.position}.`;
-  if (game.managerTeam.seniorSquad?.includes(result.player)) {
-    calculateTeamOverall(game.managerTeam);
-    message += ` Team OVR is now ${game.managerTeam.BaseOverall}.`;
+  if (team.seniorSquad?.includes(result.player)) {
+    calculateTeamOverall(team);
+    message += ` Team OVR is now ${team.BaseOverall}.`;
   }
   return ok(message);
 }
@@ -482,7 +510,7 @@ export function godAddPlayer(
 
   const club = input.clubID === null ? null : TEAM_DIRECTORY.get(input.clubID);
   if (input.clubID !== null && !club) return fail("Choose a valid club.");
-  if (input.clubID === game.managerTeam.ID) return fail("Players cannot be added directly to your managed club.");
+  if (input.clubID === game.managerTeam?.ID) return fail("Players cannot be added directly to your managed club.");
 
   const firstName = input.firstName?.trim() ?? "";
   const lastName = input.lastName?.trim() ?? "";
@@ -552,12 +580,13 @@ export interface FoundPlayer {
 
 /** Finds active players and retained retired players by ID. */
 export function findPlayer(game: Game, playerID: string): FoundPlayer | null {
-  const own = getPlayer(game.managerTeam, playerID);
+  const team = game.managerTeam;
+  const own = team ? getPlayer(team, playerID) : null;
   if (own) {
     return {
       player: own,
-      location: game.managerTeam.seniorSquad?.includes(own) ? "senior" : "youth",
-      teamID: game.managerTeam.ID
+      location: team?.seniorSquad?.includes(own) ? "senior" : "youth",
+      teamID: team?.ID ?? null
     };
   }
 
@@ -599,8 +628,10 @@ export function getPlayerSearchPlayers(game: Game): PlayerSearchEntry[] {
     });
   };
 
-  for (const player of [...(game.managerTeam.seniorSquad ?? []), ...(game.managerTeam.youthAcademySquad ?? [])]) {
-    add(player, game.managerTeam.ID);
+  if (game.managerTeam) {
+    for (const player of [...(game.managerTeam.seniorSquad ?? []), ...(game.managerTeam.youthAcademySquad ?? [])]) {
+      add(player, game.managerTeam.ID);
+    }
   }
   for (const entry of game.season.freeAgents.available) add(entry.player, null);
   for (const clubEntries of Object.values(game.season.freeAgents.clubPlayers)) {
@@ -679,8 +710,8 @@ export interface NationPlayer {
 export function getNationPlayers(game: Game, code: string): NationPlayer[] {
   const out: NationPlayer[] = [];
   const manager = game.managerTeam;
-  for (const player of [...(manager.seniorSquad ?? []), ...(manager.youthAcademySquad ?? [])]) {
-    if (!player.isRetired && player.primaryNationality === code) out.push({ player, clubID: manager.ID, clubName: manager.Team });
+  for (const player of [...(manager?.seniorSquad ?? []), ...(manager?.youthAcademySquad ?? [])]) {
+    if (!player.isRetired && player.primaryNationality === code && manager) out.push({ player, clubID: manager.ID, clubName: manager.Team });
   }
   for (const entry of game.season.freeAgents.available) {
     if (!entry.player.isRetired && entry.player.primaryNationality === code) out.push({ player: entry.player, clubID: null, clubName: "Free Agents" });

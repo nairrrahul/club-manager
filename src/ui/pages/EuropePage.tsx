@@ -59,7 +59,7 @@ export default function EuropePage() {
   const view = views.find(v => v.year === year) ?? views[views.length - 1];
   const comp = view.european![code];
   const isCurrent = view.year === game.season.year;
-  const managerID = game.managerTeam.ID;
+  const managerID = game.managerTeam?.ID;
 
   return (
     <div>

@@ -34,7 +34,7 @@ function groupToCup(group: ClubWorldCupSnap): CupSnap {
   };
 }
 
-function GroupTable(props: { group: ClubWorldCupSnap["groups"][number]; highlightID: number }) {
+function GroupTable(props: { group: ClubWorldCupSnap["groups"][number]; highlightID?: number }) {
   return (
     <Panel title={`Group ${props.group.name}`}>
       <div className="overflow-x-auto">
@@ -132,7 +132,7 @@ export default function ClubWorldCupPage() {
       {tab === "groups" && (
         <div className="space-y-6">
           <div className="grid xl:grid-cols-2 gap-6">
-            {cup.groups.map(group => <GroupTable key={group.name} group={group} highlightID={game.managerTeam.ID} />)}
+            {cup.groups.map(group => <GroupTable key={group.name} group={group} highlightID={game.managerTeam?.ID} />)}
           </div>
           <div className="grid xl:grid-cols-2 gap-6">
             {cup.groups.map(group => <GroupFixtures key={group.name} group={group} />)}
@@ -142,7 +142,7 @@ export default function ClubWorldCupPage() {
 
       {tab === "knockout" && (
         cup.knockout
-          ? <CupBracketTree cup={groupToCup(cup)} highlightID={game.managerTeam.ID} />
+          ? <CupBracketTree cup={groupToCup(cup)} highlightID={game.managerTeam?.ID} />
           : <Panel><Empty>The semi-finals and final are played after the group stage between matchdays 21 and 22.</Empty></Panel>
       )}
 

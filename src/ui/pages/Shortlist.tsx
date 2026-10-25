@@ -22,7 +22,7 @@ export default function Shortlist() {
   const [tab, setTab] = useState<ListTab>("active");
 
   const team = game.managerTeam;
-  const squadFull = (team.seniorSquad?.length ?? 0) >= team.maxSeniorSquadSize;
+  const squadFull = !team || (team.seniorSquad?.length ?? 0) >= team.maxSeniorSquadSize;
   const entries = getShortlistedPlayers(game);
   const retiredEntries = getRetiredShortlistedPlayers(game);
 
@@ -98,6 +98,7 @@ export default function Shortlist() {
                   const agent = entry.freeAgent;
                   const reason = agent?.blocked
                     ? `Cannot be re-signed until ${seasonDisplay(agent.resignBlockedUntilYear as number)}`
+                    : !team ? "Signing players is unavailable in Observer Mode"
                     : squadFull ? "Your senior squad is full" : "";
                   return (
                     <tr key={player.id}>

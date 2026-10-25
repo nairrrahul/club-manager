@@ -186,7 +186,7 @@ export default function LeaguePage() {
           <LeagueTable
             rows={league.rows}
             zones={zoneInfo.zones}
-            highlightID={game.managerTeam.ID}
+            highlightID={game.managerTeam?.ID}
             showStatus={!isCurrent}
           />
           <Legend items={zoneInfo.legend} />
@@ -195,7 +195,7 @@ export default function LeaguePage() {
           )}
         </Panel>
       )}
-      {tab === "prediction" && <Prediction league={league} highlightID={game.managerTeam.ID} />}
+      {tab === "prediction" && game.managerTeam && <Prediction league={league} highlightID={game.managerTeam.ID} />}
       {tab === "fixtures" && <Fixtures key={`${view.year}-${tier}`} league={league} />}
       {tab === "playoffs" && tier > 1 && <Playoffs league={league} />}
       {tab === "history" && (

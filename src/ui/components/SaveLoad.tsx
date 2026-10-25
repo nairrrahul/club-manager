@@ -77,7 +77,7 @@ export function LoadGameButton(props: { className?: string; label?: string; conf
           message={
             <div className="space-y-2">
               <p>
-                Load <b>{pending.meta.team}</b> — season {pending.meta.season}, matchday {pending.meta.matchday}
+                Load <b>{pending.meta.mode === "observer" ? "Observer Mode" : pending.meta.team}</b> — season {pending.meta.season}, matchday {pending.meta.matchday}
                 {pending.meta.godMode ? " (God Mode on)" : ""}?
               </p>
               <p className="text-navy-300 text-xs">

@@ -48,7 +48,7 @@ export default function CupPage() {
         onChange={setTab}
       />
 
-      {tab === "bracket" && <CupBracketTree cup={cup} highlightID={game.managerTeam.ID} showFlag={false} />}
+      {tab === "bracket" && <CupBracketTree cup={cup} highlightID={game.managerTeam?.ID} showFlag={false} />}
 
       {tab === "rounds" && (
         <Panel

@@ -34,18 +34,22 @@ function Sidebar() {
   return (
     <aside className="w-56 shrink-0 bg-navy-900 border-r border-navy-700 flex flex-col overflow-y-auto">
       <div className="px-4 py-4 border-b border-navy-700">
-        <div className="text-[10px] uppercase tracking-widest text-accent-yellow font-bold">Manager</div>
-        <div className="font-bold leading-tight mt-0.5">{game.managerTeam.Team}</div>
+        <div className="text-[10px] uppercase tracking-widest text-accent-yellow font-bold">
+          {game.mode === "observer" ? "Observer Mode" : "Manager"}
+        </div>
+        {game.managerTeam && <div className="font-bold leading-tight mt-0.5">{game.managerTeam.Team}</div>}
       </div>
       <nav className="py-2 flex-1">
         <NavLink to="/" end className={navClass}>Home</NavLink>
-        <NavSection title="Club">
-          <NavLink to="/squad" className={navClass}>Squad</NavLink>
-          <NavLink to="/academy" className={navClass}>Youth Academy</NavLink>
-          <NavLink to="/scouting" className={navClass}>Scouting</NavLink>
-          <NavLink to="/free-agents" className={navClass}>Free Agents</NavLink>
-          <NavLink to={`/team/${game.managerTeam.ID}`} className={navClass}>Club Info</NavLink>
-        </NavSection>
+        {game.managerTeam && (
+          <NavSection title="Club">
+            <NavLink to="/squad" className={navClass}>Squad</NavLink>
+            <NavLink to="/academy" className={navClass}>Youth Academy</NavLink>
+            <NavLink to="/scouting" className={navClass}>Scouting</NavLink>
+            <NavLink to="/free-agents" className={navClass}>Free Agents</NavLink>
+            <NavLink to={`/team/${game.managerTeam.ID}`} className={navClass}>Club Info</NavLink>
+          </NavSection>
+        )}
         <NavSection title="Shortlist">
           <NavLink to="/shortlist" className={navClass}>Shortlist</NavLink>
           <NavLink to="/player-search" className={navClass}>Player Search</NavLink>
@@ -288,15 +292,17 @@ function SettingsMenu() {
             />
             <span>Manually simulate the Club World Cup</span>
           </label>
-          <label className="flex items-start gap-2 rounded px-2 py-2 text-sm hover:bg-navy-800">
-            <input
-              type="checkbox"
-              className="mt-0.5 accent-accent-purple"
-              checked={game.season.freeAgents.autoSendUnsignedScouts === true}
-              onChange={event => setAutoSendScouts(event.target.checked)}
-            />
-            <span>Send unsigned scouting candidates to free agents</span>
-          </label>
+          {game.managerTeam && (
+              <label className="flex items-start gap-2 rounded px-2 py-2 text-sm hover:bg-navy-800">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 accent-accent-purple"
+                  checked={game.season.freeAgents.autoSendUnsignedScouts === true}
+                  onChange={event => setAutoSendScouts(event.target.checked)}
+                />
+                <span>Send unsigned scouting candidates to free agents</span>
+              </label>
+          )}
           <label className={`flex items-start gap-2 rounded px-2 py-2 text-sm hover:bg-navy-800 ${locked ? "opacity-50" : ""}`}>
             <input
               type="checkbox"
@@ -364,6 +370,7 @@ function AgingOutModal() {
   const releaseYouth = useGameStore(s => s.releaseYouth);
   const nextSeason = useGameStore(s => s.nextSeason);
   if (!open) return null;
+  if (!game.managerTeam) return null;
 
   const players = getYouthPlayersAgingOut(game.managerTeam);
   const squadFull = (game.managerTeam.seniorSquad?.length ?? 0) >= game.managerTeam.maxSeniorSquadSize;
