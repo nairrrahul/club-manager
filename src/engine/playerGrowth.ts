@@ -46,6 +46,7 @@ function getGrowthPotential(player: Player): number {
 }
 
 export function calculateOverallChange(player: Player, facilityRating = 3): number {
+  if (player.isRetired) return 0;
   const { age, overall, potential } = player;
   const { start: peakStart, end: peakEnd } = getPlayerGrowthRange(player);
   const growthPotential = Math.min(potential, getGrowthPotential(player));
@@ -90,6 +91,7 @@ export function calculateOverallChange(player: Player, facilityRating = 3): numb
 }
 
 export function applyPlayerGrowth(player: Player, facilityRating = 3): number {
+  if (player.isRetired) return 0;
   const change = calculateOverallChange(player, facilityRating);
   player.overall = Math.max(
     20,

@@ -47,6 +47,10 @@ export interface Player {
   caps: number;
   /** Web UI addition: on the user's shortlist (never true for managed-club players; missing in old saves = false). */
   isShortlisted: boolean;
+  /** Season in which the player is scheduled to retire at season end, or the season they retired. */
+  retirementYear?: number | null;
+  /** Retired players are retained for direct lookup, but excluded from active player listings. */
+  isRetired?: boolean;
 }
 
 /**
@@ -241,6 +245,8 @@ export interface FreeAgentState {
   available: FreeAgentEntry[];
   /** Players signed by clubs other than the managed club, keyed by team ID. */
   clubPlayers: Record<number, ClubPlayerEntry[]>;
+  /** Players who retired at a previous season rollover. */
+  retiredPlayers: Player[];
   /** Counter used to generate unique free-agent player IDs. */
   nextSeq: number;
   /** When true, unsigned youth-scouting candidates become free agents instead of being discarded. */

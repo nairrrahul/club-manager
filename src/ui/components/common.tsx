@@ -302,6 +302,22 @@ export function PlaneIcon(props: { title?: string; className?: string }) {
   );
 }
 
+/** Door-and-arrow icon for a player scheduled to retire at season end. */
+export function RetirementIcon(props: { title?: string; className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={`inline-block align-[-0.15em] ${props.className ?? ""}`}
+      style={{ width: "1.1em", height: "1.1em" }}
+      role="img"
+      aria-label={props.title ?? "Retiring at the end of the season"}
+    >
+      <title>{props.title ?? "Retiring at the end of the season"}</title>
+      <path fill="currentColor" d="M13 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8v-2H5V5h8v4h2V5a2 2 0 0 0-2-2Zm5.59 8L16 8.41 14.59 9.83 16.76 12h-7.17v2h7.17l-2.17 2.17L16 17.59 20.59 13 18.59 11Z" />
+    </svg>
+  );
+}
+
 /** Flag icon button to add/remove a player from the shortlist (filled = shortlisted). */
 export function ShortlistButton(props: { playerId: string; shortlisted: boolean; className?: string }) {
   const toggle = useGameStore(state => state.toggleShortlist);

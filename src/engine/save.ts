@@ -9,6 +9,7 @@ import { refreshAllClubOveralls } from "./squadStrength";
 import { collectSeasonPlayers } from "./playerIds";
 import { refreshStartingXI } from "./playerSquad";
 import { TEAM_DIRECTORY } from "./game";
+import { schedulePlayerRetirements } from "./retirement";
 import { createClubWorldCup, simulateClubWorldCup } from "./clubWorldCup";
 import {
   CONTINENTAL_TOURNAMENT_MATCHDAY, CONTINENTAL_TOURNAMENT_START_YEAR,
@@ -46,8 +47,9 @@ export const SAVE_FORMAT = "soccer-season-simulator-save";
  * v10: stores continental tournaments using the shared seeded knockout bracket.
  * v11: schedules each continental knockout round on its own matchday.
  * v12: adds Nations League divisions, groups, fixtures and history.
+ * v13: tracks scheduled and retired players.
  */
-export const SAVE_VERSION = 12;
+export const SAVE_VERSION = 13;
 
 export interface SaveMeta {
   team: string;
@@ -348,6 +350,7 @@ function validateRoot(root: unknown): GameRoot {
     !!season.leagueStates && ["1", "2", "3", "4", "5"].every(tier => !!season.leagueStates[tier]) &&
     !!season.cup && Array.isArray(season.archives) && Array.isArray(season.history) &&
     !!season.freeAgents && Array.isArray(season.freeAgents.available) && !!season.freeAgents.clubPlayers &&
+    Array.isArray(season.freeAgents.retiredPlayers) &&
     typeof season.freeAgents.nextSeq === "number" &&
     !!season.international && !!season.international.nations && Array.isArray(season.international.windows) &&
     Array.isArray(season.international.rankingHistory) && !!season.international.nationsLeague &&
@@ -441,6 +444,9 @@ export function gameFromSave(file: SaveFile): Game {
     // v1 -> v2: introduce the free-agent pool (with a first batch for the current season).
     loadedSeason.freeAgents = createFreeAgentState();
     generateFreeAgents(loadedSeason);
+  }
+  if (loadedSeason?.freeAgents && !Array.isArray(loadedSeason.freeAgents.retiredPlayers)) {
+    loadedSeason.freeAgents.retiredPlayers = [];
   }
   if (loadedSeason && file.version < 3) {
     migratePlayerHistories(loadedSeason, (root as Partial<GameRoot>).managerTeam as Team);
@@ -585,6 +591,20 @@ export function gameFromSave(file: SaveFile): Game {
         });
       }
     }
+  }
+  if (loadedSeason && file.version < 13) {
+    const manager = (root as Partial<GameRoot>).managerTeam as Team;
+    loadedSeason.managerTeam = manager;
+    const retiredPlayers = loadedSeason.freeAgents.retiredPlayers;
+    for (const player of retiredPlayers) {
+      player.isRetired = true;
+      player.retirementYear ??= loadedSeason.year;
+    }
+    for (const player of collectSeasonPlayers(loadedSeason)) {
+      if (player.isRetired !== true) player.isRetired = false;
+      player.retirementYear ??= null;
+    }
+    schedulePlayerRetirements(loadedSeason);
   }
   const { season, managerTeam, godMode } = validateRoot(root);
   return { season, managerTeam, godMode, version: 0, liveCache: null };

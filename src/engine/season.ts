@@ -45,6 +45,7 @@ import type { ContinentalTournament } from "./continentalTournaments";
 import { refreshAllClubOveralls } from "./squadStrength";
 import { snapshotSeason } from "./snapshots";
 import { nextPlayerID } from "./playerIds";
+import { retireScheduledPlayers, schedulePlayerRetirements } from "./retirement";
 import type { SeasonArchive } from "./snapshots";
 import type {
   CupState, FinalHistory, FreeAgentState, LeagueState, Notice, OverallChange, PlayoffResult,
@@ -576,6 +577,7 @@ export function advanceToNextSeason(season: Season, managerTeam: Team | null = n
   applySeasonOverallChanges(season);
 
   const nextYear = season.year + 1;
+  retireScheduledPlayers(season);
 
   if (managerTeam) {
     // Returned scouting reports expire with the season if they were not signed.
@@ -618,6 +620,7 @@ export function advanceToNextSeason(season: Season, managerTeam: Team | null = n
     }
   }
   refreshAllClubOveralls(nextSeason);
+  schedulePlayerRetirements(nextSeason);
   // Keep the previous season's overall-change report available for the new-season summary.
   nextSeason.notices = [];
   return nextSeason;

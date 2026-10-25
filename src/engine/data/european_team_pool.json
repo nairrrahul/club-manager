@@ -1085,6 +1085,15 @@
       "facilityRating": 4,
       "youthScouting": 2,
       "youthExperience": 2
+    },
+    {
+      "id": 316,
+      "team": "Ferencvaros",
+      "overall": 72,
+      "countrycode": "HUN",
+      "facilityRating": 3,
+      "youthScouting": 3,
+      "youthExperience": 3
     }
   ],
   "OTHER_UECL": [

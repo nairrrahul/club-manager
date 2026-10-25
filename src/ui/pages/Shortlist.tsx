@@ -1,29 +1,32 @@
 import { useState } from "react";
 import { useGame, useGameStore } from "../../store/gameStore";
-import { getShortlistedPlayers } from "../../engine/game";
+import { getRetiredShortlistedPlayers, getShortlistedPlayers } from "../../engine/game";
 import type { ShortlistEntry } from "../../engine/game";
 import { getNationName } from "../../engine/nations";
 import { POSITION_ORDER } from "../../engine/formation";
 import { seasonDisplay } from "../../engine/constants";
 import {
   Empty, NationTag, OvrBadge, PageHeader, Panel, PlayerLink, PosBadge, ShortlistButton, SortTh, TeamLink,
-  compareSortValues
+  Tabs, compareSortValues
 } from "../components/common";
 import type { SortState } from "../components/common";
 
 type Key = "pos" | "name" | "age" | "ovr" | "pot" | "nat" | "sec" | "club" | "status";
+type ListTab = "active" | "retired";
 const DESC_FIRST: Key[] = ["ovr", "pot"];
 
 export default function Shortlist() {
   const game = useGame();
   const sign = useGameStore(s => s.signFreeAgent);
   const [sort, setSort] = useState<SortState>({ key: "ovr", dir: "desc" });
+  const [tab, setTab] = useState<ListTab>("active");
 
   const team = game.managerTeam;
   const squadFull = (team.seniorSquad?.length ?? 0) >= team.maxSeniorSquadSize;
   const entries = getShortlistedPlayers(game);
+  const retiredEntries = getRetiredShortlistedPlayers(game);
 
-  const rows = [...entries].sort((a, b) => {
+  const rows = [...(tab === "active" ? entries : retiredEntries)].sort((a, b) => {
     const value = (entry: ShortlistEntry): string | number | null => {
       const p = entry.player;
       switch (sort.key as Key) {
@@ -51,16 +54,26 @@ export default function Shortlist() {
     <div>
       <PageHeader
         title="Shortlist"
-        subtitle={`${entries.length} player${entries.length === 1 ? "" : "s"} shortlisted`}
+        subtitle={`${entries.length} active · ${retiredEntries.length} retired`}
       />
       <p className="text-sm text-navy-300 mb-4 max-w-3xl">
         Use the flag icon next to a player to add or remove them from your shortlist. Players on your own team cannot be shortlisted,
         and a shortlisted player is removed from the list when you sign them.
       </p>
 
-      <Panel title="Shortlisted players">
+      <Tabs
+        tabs={[
+          { id: "active", label: `Active (${entries.length})` },
+          { id: "retired", label: `Retired (${retiredEntries.length})` }
+        ]}
+        value={tab}
+        onChange={setTab}
+      />
+      <Panel title={tab === "active" ? "Active shortlisted players" : "Retired shortlisted players"}>
         {rows.length === 0 ? (
-          <Empty>Your shortlist is empty. Click the flag icon on a free agent, a club's player or a nation's player to add them.</Empty>
+          <Empty>{tab === "active"
+            ? "Your active shortlist is empty. Click the flag icon on a free agent, a club's player or a nation's player to add them."
+            : "No retired players are on your shortlist."}</Empty>
         ) : (
           <div className="overflow-x-auto">
             <table className="tbl">
@@ -97,12 +110,16 @@ export default function Shortlist() {
                       <td><NationTag code={player.primaryNationality} /></td>
                       <td>{player.secondaryNationality ? <NationTag code={player.secondaryNationality} muted /> : <span className="text-navy-400">–</span>}</td>
                       <td className="text-sm">
-                        {entry.clubID !== null
+                        {entry.retired
+                          ? <span className="text-navy-200">Retired</span>
+                          : entry.clubID !== null
                           ? <TeamLink team={{ id: entry.clubID, name: entry.clubName }} />
                           : <span className="text-navy-200">Free Agents</span>}
                       </td>
                       <td className="text-xs">
-                        {agent
+                        {entry.retired
+                          ? <span className="text-navy-300">Retired</span>
+                          : agent
                           ? agent.blocked
                             ? <span className="text-accent-yellow">Re-signable from {seasonDisplay(agent.resignBlockedUntilYear as number)}</span>
                             : <span className="text-navy-100">Available</span>

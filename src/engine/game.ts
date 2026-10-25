@@ -32,6 +32,7 @@ import { generateNameForNationalities } from "./nameGenerator";
 import { isValidNationCode } from "./nations";
 import { openStint } from "./playerHistory";
 import { nextPlayerID, assertUniquePlayerID } from "./playerIds";
+import { schedulePlayerRetirements } from "./retirement";
 import { continentalTeams, simulateClubWorldCup as playClubWorldCup } from "./clubWorldCup";
 import type { ClubWorldCup } from "./clubWorldCup";
 
@@ -138,6 +139,7 @@ export function createGame(teamID: number): Game {
   season.managerTeam = team;
   generateClubRegens(season);
   refreshAllClubOveralls(season);
+  schedulePlayerRetirements(season);
 
   return { season, managerTeam: team, godMode: false, version: 0, liveCache: null };
 }
@@ -377,7 +379,7 @@ export function getFreeAgents(game: Game): (FreeAgentEntry & { blocked: boolean 
 
 /** Players a non-managed club has signed from the free-agent pool. */
 export function getClubPlayers(game: Game, teamID: number): ClubPlayerEntry[] {
-  return game.season.freeAgents.clubPlayers[teamID] ?? [];
+  return (game.season.freeAgents.clubPlayers[teamID] ?? []).filter(entry => !entry.player.isRetired);
 }
 
 export function setFormation(game: Game, formation: string): ActionResult {
@@ -537,7 +539,7 @@ export function godAddPlayer(
   return { ...ok(`Added ${player.firstName} ${player.lastName}.`), playerID: player.id };
 }
 
-export type PlayerLocation = "senior" | "youth" | "free-agent" | "club";
+export type PlayerLocation = "senior" | "youth" | "free-agent" | "club" | "retired";
 
 export interface FoundPlayer {
   player: Player;
@@ -548,7 +550,7 @@ export interface FoundPlayer {
   club?: ClubPlayerEntry;
 }
 
-/** Finds any player in the game world: managed squads, free agents, and other clubs' signings. */
+/** Finds active players and retained retired players by ID. */
 export function findPlayer(game: Game, playerID: string): FoundPlayer | null {
   const own = getPlayer(game.managerTeam, playerID);
   if (own) {
@@ -566,6 +568,8 @@ export function findPlayer(game: Game, playerID: string): FoundPlayer | null {
     const club = entries.find(entry => entry.player.id === playerID);
     if (club) return { player: club.player, location: "club", teamID: club.teamID, club };
   }
+  const retired = game.season.freeAgents.retiredPlayers.find(player => player.id === playerID);
+  if (retired) return { player: retired, location: "retired", teamID: null };
   return null;
 }
 
@@ -576,7 +580,7 @@ export interface PlayerSearchEntry {
   leagueTier: number | null;
 }
 
-/** Searchable players currently in the game world and their current club/league. */
+/** Searchable active players and their current club/league. */
 export function getPlayerSearchPlayers(game: Game): PlayerSearchEntry[] {
   const leagueByTeam = new Map<number, number>();
   for (const league of Object.values(game.season.leagueStates)) {
@@ -585,6 +589,7 @@ export function getPlayerSearchPlayers(game: Game): PlayerSearchEntry[] {
 
   const entries: PlayerSearchEntry[] = [];
   const add = (player: Player, clubID: number | null): void => {
+    if (player.isRetired) return;
     const club = clubID === null ? null : TEAM_DIRECTORY.get(clubID);
     entries.push({
       player,
@@ -670,19 +675,19 @@ export interface NationPlayer {
   clubName: string;
 }
 
-/** Players in the game whose primary nationality is the given nation, best first. */
+/** Active players in the game whose primary nationality is the given nation, best first. */
 export function getNationPlayers(game: Game, code: string): NationPlayer[] {
   const out: NationPlayer[] = [];
   const manager = game.managerTeam;
   for (const player of [...(manager.seniorSquad ?? []), ...(manager.youthAcademySquad ?? [])]) {
-    if (player.primaryNationality === code) out.push({ player, clubID: manager.ID, clubName: manager.Team });
+    if (!player.isRetired && player.primaryNationality === code) out.push({ player, clubID: manager.ID, clubName: manager.Team });
   }
   for (const entry of game.season.freeAgents.available) {
-    if (entry.player.primaryNationality === code) out.push({ player: entry.player, clubID: null, clubName: "Free Agents" });
+    if (!entry.player.isRetired && entry.player.primaryNationality === code) out.push({ player: entry.player, clubID: null, clubName: "Free Agents" });
   }
   for (const [teamID, entries] of Object.entries(game.season.freeAgents.clubPlayers)) {
     for (const entry of entries) {
-      if (entry.player.primaryNationality === code) {
+      if (!entry.player.isRetired && entry.player.primaryNationality === code) {
         out.push({ player: entry.player, clubID: Number(teamID), clubName: TEAM_DIRECTORY.get(Number(teamID))?.name ?? "Unknown club" });
       }
     }
@@ -735,13 +740,14 @@ export interface ShortlistEntry {
   clubID: number | null;
   clubName: string;
   freeAgent?: FreeAgentEntry & { blocked: boolean };
+  retired?: boolean;
 }
 
 /** Every shortlisted player (free agents and players at other clubs). */
 export function getShortlistedPlayers(game: Game): ShortlistEntry[] {
   const out: ShortlistEntry[] = [];
   for (const entry of game.season.freeAgents.available) {
-    if (entry.player.isShortlisted) {
+    if (entry.player.isShortlisted && !entry.player.isRetired) {
       out.push({
         player: entry.player,
         clubID: null,
@@ -752,7 +758,7 @@ export function getShortlistedPlayers(game: Game): ShortlistEntry[] {
   }
   for (const [teamID, entries] of Object.entries(game.season.freeAgents.clubPlayers)) {
     for (const entry of entries) {
-      if (entry.player.isShortlisted) {
+      if (entry.player.isShortlisted && !entry.player.isRetired) {
         out.push({
           player: entry.player,
           clubID: Number(teamID),
@@ -762,6 +768,18 @@ export function getShortlistedPlayers(game: Game): ShortlistEntry[] {
     }
   }
   return out;
+}
+
+/** Every retired player still on the user's shortlist. */
+export function getRetiredShortlistedPlayers(game: Game): ShortlistEntry[] {
+  return game.season.freeAgents.retiredPlayers
+    .filter(player => player.isShortlisted)
+    .map(player => ({
+      player,
+      clubID: null,
+      clubName: "Retired",
+      retired: true
+    }));
 }
 
 /** When on, unsigned youth-scouting candidates join the free agents instead of being discarded. */

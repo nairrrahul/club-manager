@@ -99,8 +99,9 @@ export default function PlayerPage() {
   }
 
   const { player, location } = found;
-  const clubName = found.teamID !== null ? TEAM_DIRECTORY.get(found.teamID)?.name ?? "Unknown club" : null;
-  const status =
+  const retired = location === "retired" || player.isRetired === true;
+  const clubName = retired ? "Retired" : found.teamID !== null ? TEAM_DIRECTORY.get(found.teamID)?.name ?? "Unknown club" : null;
+  const status = retired ? "Retired" :
     location === "senior" ? "Senior squad"
     : location === "youth" ? "Youth academy"
     : location === "free-agent"
@@ -124,12 +125,19 @@ export default function PlayerPage() {
             )}
           </h1>
           <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-navy-200">
-            {found.teamID !== null
+            {retired
+              ? <span className="text-accent-yellow font-semibold">Retired</span>
+              : found.teamID !== null
               ? <Link to={`/team/${found.teamID}`} className="link text-accent-yellow font-semibold">{clubName}</Link>
               : <span className="text-accent-yellow font-semibold">Free agent</span>}
             <span>{status}</span>
             <PosBadge position={player.position} />
           </div>
+          {!retired && player.retirementYear === game.season.year && (
+            <p className="text-sm text-accent-yellow mb-4" role="status">
+              This player is scheduled to retire at the end of {seasonDisplay(player.retirementYear)}.
+            </p>
+          )}
           <div className="mt-3 text-left">
             <div className="text-xl font-semibold">
               <NationTag code={player.primaryNationality} label="name" />
@@ -164,7 +172,7 @@ export default function PlayerPage() {
           <Panel title="Details">
             <dl className="divide-y divide-navy-700/60 text-sm">
               {([
-                ["Club", clubName ?? "Free agent"],
+                ["Club", retired ? "Retired" : clubName ?? "Free agent"],
                 ["Position", player.position],
                 ["Primary nationality", <NationTag key="n1" code={player.primaryNationality} label="name" />],
                 ["Secondary nationality", player.secondaryNationality ? <NationTag key="n2" code={player.secondaryNationality} label="name" /> : "None"],

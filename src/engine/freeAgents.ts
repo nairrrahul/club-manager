@@ -23,7 +23,7 @@ export const REGEN_RATING_SHIFT = 2;
 export const HOME_NATION_PRIORITY = 0.8;
 
 export function createFreeAgentState(): FreeAgentState {
-  return { available: [], clubPlayers: {}, nextSeq: 1, autoSendUnsignedScouts: false };
+  return { available: [], clubPlayers: {}, retiredPlayers: [], nextSeq: 1, autoSendUnsignedScouts: false };
 }
 
 /** Generates 3-5 new free agents at the start of a season. */
@@ -158,6 +158,7 @@ export function signFreeAgentForTeam(
 // ---------------------------------------------------------------------------
 
 function advanceOneYear(player: Player, facilityRating: number, year: number): void {
+  if (player.isRetired) return;
   player.age += 1;
   applyPlayerGrowth(player, facilityRating);
   player.progression.push({ year, age: player.age, overall: player.overall, potential: player.potential });

@@ -23,12 +23,25 @@ export function runSearch(game: Game, rawQuery: string): SearchResult[] {
 
   const players: SearchResult[] = [];
   const team = game.managerTeam;
+  for (const player of game.season.freeAgents.retiredPlayers) {
+    const name = `${player.firstName} ${player.lastName}`;
+    if (normalizeText(name).includes(query)) {
+      players.push({
+        kind: "player",
+        key: `p-${player.id}`,
+        label: name,
+        sub: `Retired · ${player.position} · OVR ${player.overall}`,
+        to: `/player/${encodeURIComponent(player.id)}`
+      });
+    }
+  }
   const groups: [string, typeof team.seniorSquad][] = [
     ["Senior squad", team.seniorSquad],
     ["Youth academy", team.youthAcademySquad]
   ];
   for (const [where, squad] of groups) {
     for (const player of squad ?? []) {
+      if (player.isRetired) continue;
       const name = `${player.firstName} ${player.lastName}`;
       if (normalizeText(name).includes(query)) {
         players.push({
@@ -44,6 +57,7 @@ export function runSearch(game: Game, rawQuery: string): SearchResult[] {
 
   // Free agents and players signed by other clubs.
   for (const entry of game.season.freeAgents.available) {
+    if (entry.player.isRetired) continue;
     const name = `${entry.player.firstName} ${entry.player.lastName}`;
     if (normalizeText(name).includes(query)) {
       players.push({
@@ -57,6 +71,7 @@ export function runSearch(game: Game, rawQuery: string): SearchResult[] {
   }
   for (const [teamID, entries] of Object.entries(game.season.freeAgents.clubPlayers)) {
     for (const entry of entries) {
+      if (entry.player.isRetired) continue;
       const name = `${entry.player.firstName} ${entry.player.lastName}`;
       if (normalizeText(name).includes(query)) {
         players.push({

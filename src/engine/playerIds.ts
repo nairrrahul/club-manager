@@ -10,7 +10,8 @@ export function collectSeasonPlayers(season: Season): Player[] {
     ...(manager?.scoutedPlayers ?? []),
     ...(manager?.scoutingMissions ?? []).flatMap(mission => mission.candidates),
     ...season.freeAgents.available.map(entry => entry.player),
-    ...Object.values(season.freeAgents.clubPlayers).flatMap(entries => entries.map(entry => entry.player))
+    ...Object.values(season.freeAgents.clubPlayers).flatMap(entries => entries.map(entry => entry.player)),
+    ...season.freeAgents.retiredPlayers
   ];
   return [...new Set(players)];
 }

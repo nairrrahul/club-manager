@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useGame, useGameStore } from "../../store/gameStore";
 import { FORMATIONS, POSITION_ORDER, canPlayPosition, getFormationLayoutSlots, getFormationRequirements } from "../../engine/formation";
 import { calculateFormationOverall, getStartingXISlots } from "../../engine/playerSquad";
-import { ConfirmDialog, Empty, NationTag, OvrBadge, PageHeader, Panel, PlaneIcon, PlayerLink, PosBadge, SortTh, Tabs, compareSortValues } from "../components/common";
+import { ConfirmDialog, Empty, NationTag, OvrBadge, PageHeader, Panel, PlaneIcon, PlayerLink, PosBadge, RetirementIcon, SortTh, Tabs, compareSortValues } from "../components/common";
 import type { SortState } from "../components/common";
 import { getNationName } from "../../engine/nations";
 import { getPlayerInternationalDuty } from "../../engine/game";
@@ -99,11 +99,13 @@ function SquadTable() {
               {sorted.map(player => {
                 // Only shown during a manually simulated international break.
                 const duty = getPlayerInternationalDuty(game, player.id);
+                const retiring = player.retirementYear === game.season.year;
                 return (
                 <tr key={player.id} className={duty ? "bg-red-500/10" : ""}>
                   <td><PosBadge position={player.position} /></td>
                   <td>
                     {duty && <PlaneIcon className="text-red-300 mr-1.5" title={`On international duty with ${getNationName(duty)}`} />}
+                    {retiring && <RetirementIcon className="text-accent-yellow mr-1.5" title="Retiring at the end of this season" />}
                     <PlayerLink id={player.id} name={fullName(player)} />
                   </td>
                   <td className="num">{player.age}</td>
