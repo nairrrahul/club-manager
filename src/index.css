@@ -25,6 +25,7 @@
   .tbl th { @apply text-left text-[11px] font-semibold uppercase tracking-wider text-navy-300 px-2 py-2 border-b border-navy-700 whitespace-nowrap; }
   .tbl td { @apply px-2 py-1.5 border-b border-navy-700/60 whitespace-nowrap; }
   .tbl tr:hover td { @apply bg-navy-700/40; }
+  .division-history-table tbody tr:hover > .division-history-sticky { @apply bg-navy-700; }
   .num { @apply tabular-nums; }
   .link { @apply hover:text-accent-yellow hover:underline underline-offset-2 cursor-pointer; }
 }

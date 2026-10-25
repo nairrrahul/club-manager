@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { useGame } from "../../store/gameStore";
 import { getNationClubs, getNationPlayers, getWorldRankings } from "../../engine/game";
 import { getConfederation, getNationName } from "../../engine/nations";
@@ -164,6 +164,7 @@ function RankingTab(props: { code: string }) {
 
 function MatchesTab(props: { code: string }) {
   const game = useGame();
+  const confederation = getConfederation(props.code);
   const matches = getNationMatches(game.season.international, props.code);
   const years = [...new Set(matches.map(match => match.year))];
   if (!years.includes(game.season.year)) years.push(game.season.year);
@@ -189,7 +190,11 @@ function MatchesTab(props: { code: string }) {
                 {rows.map((match, index) => (
                   <tr key={index}>
                     <td className="text-navy-200">{match.windowLabel}</td>
-                    <td>{match.kind === "friendly" ? "Friendly" : match.kind}</td>
+                    <td>
+                      {match.kind === "friendly" ? "Friendly" : match.kind === "nationsLeague" ? (
+                        <Link className="link" to={`/nations-league/${confederation}`}>Nations League</Link>
+                      ) : match.kind}
+                    </td>
                     <td><NationLink code={match.opponent} /></td>
                     <td className="text-xs text-navy-300">{match.home ? "H" : "A"}</td>
                     <td className="tabular-nums">

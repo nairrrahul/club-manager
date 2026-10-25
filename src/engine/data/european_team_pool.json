@@ -1249,6 +1249,24 @@
       "facilityRating": 4,
       "youthScouting": 3,
       "youthExperience": 3
+    },
+    {
+      "id": 306,
+      "team": "The New Saints",
+      "overall": 62,
+      "countrycode": "WAL",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
+    },
+    {
+      "id": 307,
+      "team": "HJK Helsinki",
+      "overall": 61,
+      "countrycode": "FIN",
+      "facilityRating": 3,
+      "youthScouting": 2,
+      "youthExperience": 2
     }
   ]
 }

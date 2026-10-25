@@ -5,6 +5,11 @@ import { simulateMatch } from "./matchEngine";
 import { SEASON_END_MATCHDAY } from "./constants";
 import { STAR_PLAYER_FACTOR, starBonus } from "./squadStrength";
 import { POSITION_GROUP } from "./formation";
+import {
+  completeNationsLeagueEditions, createNationsLeagueState, getInternationalWindowType,
+  getNationConfederation, getNationsLeagueRoundsForWindow, prepareNationsLeagueDraws
+} from "./nationsLeague";
+import type { NationsLeagueState } from "./nationsLeague";
 import type { Season } from "./season";
 import type { Team } from "./team";
 import type { Player } from "./types";
@@ -49,10 +54,19 @@ export interface InternationalMatch {
   awayGoals: number | null;
   homeChange: number | null;
   awayChange: number | null;
+  nationsLeagueId?: string;
+  nationsLeagueConfederation?: string;
+  nationsLeagueDivision?: string;
+  nationsLeagueGroup?: string;
+  nationsLeagueRound?: number;
+  windowYear?: number;
+  windowId?: string;
 }
 
 export interface InternationalRound {
   matches: InternationalMatch[];
+  kind?: "friendly" | "nationsLeague";
+  label?: string;
   /** The one nation without a match in this set of fixtures (there is an odd number of nations). */
   leftOut: string | null;
 }
@@ -80,6 +94,7 @@ export interface InternationalState {
   nations: Record<string, NationTeam>;
   windows: WindowRecord[];
   rankingHistory: RankingSnapshot[];
+  nationsLeague: NationsLeagueState;
   /** The nation left out of the most recent set of fixtures (never left out twice in a row). */
   lastLeftOut: string | null;
   /** When true, windows must be simulated explicitly instead of automatically. */
@@ -96,7 +111,14 @@ export function createInternationalState(): InternationalState {
       points: info.rankingPts
     };
   }
-  return { nations, windows: [], rankingHistory: [], lastLeftOut: null, explicitWindows: false };
+  return {
+    nations,
+    windows: [],
+    rankingHistory: [],
+    nationsLeague: createNationsLeagueState(),
+    lastLeftOut: null,
+    explicitWindows: false
+  };
 }
 
 const round2 = (value: number): number => Math.round(value * 100) / 100;
@@ -215,7 +237,7 @@ function gaussian(): number {
 }
 
 /** Standard deviation of the random noise added to overalls when pairing, keeping opponents similar but varied. */
-const PAIRING_NOISE = 0.7;
+const PAIRING_NOISE = 2.5;
 
 const pairKey = (a: string, b: string): string => (a < b ? `${a}|${b}` : `${b}|${a}`);
 
@@ -258,9 +280,10 @@ function repairRematches(pairs: [string, string][], avoid: Set<string>, overalls
 function scheduleFriendlies(
   state: InternationalState,
   overalls: Record<string, number>,
-  avoid: Set<string>
+  avoid: Set<string>,
+  eligibleCodes: string[]
 ): InternationalRound {
-  const codes = Object.keys(state.nations);
+  const codes = eligibleCodes;
   let leftOut: string | null = null;
   let pool = codes;
 
@@ -294,6 +317,7 @@ function scheduleFriendlies(
 
   state.lastLeftOut = leftOut;
   return {
+    kind: "friendly",
     leftOut,
     matches: best.map(([home, away]) => ({
       home, away, kind: "friendly", homeGoals: null, awayGoals: null, homeChange: null, awayChange: null
@@ -339,6 +363,8 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
   const def = findDueWindowDef(season);
   if (!def) return null;
 
+  prepareNationsLeagueDraws(state.nationsLeague, season.year, def.id);
+
   // Players first decide whether they are willing, then compete for their positional quota.
   const callUps: Record<string, string[]> = {};
   const calledPlayers: Record<string, Player[]> = {};
@@ -371,14 +397,42 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
     overalls[nation.code] = nation.actualOverall;
   }
 
-  // Fixtures: two sets of friendlies, avoiding an immediate rematch.
+  // Confederations use the window type assigned to this position in the four-year cycle.
   const rounds: InternationalRound[] = [];
   const played = new Set<string>();
-  for (let i = 0; i < FRIENDLY_SETS_PER_WINDOW; i++) {
-    const round = scheduleFriendlies(state, overalls, played);
-    round.matches.forEach(match => played.add(pairKey(match.home, match.away)));
-    rounds.push(round);
+  const friendlyNations = Object.keys(state.nations).filter(code =>
+    getInternationalWindowType(getNationConfederation(code), season.year, def.id) === "FR"
+  );
+  if (friendlyNations.length > 1) {
+    for (let i = 0; i < FRIENDLY_SETS_PER_WINDOW; i++) {
+      const round = scheduleFriendlies(state, overalls, played, friendlyNations);
+      round.label = `Friendlies · Set ${i + 1}`;
+      round.matches.forEach(match => played.add(pairKey(match.home, match.away)));
+      rounds.push(round);
+    }
   }
+
+  const nationsLeagueRounds = new Map<string, InternationalRound>();
+  for (const confederation of Object.keys(state.nationsLeague.divisions)) {
+    const scheduled = getNationsLeagueRoundsForWindow(
+      state.nationsLeague,
+      confederation,
+      season.year,
+      def.id
+    );
+    if (!scheduled) continue;
+    for (const item of scheduled.rounds) {
+      const round = nationsLeagueRounds.get(item.label) ?? {
+        kind: "nationsLeague",
+        label: item.label,
+        matches: [],
+        leftOut: null
+      };
+      round.matches.push(...item.matches);
+      nationsLeagueRounds.set(item.label, round);
+    }
+  }
+  rounds.push(...nationsLeagueRounds.values());
 
   const record: WindowRecord = {
     year: season.year,
@@ -444,6 +498,7 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
   }
 
   window.status = "played";
+  completeNationsLeagueEditions(state.nationsLeague);
   state.rankingHistory.push({
     year: window.year,
     windowId: window.windowId,

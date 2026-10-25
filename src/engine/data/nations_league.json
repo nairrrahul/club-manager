@@ -1,0 +1,61 @@
+{
+  "UEFA": {
+    "A": {
+      "numDown": 4,
+      "numUp": 0,
+      "1": ["POR", "ESP", "FRA", "GER"],
+      "2": ["ITA", "NED", "DEN", "CRO"],
+      "3": ["SRB", "BEL", "ENG", "NOR"],
+      "4": ["WAL", "CZE", "GRE", "TUR"]
+    },
+    "B": {
+      "numDown": 4,
+      "numUp": 4,
+      "1": ["SCO", "HUN", "POL", "ISR"],
+      "2": ["SUI", "BIH", "AUT", "UKR"],
+      "3": ["SVN", "GEO", "IRL", "ROU"],
+      "4": ["SWE", "MKD", "NIR", "KVX"]
+    },
+    "C": {
+      "numDown": 4,
+      "numUp": 4,
+      "1": ["ISL", "ALB", "MNE", "KAZ"],
+      "2": ["FIN", "SVK", "BUL", "ARM"],
+      "3": ["BLR", "FRO", "CYP", "EST"],
+      "4": ["LVA", "LUX", "MDA", "SMR"]
+    },
+    "D": {
+      "numDown": 0,
+      "numUp": 4,
+      "1": ["AZE", "LTU"],
+      "2": ["MLT", "GIB"],
+      "3": ["LIE", "AND"]
+    }
+  },
+  "CONCACAF": {
+    "A": {
+      "numUp": 0,
+      "numDown": 3,
+      "1": ["USA", "MEX", "CAN"],
+      "2": ["PAN", "CUW", "GUA"],
+      "3": ["HAI", "JAM", "DOM"],
+      "4": ["SUR", "CRC", "HON"]
+    },
+    "B": {
+      "numUp": 3,
+      "numDown": 3,
+      "1": ["TRI", "NCA", "SLV"],
+      "2": ["GUY", "BRB", "VIN"],
+      "3": ["CUB", "LCA", "PUR"],
+      "4": ["SKN", "CAY", "BLZ"]
+    },
+    "C": {
+      "numUp": 3,
+      "numDown": 0,
+      "1": ["GRN", "DMA", "BER"],
+      "2": ["ATG", "ARU", "MSR"],
+      "3": ["TCA", "VIR", "AIA"],
+      "4": ["VGB", "BAH"]
+    }
+  }
+}

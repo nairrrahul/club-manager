@@ -145,6 +145,12 @@
       "team": "Saprissa",
       "overall": 67,
       "countrycode": "CRC"
+    },
+    {
+      "id": 305,
+      "team": "Vancouver Whitecaps",
+      "overall": 71,
+      "countrycode": "CAN"
     }
   ],
   "CAF": [
@@ -219,25 +225,43 @@
       "team": "MC Alger",
       "overall": 61,
       "countrycode": "ALG"
+    },
+    {
+      "id": 308,
+      "team": "Simba",
+      "overall": 63,
+      "countrycode": "TAN"
+    },
+    {
+      "id": 309,
+      "team": "Zamalek",
+      "overall": 69,
+      "countrycode": "EGY"
+    },
+    {
+      "id": 310,
+      "team": "Stade Malien",
+      "overall": 60,
+      "countrycode": "MLI"
     }
   ],
   "OFC": [
     {
       "id": 279,
       "team": "Auckland City",
-      "overall": 60,
+      "overall": 61,
       "countrycode": "NZL"
     },
     {
       "id": 280,
       "team": "Auckland FC",
-      "overall": 62,
+      "overall": 63,
       "countrycode": "NZL"
     },
     {
       "id": 281,
       "team": "South Melbourne",
-      "overall": 61,
+      "overall": 62,
       "countrycode": "AUS"
     },
     {
@@ -245,6 +269,18 @@
       "team": "Bula FC",
       "overall": 56,
       "countrycode": "FIJ"
+    },
+    {
+      "id": 311,
+      "team": "Central Coast",
+      "overall": 50,
+      "countrycode": "SOL"
+    },
+    {
+      "id": 312,
+      "team": "Vanuatu United",
+      "overall": 53,
+      "countrycode": "VAN"
     }
   ],
   "AFC": [
@@ -311,7 +347,7 @@
     {
       "id": 293,
       "team": "Melbourne City",
-      "overall": 70,
+      "overall": 71,
       "countrycode": "AUS"
     },
     {
@@ -319,6 +355,18 @@
       "team": "Pakhtakor",
       "overall": 64,
       "countrycode": "UZB"
+    },
+    {
+      "id": 313,
+      "team": "Johor DT",
+      "overall": 63,
+      "countrycode": "MAS"
+    },
+    {
+      "id": 314,
+      "team": "Al Ittihad",
+      "overall": 72,
+      "countrycode": "KSA"
     }
   ]
 }

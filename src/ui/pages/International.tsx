@@ -33,6 +33,23 @@ function FixtureRow(props: { match: InternationalMatch }) {
 function WindowView(props: { window: WindowRecord }) {
   const { window } = props;
   const played = window.status === "played";
+  const friendlyRounds = window.rounds.filter(round =>
+    round.kind === "friendly" || (!round.kind && round.matches.every(match => match.kind === "friendly"))
+  );
+  const nationsLeagueRounds = window.rounds.filter(round => round.kind === "nationsLeague");
+
+  const renderRounds = (rounds: typeof window.rounds) => rounds.map((round, index) => (
+    <Panel
+      key={`${round.label ?? round.kind ?? "friendly"}-${index}`}
+      title={round.label ?? `Friendlies · Set ${index + 1}`}
+      right={round.leftOut ? <span className="text-navy-300 flex items-center gap-1.5">No match: <NationLink code={round.leftOut} /></span> : undefined}
+    >
+      <div className="max-h-[60vh] overflow-y-auto">
+        {round.matches.map((match, i) => <FixtureRow key={i} match={match} />)}
+      </div>
+    </Panel>
+  ));
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3 text-sm text-navy-200">
@@ -42,17 +59,18 @@ function WindowView(props: { window: WindowRecord }) {
           {played ? "Played" : "Scheduled"}
         </span>
       </div>
-      {window.rounds.map((round, index) => (
-        <Panel
-          key={index}
-          title={`Friendlies — set ${index + 1}`}
-          right={round.leftOut ? <span className="text-navy-300 flex items-center gap-1.5">No match: <NationLink code={round.leftOut} /></span> : undefined}
-        >
-          <div className="max-h-[60vh] overflow-y-auto">
-            {round.matches.map((match, i) => <FixtureRow key={i} match={match} />)}
-          </div>
-        </Panel>
-      ))}
+      {friendlyRounds.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">International Friendlies</h2>
+          {renderRounds(friendlyRounds)}
+        </section>
+      )}
+      {nationsLeagueRounds.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">Nations League</h2>
+          {renderRounds(nationsLeagueRounds)}
+        </section>
+      )}
     </div>
   );
 }
@@ -73,7 +91,7 @@ export default function International() {
     <div>
       <PageHeader
         title="International Windows"
-        subtitle="Friendlies played during the international breaks"
+        subtitle="Friendlies and Nations League matches played during international breaks"
         right={
           <SeasonSelect
             years={years.map(y => ({ year: y, label: seasonDisplay(y) }))}

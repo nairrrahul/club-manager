@@ -5,6 +5,8 @@ import type { MatchResult } from "./types";
 
 const score_probs = scoreProbsRaw as Record<string, number[]>;
 const zscores = zscoresRaw as Record<string, number>;
+// Beyond this skew the approximate CDF can round every supported score difference down to zero.
+const MAX_SCORELINE_SKEW = 12;
 
 function normSDist(z: number): number {
   // Standard normal CDF
@@ -48,7 +50,10 @@ function computeProbTable(ovr1: number, ovr2: number, context: string): Record<s
   const SKEW_POW = context == "LEAGUE" ? 1 : 2;
   const initRatingRatio = Math.pow(ovr1 / ovr2, SKEW_POW);
   const ratingRatio = initRatingRatio < 1 ? computeUnderdogRatio(initRatingRatio) : initRatingRatio;
-  const skewFactor = (1 - ratingRatio) * 4;
+  const skewFactor = Math.max(
+    -MAX_SCORELINE_SKEW,
+    Math.min(MAX_SCORELINE_SKEW, (1 - ratingRatio) * 4)
+  );
 
   const skewProbs = Object.fromEntries(Object.entries(zscores).map(([delta, zscore]) => {
     return [
@@ -72,6 +77,9 @@ function computeUnderdogRatio(ratio: number): number {
 
 function weightedRandom(weights: Record<string, number>): number {
   const total = Object.values(weights).reduce((sum, weight) => sum + weight, 0);
+  if (!Number.isFinite(total) || total <= 0) {
+    throw new Error("Cannot select a match outcome from an empty probability distribution.");
+  }
   const random = Math.random() * total;
 
   let cumulative = 0;

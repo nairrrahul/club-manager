@@ -5,6 +5,7 @@ import { COMPETITION_NAMES } from "../engine/europeanCompetitions";
 import { normalizeText } from "./format";
 import { nationInfo } from "../engine/nations";
 import { computeRankings } from "../engine/international";
+import { getNationsLeagueConfederations } from "../engine/nationsLeague";
 
 export interface SearchResult {
   kind: "player" | "team" | "competition" | "nation";
@@ -120,6 +121,12 @@ export function runSearch(game: Game, rawQuery: string): SearchResult[] {
     { label: CUP_NAME, sub: "Domestic cup", to: "/cup", extra: "cup fa" },
     ...Object.entries(COMPETITION_NAMES).map(([code, name]) => ({
       label: name, sub: `European · ${code}`, to: `/europe/${code}`, extra: code.toLowerCase()
+    })),
+    ...getNationsLeagueConfederations().map(confederation => ({
+      label: `${confederation} Nations League`,
+      sub: `International · ${confederation}`,
+      to: `/nations-league/${confederation}`,
+      extra: `nations league ${confederation.toLowerCase()}`
     }))
   ];
   for (const item of all) {

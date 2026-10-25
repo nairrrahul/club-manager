@@ -20,6 +20,7 @@ import International from "./ui/pages/International";
 import AddPlayer from "./ui/pages/AddPlayer";
 import ClubWorldCupPage from "./ui/pages/ClubWorldCupPage";
 import ContinentalTournamentsPage from "./ui/pages/ContinentalTournamentsPage";
+import NationsLeaguePage from "./ui/pages/NationsLeaguePage";
 
 export default function App() {
   useGameStore(state => state.tick);
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/rankings" element={<Rankings />} />
         <Route path="/nation/:code" element={<NationPage />} />
         <Route path="/international" element={<International />} />
+        <Route path="/nations-league/:confederation" element={<NationsLeaguePage />} />
         <Route path="/add-player" element={game.godMode ? <AddPlayer /> : <Navigate to="/" replace />} />
         <Route path="/player/:id" element={<PlayerPage />} />
         <Route path="/league/:tier" element={<LeaguePage />} />

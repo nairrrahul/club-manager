@@ -2,6 +2,7 @@ import continentalTeamsRaw from "./data/continental_teams.json";
 import { Team } from "./team";
 import { scheduleBracket } from "./scheduler";
 import { simulateMatch, simulatePenaltyShootoutOnly, parseKOMatchWinner } from "./matchEngine";
+import { getAggregateGoals } from "./europeanCompetitions";
 import { updateFormAfterMatch } from "./form";
 import type { Bracket, BracketMatch, MatchResult } from "./types";
 
@@ -60,16 +61,6 @@ function createTeam(raw: RawContinentalTeam): Team {
   return team;
 }
 
-function getAggregateGoals(match: BracketMatch): { home: number; away: number } {
-  const firstLeg = match.legs?.[0]?.result;
-  const secondLeg = match.legs?.[1]?.result;
-  if (!firstLeg || !secondLeg) throw new Error("A two-legged continental tie must have both leg results.");
-  return {
-    home: firstLeg.homeGoalInfo.homeGoals + secondLeg.awayGoalInfo.awayGoals,
-    away: firstLeg.awayGoalInfo.awayGoals + secondLeg.homeGoalInfo.homeGoals
-  };
-}
-
 function simulateTie(match: BracketMatch, team1: Team, team2: Team, matchday: number): void {
   const firstLeg = simulateMatch(team1, team2, false, "CONTINENTAL");
   const secondLeg = simulateMatch(team2, team1, false, "CONTINENTAL");
@@ -81,9 +72,9 @@ function simulateTie(match: BracketMatch, team1: Team, team2: Team, matchday: nu
   updateFormAfterMatch(secondLeg);
 
   const aggregate = getAggregateGoals(match);
-  if (aggregate.home > aggregate.away) {
+  if (aggregate.team1 > aggregate.team2) {
     match.winner = team1;
-  } else if (aggregate.away > aggregate.home) {
+  } else if (aggregate.team2 > aggregate.team1) {
     match.winner = team2;
   } else {
     match.tiebreak = simulatePenaltyShootoutOnly(team1, team2);

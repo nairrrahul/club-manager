@@ -45,8 +45,9 @@ export const SAVE_FORMAT = "soccer-season-simulator-save";
  * v9: adds continental knockout tournaments and their history.
  * v10: stores continental tournaments using the shared seeded knockout bracket.
  * v11: schedules each continental knockout round on its own matchday.
+ * v12: adds Nations League divisions, groups, fixtures and history.
  */
-export const SAVE_VERSION = 11;
+export const SAVE_VERSION = 12;
 
 export interface SaveMeta {
   team: string;
@@ -349,7 +350,9 @@ function validateRoot(root: unknown): GameRoot {
     !!season.freeAgents && Array.isArray(season.freeAgents.available) && !!season.freeAgents.clubPlayers &&
     typeof season.freeAgents.nextSeq === "number" &&
     !!season.international && !!season.international.nations && Array.isArray(season.international.windows) &&
-    Array.isArray(season.international.rankingHistory) &&
+    Array.isArray(season.international.rankingHistory) && !!season.international.nationsLeague &&
+    !!season.international.nationsLeague.divisions && !!season.international.nationsLeague.pots &&
+    Array.isArray(season.international.nationsLeague.editions) &&
     Array.isArray(team.seniorSquad) && Array.isArray(team.youthAcademySquad) &&
     Object.values(season.leagueStates).some(league => league.teams.includes(team));
   if (!valid) throw new Error("The save file is corrupted: the game data is missing or inconsistent.");
@@ -457,6 +460,9 @@ export function gameFromSave(file: SaveFile): Game {
     for (const player of everyone) {
       if (typeof player.caps !== "number") player.caps = 0;
     }
+  }
+  if (loadedSeason?.international && loadedSeason.international.nationsLeague === undefined) {
+    loadedSeason.international.nationsLeague = createInternationalState().nationsLeague;
   }
   if (loadedSeason && file.version < 6) {
     // v5 -> v6: nobody is shortlisted and unsigned scouting candidates are discarded, as before.

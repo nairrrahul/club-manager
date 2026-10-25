@@ -33,11 +33,14 @@ Run `npm run typecheck` to check TypeScript or `npm run build` to create a produ
   80% of choices when available; otherwise the existing weighted regional selection applies.
 - International call-ups are limited to 3 goalkeepers, 8 defenders, 8 midfielders, and 7 forwards per nation.
   Club and national-team player bonuses use a positional 1-GK / 4-DEF / 3-MID / 3-FWD XI.
+- International windows follow the four-year confederation schedule in `team_windows.csv`. Nations League
+  editions use the configured draw pots, home-and-away group fixtures, ranking-point importance, and
+  promotion/relegation; their standings and edition history are available from the International Windows page.
 - God Mode can add players to free agency or another club through the Add Player page, with potential up
   to 99. The God Mode toggle remains locked until you leave that page.
 
 ## Saves
 
-Save files use format version 10. Older saves are migrated when loaded, including club-player source defaults,
+Save files use format version 12. Older saves are migrated when loaded, including club-player source defaults,
 duplicate player-ID repair, recalculation of positional club bonuses, and Club World Cup and continental
 tournament state initialization.
