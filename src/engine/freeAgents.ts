@@ -86,6 +86,13 @@ export function generateClubRegens(season: Season, year = season.year): Player[]
           ((live?.facilityRating ?? team.facilityRating ?? 3) - 3 +
             (live?.scoutingExperience ?? team.youthExperience ?? 3) - 3)
       };
+    })),
+    ...(season.customTeams ?? []).map(team => ({
+      id: team.ID,
+      name: team.Team,
+      countryCode: team.countrycode ?? "",
+      scoutingRating: team.scoutingRating,
+      potentialShift: REGEN_RATING_SHIFT * (team.facilityRating - 3 + team.scoutingExperience - 3)
     }))
   ];
   const created: Player[] = [];
@@ -181,6 +188,9 @@ export function developFreeAgentWorld(season: Season, newYear: number): void {
   for (const teams of Object.values(europeanTeamPool)) {
     for (const team of teams) facilityByTeam.set(team.id, team.facilityRating ?? 3);
   }
+  for (const team of season.customTeams ?? []) {
+    facilityByTeam.set(team.ID, team.facilityRating);
+  }
   for (const [teamID, entries] of Object.entries(state.clubPlayers)) {
     const facility = facilityByTeam.get(Number(teamID)) ?? 3;
     for (const entry of entries) advanceOneYear(entry.player, facility, newYear);
@@ -216,6 +226,9 @@ function buildSuitors(season: Season): Suitor[] {
     for (const team of teams) {
       suitors.push({ id: team.id, name: team.team, overall: team.overall, country: team.countrycode });
     }
+  }
+  for (const team of season.customTeams ?? []) {
+    suitors.push({ id: team.ID, name: team.Team, overall: team.BaseOverall, country: team.countrycode ?? "" });
   }
   return suitors;
 }

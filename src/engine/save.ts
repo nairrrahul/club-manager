@@ -8,7 +8,7 @@ import { createInternationalState, startWindowIfDue, collectAllPlayers } from ".
 import { refreshAllClubOveralls } from "./squadStrength";
 import { collectSeasonPlayers } from "./playerIds";
 import { refreshStartingXI } from "./playerSquad";
-import { TEAM_DIRECTORY } from "./game";
+import { isBuiltInTeamID, resetTeamDirectory, TEAM_DIRECTORY } from "./game";
 import { schedulePlayerRetirements } from "./retirement";
 import { createClubWorldCup, simulateClubWorldCup } from "./clubWorldCup";
 import {
@@ -49,8 +49,9 @@ export const SAVE_FORMAT = "soccer-season-simulator-save";
  * v12: adds Nations League divisions, groups, fixtures and history.
  * v13: tracks scheduled and retired players.
  * v14: stores manager/observer mode and supports games without a managed club.
+ * v15: persists custom teams added through God Mode.
  */
-export const SAVE_VERSION = 14;
+export const SAVE_VERSION = 15;
 
 export interface SaveMeta {
   mode: "manager" | "observer";
@@ -349,6 +350,14 @@ function validateRoot(root: unknown): GameRoot {
   const season = candidate?.season;
   const team = candidate?.managerTeam;
   const mode = candidate?.mode === "observer" ? "observer" : "manager";
+  const customTeamIDs = new Set<number>();
+  const customTeamsValid = Array.isArray(season?.customTeams) &&
+    season.customTeams.every(customTeam => {
+      if (!(customTeam instanceof Team) || !Number.isInteger(customTeam.ID) ||
+          isBuiltInTeamID(customTeam.ID) || customTeamIDs.has(customTeam.ID)) return false;
+      customTeamIDs.add(customTeam.ID);
+      return true;
+    });
   const valid =
     !!season && (mode === "observer"
       ? team === null && season.managerTeam === null
@@ -356,6 +365,7 @@ function validateRoot(root: unknown): GameRoot {
         Array.isArray(team.seniorSquad) && Array.isArray(team.youthAcademySquad) &&
         Object.values(season.leagueStates ?? {}).some(league => league.teams.includes(team))) &&
     typeof season.year === "number" && typeof season.matchday === "number" &&
+    customTeamsValid &&
     !!season.leagueStates && ["1", "2", "3", "4", "5"].every(tier => !!season.leagueStates[tier]) &&
     !!season.cup && Array.isArray(season.archives) && Array.isArray(season.history) &&
     !!season.freeAgents && Array.isArray(season.freeAgents.available) && !!season.freeAgents.clubPlayers &&
@@ -450,6 +460,7 @@ export function gameFromSave(file: SaveFile): Game {
     (root as Partial<GameRoot>).mode = "manager";
   }
   const loadedSeason = (root as Partial<GameRoot> | null)?.season;
+  if (loadedSeason && !Array.isArray(loadedSeason.customTeams)) loadedSeason.customTeams = [];
   if (loadedSeason && file.version < 2 && loadedSeason.freeAgents === undefined) {
     // v1 -> v2: introduce the free-agent pool (with a first batch for the current season).
     loadedSeason.freeAgents = createFreeAgentState();
@@ -538,7 +549,7 @@ export function gameFromSave(file: SaveFile): Game {
   }
   if (loadedSeason && file.version < 8) {
     loadedSeason.explicitClubWorldCup = false;
-    loadedSeason.continentalTournaments = createContinentalTournaments(loadedSeason.year);
+    loadedSeason.continentalTournaments = createContinentalTournaments(loadedSeason.year, loadedSeason.customTeams);
     if (loadedSeason.matchday >= CONTINENTAL_TOURNAMENT_MATCHDAY) {
       simulateContinentalTournaments(loadedSeason.continentalTournaments, loadedSeason.matchday);
     } else if (loadedSeason.year >= CONTINENTAL_TOURNAMENT_START_YEAR + 1) {
@@ -548,13 +559,13 @@ export function gameFromSave(file: SaveFile): Game {
     if (loadedSeason.clubWorldCup && loadedSeason.matchday >= 21) simulateClubWorldCup(loadedSeason);
   }
   if (loadedSeason && file.version < 9 && loadedSeason.continentalTournaments === undefined) {
-    loadedSeason.continentalTournaments = createContinentalTournaments(loadedSeason.year);
+    loadedSeason.continentalTournaments = createContinentalTournaments(loadedSeason.year, loadedSeason.customTeams);
     if (loadedSeason.matchday >= CONTINENTAL_TOURNAMENT_MATCHDAY) {
       simulateContinentalTournaments(loadedSeason.continentalTournaments, loadedSeason.matchday);
     }
   }
   if (loadedSeason && file.version === 9) {
-    loadedSeason.continentalTournaments = createContinentalTournaments(loadedSeason.year);
+    loadedSeason.continentalTournaments = createContinentalTournaments(loadedSeason.year, loadedSeason.customTeams);
     if (loadedSeason.matchday >= CONTINENTAL_TOURNAMENT_MATCHDAY) {
       simulateContinentalTournaments(loadedSeason.continentalTournaments, loadedSeason.matchday);
     }
@@ -617,6 +628,7 @@ export function gameFromSave(file: SaveFile): Game {
     schedulePlayerRetirements(loadedSeason);
   }
   const { season, managerTeam, mode, godMode } = validateRoot(root);
+  resetTeamDirectory(season.customTeams);
   return { season, managerTeam, mode, godMode, version: 0, liveCache: null };
 }
 

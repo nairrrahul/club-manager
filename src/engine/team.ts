@@ -42,6 +42,8 @@ export class Team {
   // European guests.
   countrycode?: string;
   isEuropeanGuest?: boolean;
+  europeanGroup?: string;
+  customConfederation?: string;
 
   /**
    * Overall added by exceptional players the club has signed (non-managed clubs only; 0 for the

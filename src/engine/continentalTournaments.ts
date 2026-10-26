@@ -107,11 +107,24 @@ function createTournament(year: number, confederation: string, rawTeams: RawCont
   };
 }
 
-export function createContinentalTournaments(year: number): Record<string, ContinentalTournament> {
+export function createContinentalTournaments(year: number, customTeams: Team[] = []): Record<string, ContinentalTournament> {
   if (year < CONTINENTAL_TOURNAMENT_START_YEAR) return {};
   return Object.fromEntries(CONTINENTAL_CONFEDERATIONS.map(confederation => [
     confederation,
-    createTournament(year, confederation, continentalTeams[confederation] ?? [])
+    createTournament(year, confederation, [
+      ...(continentalTeams[confederation] ?? []),
+      ...customTeams
+        .filter(team => team.customConfederation === confederation)
+        .map(team => ({
+          id: team.ID,
+          team: team.Team,
+          overall: team.BaseOverall,
+          countrycode: team.countrycode ?? "",
+          facilityRating: team.facilityRating,
+          youthScouting: team.scoutingRating,
+          youthExperience: team.scoutingExperience
+        }))
+    ])
   ]));
 }
 

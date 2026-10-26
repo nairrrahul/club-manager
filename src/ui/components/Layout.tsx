@@ -76,6 +76,7 @@ function Sidebar() {
         {game.godMode && (
           <NavSection title="God Mode">
             <NavLink to="/add-player" className={navClass}>Add Player</NavLink>
+            <NavLink to="/add-team" className={navClass}>Add Team</NavLink>
           </NavSection>
         )}
       </nav>
@@ -236,7 +237,7 @@ function SettingsMenu() {
   const setExplicitClubWorldCup = useGameStore(s => s.explicitClubWorldCup);
   const setAutoSendScouts = useGameStore(s => s.autoSendScouts);
   const godMode = useGameStore(s => s.godMode);
-  const locked = useLocation().pathname === "/add-player";
+  const locked = ["/add-player", "/add-team"].includes(useLocation().pathname);
   const [open, setOpen] = useState(false);
   const wrapper = useRef<HTMLDivElement>(null);
 

@@ -29,7 +29,7 @@ import type { RawTeam } from "./team";
 import type { ClubPlayerEntry, FreeAgentEntry, Player, Position } from "./types";
 import { POSITION_ORDER } from "./formation";
 import { generateNameForNationalities } from "./nameGenerator";
-import { isValidNationCode } from "./nations";
+import { getConfederation, isValidNationCode } from "./nations";
 import { openStint } from "./playerHistory";
 import { nextPlayerID, assertUniquePlayerID } from "./playerIds";
 import { schedulePlayerRetirements } from "./retirement";
@@ -65,6 +65,16 @@ export interface GodAddPlayerInput {
   primaryNationality: string;
   secondaryNationality: string | null;
   clubID: number | null;
+}
+
+export interface GodAddTeamInput {
+  name: string;
+  countryCode: string;
+  overall: number;
+  facilityRating: number;
+  scoutingRating: number;
+  scoutingExperience: number;
+  conferenceLeagueOnly: boolean;
 }
 
 const ok = (message?: string): ActionResult => ({ ok: true, message });
@@ -128,10 +138,35 @@ for (const teams of Object.values(continentalTeams)) {
     });
   }
 }
+const BASE_TEAM_DIRECTORY = new Map(TEAM_DIRECTORY);
+
+function registerCustomTeam(team: Team): void {
+  TEAM_DIRECTORY.set(team.ID, {
+    id: team.ID,
+    name: team.Team,
+    kind: team.customConfederation === "UEFA" ? "EUR" : "CON",
+    countrycode: team.countrycode ?? "",
+    baseOverall: team.BaseOverall,
+    facilityRating: team.facilityRating,
+    youthScouting: team.scoutingRating,
+    youthExperience: team.scoutingExperience
+  });
+}
+
+export function resetTeamDirectory(customTeams: Team[] = []): void {
+  TEAM_DIRECTORY.clear();
+  for (const [id, entry] of BASE_TEAM_DIRECTORY) TEAM_DIRECTORY.set(id, entry);
+  customTeams.forEach(registerCustomTeam);
+}
+
+export function isBuiltInTeamID(teamID: number): boolean {
+  return BASE_TEAM_DIRECTORY.has(teamID);
+}
 
 // ---------------------------------------------------------------------------
 
 export function createGame(teamID: number | null): Game {
+  resetTeamDirectory();
   const season = createInitialSeason();
   if (teamID === null) {
     generateClubRegens(season);
@@ -171,6 +206,8 @@ export function getAllSeasonViews(game: Game): SeasonArchive[] {
 
 /** Live Team object for English clubs and teams participating in this season's competitions. */
 export function getLiveTeam(game: Game, teamID: number): Team | null {
+  const customTeam = game.season.customTeams.find(team => team.ID === teamID);
+  if (customTeam) return customTeam;
   const english = getTeamFromSeason(game.season, teamID);
   if (english) return english;
   const worldCupTeam = game.season.clubWorldCup?.teams.find(team => team.ID === teamID);
@@ -488,6 +525,7 @@ export function godAddPlayer(
   if (!Number.isInteger(input.age) || input.age < ADD_PLAYER_AGE_MIN || input.age > ADD_PLAYER_AGE_MAX) {
     return fail(`Age must be an integer from ${ADD_PLAYER_AGE_MIN} to ${ADD_PLAYER_AGE_MAX}.`);
   }
+
   if (!POSITION_ORDER.includes(input.position)) return fail("Choose a valid player position.");
   if (!Number.isInteger(input.overall) || input.overall < 20 || input.overall > MAX_GOD_MODE_POTENTIAL) {
     return fail(`Overall must be an integer from 20 to ${MAX_GOD_MODE_POTENTIAL}.`);
@@ -565,6 +603,58 @@ export function godAddPlayer(
   }
 
   return { ...ok(`Added ${player.firstName} ${player.lastName}.`), playerID: player.id };
+}
+
+export function godAddTeam(game: Game, input: GodAddTeamInput): ActionResult & { teamID?: number } {
+  if (!game.godMode) return fail("God Mode is not enabled.");
+  if (typeof input.name !== "string" || typeof input.countryCode !== "string") {
+    return fail("Enter a team name and choose a country.");
+  }
+  const name = input.name.trim();
+  if (!name) return fail("Enter a team name.");
+  const countryCode = input.countryCode.toUpperCase();
+  if (!isValidNationCode(countryCode) || countryCode === "ENG") {
+    return fail("Choose a valid non-English country.");
+  }
+  const confederation = getConfederation(countryCode);
+  if (!confederation) return fail("The selected country has no confederation.");
+  if (![input.overall, input.facilityRating, input.scoutingRating, input.scoutingExperience].every(Number.isInteger)) {
+    return fail("Team ratings must be whole numbers.");
+  }
+  if (input.overall < 20 || input.overall > MAX_GOD_MODE_POTENTIAL) {
+    return fail(`Base overall must be from 20 to ${MAX_GOD_MODE_POTENTIAL}.`);
+  }
+  if ([input.facilityRating, input.scoutingRating, input.scoutingExperience].some(rating => rating < 1 || rating > 5)) {
+    return fail("Facility, scouting, and youth experience ratings must be from 1 to 5.");
+  }
+  const isUefaPoolCountry = confederation === "UEFA" &&
+    Object.prototype.hasOwnProperty.call(europeanTeamPool, countryCode);
+  if (input.conferenceLeagueOnly && (confederation !== "UEFA" || isUefaPoolCountry)) {
+    return fail("Conference League Only is available only for UEFA countries without a dedicated European pool.");
+  }
+
+  const id = Math.max(...TEAM_DIRECTORY.keys(), ...game.season.customTeams.map(team => team.ID), 0) + 1;
+  const team = new Team({
+    ID: id,
+    Team: name,
+    Overall: input.overall,
+    BaseOverall: input.overall,
+    Tier: 0,
+    facilityRating: input.facilityRating,
+    youthScouting: input.scoutingRating,
+    youthExperience: input.scoutingExperience
+  });
+  team.countrycode = countryCode;
+  team.isEuropeanGuest = true;
+  team.customConfederation = confederation;
+  if (confederation === "UEFA") {
+    team.europeanGroup = isUefaPoolCountry
+      ? countryCode
+      : input.conferenceLeagueOnly ? "OTHER_UECL" : "OTHER";
+  }
+  game.season.customTeams.push(team);
+  registerCustomTeam(team);
+  return { ...ok(`Added ${name} to the ${countryCode} club pool.`), teamID: id };
 }
 
 export type PlayerLocation = "senior" | "youth" | "free-agent" | "club" | "retired";

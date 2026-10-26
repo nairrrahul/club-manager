@@ -18,6 +18,7 @@ import Rankings from "./ui/pages/Rankings";
 import NationPage from "./ui/pages/NationPage";
 import International from "./ui/pages/International";
 import AddPlayer from "./ui/pages/AddPlayer";
+import AddTeam from "./ui/pages/AddTeam";
 import ClubWorldCupPage from "./ui/pages/ClubWorldCupPage";
 import ContinentalTournamentsPage from "./ui/pages/ContinentalTournamentsPage";
 import NationsLeaguePage from "./ui/pages/NationsLeaguePage";
@@ -43,6 +44,7 @@ export default function App() {
         <Route path="/international" element={<International />} />
         <Route path="/nations-league/:confederation" element={<NationsLeaguePage />} />
         <Route path="/add-player" element={game.godMode ? <AddPlayer /> : <Navigate to="/" replace />} />
+        <Route path="/add-team" element={game.godMode ? <AddTeam /> : <Navigate to="/" replace />} />
         <Route path="/player/:id" element={<PlayerPage />} />
         <Route path="/league/:tier" element={<LeaguePage />} />
         <Route path="/cup" element={<CupPage />} />

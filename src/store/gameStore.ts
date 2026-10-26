@@ -4,9 +4,9 @@ import {
   setFormation, setXIMode, setXISlot, sendScout, signScouted, setGodMode, setGodRating,
   godChangePosition, canStartNextSeason, signFreeAgent, simulateWindow, setExplicitWindows,
   toggleShortlist, setAutoSendScouts, godAddPlayer, findPlayer, simulateClubWorldCup,
-  setExplicitClubWorldCup
+  setExplicitClubWorldCup, godAddTeam
 } from "../engine/game";
-import type { ActionResult, Game, GodAddPlayerInput, SeasonSummary } from "../engine/game";
+import type { ActionResult, Game, GodAddPlayerInput, GodAddTeamInput, SeasonSummary } from "../engine/game";
 import { gameFromSave, gameToSave, saveFileName, verifySave } from "../engine/save";
 import type { SaveFile } from "../engine/save";
 import type { Position } from "../engine/types";
@@ -67,6 +67,7 @@ interface GameStore {
   godRating: (which: "scouting" | "experience" | "training", rating: number) => void;
   godPosition: (playerID: string, position: Position) => void;
   godAddPlayer: (input: GodAddPlayerInput) => ActionResult & { playerID?: string };
+  godAddTeam: (input: GodAddTeamInput) => ActionResult & { teamID?: number };
 }
 
 let toastId = 1;
@@ -202,6 +203,15 @@ export const useGameStore = create<GameStore>()((set, get) => {
         );
       }
       return { ...result, playerID };
+    },
+    godAddTeam: input => {
+      let teamID: number | undefined;
+      const result = act(game => {
+        const created = godAddTeam(game, input);
+        teamID = created.teamID;
+        return created;
+      });
+      return { ...result, teamID };
     }
   };
 });

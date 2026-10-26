@@ -57,6 +57,7 @@ export function refreshAllClubOveralls(season: Season): void {
     team.recomputeOverall();
   };
   for (const league of Object.values(season.leagueStates)) league.teams.forEach(refresh);
+  for (const team of season.customTeams ?? []) refresh(team);
   for (const competition of Object.values(season.europeanCompetitions ?? {})) {
     competition.teams.filter(team => team.isEuropeanGuest).forEach(refresh);
   }
@@ -78,6 +79,8 @@ export function refreshClubOverall(season: Season, teamID: number): void {
     const team = league.teams.find(candidate => candidate.ID === teamID);
     if (team) apply(team);
   }
+  const customTeam = season.customTeams?.find(team => team.ID === teamID);
+  if (customTeam) apply(customTeam);
   for (const competition of Object.values(season.europeanCompetitions ?? {})) {
     const team = competition.teams.find(candidate => candidate.ID === teamID);
     if (team) apply(team);

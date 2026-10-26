@@ -119,8 +119,23 @@ function createEuropeanTeam(raw: EuropeanPoolTeam): Team {
   return team;
 }
 
-function getForeignPoolTeams(countryCode: string): Team[] {
-  return (europeanTeamPool[countryCode] ?? []).map(createEuropeanTeam);
+function customTeamPoolEntry(team: Team): EuropeanPoolTeam {
+  return {
+    id: team.ID,
+    team: team.Team,
+    overall: team.BaseOverall,
+    countrycode: team.countrycode ?? "",
+    facilityRating: team.facilityRating,
+    youthScouting: team.scoutingRating,
+    youthExperience: team.scoutingExperience
+  };
+}
+
+function getForeignPoolTeams(countryCode: string, customTeams: Team[]): Team[] {
+  const custom = customTeams
+    .filter(team => team.europeanGroup === countryCode)
+    .map(customTeamPoolEntry);
+  return [...(europeanTeamPool[countryCode] ?? []), ...custom].map(createEuropeanTeam);
 }
 
 type Entrants = Record<"UCL" | "UEL" | "UECL", Team[]>;
@@ -160,8 +175,8 @@ function getEnglandQualifiedTeams(previousSeason: Season): Entrants {
   return result;
 }
 
-function allocateForeignCountry(countryCode: string): Entrants {
-  const teams = getForeignPoolTeams(countryCode);
+function allocateForeignCountry(countryCode: string, customTeams: Team[]): Entrants {
+  const teams = getForeignPoolTeams(countryCode, customTeams);
   const allocation = europeanAllocations[countryCode];
   if (!allocation) return { UCL: [], UEL: [], UECL: [] };
 
@@ -243,6 +258,7 @@ function applyEuropeanChampionQualification(
       champion = entrants[current].find(team => team.ID === winner.teamID) as Team;
     } else {
       champion = getTeamFromSeasonByID(previousSeason, winner.teamID);
+      if (!champion) champion = previousSeason.customTeams.find(team => team.ID === winner.teamID) ?? null;
       if (!champion) {
         const pool = findPoolTeam(winner.teamID);
         if (pool) {
@@ -308,8 +324,9 @@ function buildEuropeanEntrants(previousSeason: Season): Entrants {
     england[competition].forEach(team => groupOf.set(team.ID, "ENG"));
   }
 
-  for (const countryCode of Object.keys(europeanTeamPool)) {
-    const allocation = allocateForeignCountry(countryCode);
+  const poolGroups = [...new Set(Object.keys(europeanTeamPool))];
+  for (const countryCode of poolGroups) {
+    const allocation = allocateForeignCountry(countryCode, previousSeason.customTeams ?? []);
     for (const competition of Object.keys(entrants) as (keyof Entrants)[]) {
       entrants[competition].push(...allocation[competition]);
       allocation[competition].forEach(team => groupOf.set(team.ID, countryCode));

@@ -65,6 +65,7 @@ export interface Season {
   seasonOverallChanges: OverallChange[] | null;
   nextTierByTeam: Record<number, number> | null;
   managerTeam: Team | null;
+  customTeams: Team[];
   europeanCompetitions: Record<string, EuropeanCompetition> | null;
   /** Web UI addition: full snapshots of every completed season. */
   archives: SeasonArchive[];
@@ -133,7 +134,8 @@ export function createSeason(
   startYear: number = SEASON_START_YEAR,
   archives: SeasonArchive[] = [],
   freeAgents: FreeAgentState = createFreeAgentState(),
-  international: InternationalState = createInternationalState()
+  international: InternationalState = createInternationalState(),
+  customTeams: Team[] = []
 ): Season {
   const leagueStates: Record<string, LeagueState> = {};
 
@@ -163,6 +165,7 @@ export function createSeason(
     seasonOverallChanges: null,
     nextTierByTeam: null,
     managerTeam: null,
+    customTeams,
     europeanCompetitions: null,
     archives,
     notices: [],
@@ -170,7 +173,7 @@ export function createSeason(
     international,
     clubWorldCup: null,
     explicitClubWorldCup: false,
-    continentalTournaments: createContinentalTournaments(startYear)
+    continentalTournaments: createContinentalTournaments(startYear, customTeams)
   };
 }
 
@@ -609,7 +612,9 @@ export function advanceToNextSeason(season: Season, managerTeam: Team | null = n
     recordSeasonHistory(season)
   ];
 
-  const nextSeason = createSeason(nextTeamsByTier, history, nextYear, archives, season.freeAgents, season.international);
+  const nextSeason = createSeason(
+    nextTeamsByTier, history, nextYear, archives, season.freeAgents, season.international, season.customTeams
+  );
   nextSeason.managerTeam = managerTeam;
   nextSeason.explicitClubWorldCup = season.explicitClubWorldCup;
   nextSeason.europeanCompetitions = createEuropeanCompetitions(season, history);

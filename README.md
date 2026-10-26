@@ -41,10 +41,12 @@ Run `npm run typecheck` to check TypeScript or `npm run build` to create a produ
   promotion/relegation; their standings and edition history are available from the International Windows page.
 - God Mode can add players to free agency or another club through the Add Player page, with potential up
   to 99. It is available in Observer Mode as well, where it is limited to adding players to other clubs
-  or free agency. The God Mode toggle remains locked until you leave that page.
+  or free agency. The Add Team page can add non-English clubs to the appropriate European or continental
+  competition pool. The God Mode toggle remains locked until you leave either God Mode page.
 
 ## Saves
 
-Save files use format version 14 and record whether the game is in manager or observer mode. Older saves are
-migrated when loaded, including club-player source defaults, duplicate player-ID repair, recalculation of
-positional club bonuses, and Club World Cup and continental tournament state initialization.
+Save files use format version 15 and record whether the game is in manager or observer mode, along with
+any custom teams. Older saves are migrated when loaded, including club-player source defaults, duplicate
+player-ID repair, recalculation of positional club bonuses, and Club World Cup and continental tournament
+state initialization.
