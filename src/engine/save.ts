@@ -5,6 +5,8 @@ import { seasonDisplay } from "./constants";
 import { createFreeAgentState, generateFreeAgents } from "./freeAgents";
 import { FREE_AGENTS_LABEL } from "./playerHistory";
 import { createInternationalState, startWindowIfDue, collectAllPlayers } from "./international";
+import { createGoldCupState } from "./goldCup";
+import { createCopaAmericaState } from "./copaAmerica";
 import { refreshAllClubOveralls } from "./squadStrength";
 import { collectSeasonPlayers } from "./playerIds";
 import { refreshStartingXI } from "./playerSquad";
@@ -50,8 +52,10 @@ export const SAVE_FORMAT = "soccer-season-simulator-save";
  * v13: tracks scheduled and retired players.
  * v14: stores manager/observer mode and supports games without a managed club.
  * v15: persists custom teams added through God Mode.
+ * v16: adds CONCACAF Gold Cup and Gold Cup Playoff state.
+ * v17: adds Copa América state.
  */
-export const SAVE_VERSION = 15;
+export const SAVE_VERSION = 17;
 
 export interface SaveMeta {
   mode: "manager" | "observer";
@@ -490,6 +494,12 @@ export function gameFromSave(file: SaveFile): Game {
   }
   if (loadedSeason?.international && loadedSeason.international.nationsLeague === undefined) {
     loadedSeason.international.nationsLeague = createInternationalState().nationsLeague;
+  }
+  if (loadedSeason?.international && loadedSeason.international.goldCup === undefined) {
+    loadedSeason.international.goldCup = createGoldCupState();
+  }
+  if (loadedSeason?.international && loadedSeason.international.copaAmerica === undefined) {
+    loadedSeason.international.copaAmerica = createCopaAmericaState();
   }
   if (loadedSeason && file.version < 6) {
     // v5 -> v6: nobody is shortlisted and unsigned scouting candidates are discarded, as before.

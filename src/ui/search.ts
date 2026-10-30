@@ -141,7 +141,10 @@ export function runSearch(game: Game, rawQuery: string): SearchResult[] {
       sub: `International · ${confederation}`,
       to: `/nations-league/${confederation}`,
       extra: `nations league ${confederation.toLowerCase()}`
-    }))
+    })),
+    { label: "Gold Cup", sub: "International · CONCACAF", to: "/gold-cup", extra: "gold cup concacaf" },
+    { label: "Gold Cup Playoff", sub: "International · CONCACAF", to: "/gold-cup-playoff", extra: "gold cup playoff qualifier" },
+    { label: "Copa América", sub: "International · CONMEBOL", to: "/copa-america", extra: "copa america copa CONMEBOL" }
   ];
   for (const item of all) {
     if (normalizeText(`${item.label} ${item.extra}`).includes(query)) {

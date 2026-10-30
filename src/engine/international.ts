@@ -1,15 +1,25 @@
 import windowsRaw from "./data/international_windows.json";
 import importanceRaw from "./data/match_importance.json";
 import { nationInfo, getNationName } from "./nations";
-import { simulateMatch } from "./matchEngine";
+import { parseKOMatchWinner, simulateMatch, simulatePenaltyShootoutOnly } from "./matchEngine";
 import { SEASON_END_MATCHDAY } from "./constants";
 import { STAR_PLAYER_FACTOR, starBonus } from "./squadStrength";
 import { POSITION_GROUP } from "./formation";
 import {
   completeNationsLeagueEditions, createNationsLeagueState, getInternationalWindowType,
-  getNationConfederation, getNationsLeagueRoundsForWindow, prepareNationsLeagueDraws
+  getGoldCupWindowType, getNationConfederation, getNationsLeagueRoundsForWindow, prepareNationsLeagueDraws
 } from "./nationsLeague";
 import type { NationsLeagueState } from "./nationsLeague";
+import {
+  advanceInternationalCupRound, completeGoldCupPlayoff, createGoldCupEdition, createGoldCupPlayoffEdition,
+  createGoldCupState, findLatestGoldCupPlayoff, getGoldCupPlayoff,
+  resolveGoldCupPlayoffTie, setInternationalCupKnockoutWinner
+} from "./goldCup";
+import type { GoldCupState } from "./goldCup";
+import {
+  createCopaAmericaEdition, createCopaAmericaState
+} from "./copaAmerica";
+import type { CopaAmericaState } from "./copaAmerica";
 import type { Season } from "./season";
 import type { Team } from "./team";
 import type { Player } from "./types";
@@ -61,11 +71,29 @@ export interface InternationalMatch {
   nationsLeagueRound?: number;
   windowYear?: number;
   windowId?: string;
+  windowMatchday?: number;
+  goldCupPlayoffId?: string;
+  goldCupTieId?: string;
+  goldCupLeg?: 1 | 2;
+  goldCupEditionId?: string;
+  goldCupStage?: "group" | "knockout";
+  goldCupGroup?: string;
+  goldCupRound?: number;
+  goldCupKnockoutMatchId?: string;
+  goldCupWinner?: string;
+  copaAmericaEditionId?: string;
+  copaAmericaStage?: "group" | "knockout";
+  copaAmericaGroup?: string;
+  copaAmericaRound?: number;
+  copaAmericaKnockoutMatchId?: string;
+  copaAmericaWinner?: string;
+  homePenalties?: string[];
+  awayPenalties?: string[];
 }
 
 export interface InternationalRound {
   matches: InternationalMatch[];
-  kind?: "friendly" | "nationsLeague";
+  kind?: "friendly" | "nationsLeague" | "goldCupPlayoff" | "goldCup" | "copaAmerica";
   label?: string;
   /** The one nation without a match in this set of fixtures (there is an odd number of nations). */
   leftOut: string | null;
@@ -95,6 +123,8 @@ export interface InternationalState {
   windows: WindowRecord[];
   rankingHistory: RankingSnapshot[];
   nationsLeague: NationsLeagueState;
+  goldCup: GoldCupState;
+  copaAmerica: CopaAmericaState;
   /** The nation left out of the most recent set of fixtures (never left out twice in a row). */
   lastLeftOut: string | null;
   /** When true, windows must be simulated explicitly instead of automatically. */
@@ -116,6 +146,8 @@ export function createInternationalState(): InternationalState {
     windows: [],
     rankingHistory: [],
     nationsLeague: createNationsLeagueState(),
+    goldCup: createGoldCupState(),
+    copaAmerica: createCopaAmericaState(),
     lastLeftOut: null,
     explicitWindows: false
   };
@@ -352,6 +384,14 @@ export function findDueWindowDef(season: Season): WindowDef | null {
   return null;
 }
 
+function latestCompletedConcacafNationsLeague(state: InternationalState): NationsLeagueState["editions"][number] {
+  const edition = [...state.nationsLeague.editions]
+    .filter(candidate => candidate.confederation === "CONCACAF" && candidate.status === "complete")
+    .sort((a, b) => b.startWindowIndex - a.startWindowIndex)[0];
+  if (!edition) throw new Error("A completed CONCACAF Nations League edition is required for Gold Cup qualification.");
+  return edition;
+}
+
 /**
  * Opens an international window if one is due: players are called up and the fixtures are drawn.
  * Matches are played later by simulateInternationalWindow.
@@ -400,8 +440,24 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
   // Confederations use the window type assigned to this position in the four-year cycle.
   const rounds: InternationalRound[] = [];
   const played = new Set<string>();
+  const copaAmericaRounds: InternationalRound[] = [];
+  let copaAmericaTeams: string[] = [];
+  if (getInternationalWindowType("CONMEBOL", season.year, def.id) === "COPA") {
+    const worldRanks = Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]));
+    const created = createCopaAmericaEdition(
+      state.copaAmerica,
+      state.goldCup,
+      season.year,
+      def.id,
+      def.afterMatchday,
+      worldRanks
+    );
+    copaAmericaTeams = created.edition.teams;
+    copaAmericaRounds.push(...created.rounds);
+  }
   const friendlyNations = Object.keys(state.nations).filter(code =>
-    getInternationalWindowType(getNationConfederation(code), season.year, def.id) === "FR"
+    getInternationalWindowType(getNationConfederation(code), season.year, def.id) === "FR" &&
+    !copaAmericaTeams.includes(code)
   );
   if (friendlyNations.length > 1) {
     for (let i = 0; i < FRIENDLY_SETS_PER_WINDOW; i++) {
@@ -433,6 +489,42 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
     }
   }
   rounds.push(...nationsLeagueRounds.values());
+  rounds.push(...copaAmericaRounds);
+
+  const goldCupWindowType = getGoldCupWindowType(season.year, def.id);
+  if (goldCupWindowType === "GCPO") {
+    const nationsLeagueEdition = latestCompletedConcacafNationsLeague(state);
+    const worldRanks = Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]));
+    const created = createGoldCupPlayoffEdition(
+      nationsLeagueEdition,
+      season.year,
+      def.id,
+      def.afterMatchday,
+      worldRanks
+    );
+    state.goldCup.playoffEditions.push(created.edition);
+    rounds.push(...created.rounds);
+  } else if (goldCupWindowType === "GC") {
+    const playoff = findLatestGoldCupPlayoff(state.goldCup);
+    if (!playoff) throw new Error("A completed Gold Cup playoff is required before the Gold Cup draw.");
+    const nationsLeagueEdition = state.nationsLeague.editions.find(
+      edition => edition.id === playoff.nationsLeagueEditionId
+    );
+    if (!nationsLeagueEdition || nationsLeagueEdition.status !== "complete") {
+      throw new Error(`The Nations League edition for Gold Cup playoff "${playoff.id}" is unavailable.`);
+    }
+    const worldRanks = Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]));
+    const created = createGoldCupEdition(
+      state.goldCup,
+      playoff.id,
+      playoff.directQualifiers,
+      season.year,
+      def.id,
+      def.afterMatchday,
+      worldRanks
+    );
+    rounds.push(...created.rounds);
+  }
 
   const record: WindowRecord = {
     year: season.year,
@@ -467,7 +559,8 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
     }
   };
 
-  for (const round of window.rounds) {
+  for (let roundIndex = 0; roundIndex < window.rounds.length; roundIndex++) {
+    const round = window.rounds[roundIndex];
     for (const match of round.matches) {
       const home = state.nations[match.home];
       const away = state.nations[match.away];
@@ -475,15 +568,63 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
       // The match engine reads only `Overall`, so lightweight stand-ins are enough.
       const homeTeam = { ID: 0, Team: home.code, Overall: home.actualOverall } as unknown as Team;
       const awayTeam = { ID: 0, Team: away.code, Overall: away.actualOverall } as unknown as Team;
-      const result = simulateMatch(homeTeam, awayTeam, false, "LEAGUE");
+      const isKnockout = match.goldCupStage === "knockout" || match.copaAmericaStage === "knockout";
+      const result = simulateMatch(homeTeam, awayTeam, isKnockout, "LEAGUE");
       const homeGoals = result.homeGoalInfo.homeGoals;
       const awayGoals = result.awayGoalInfo.awayGoals;
+      let playoffResolution: {
+        playoffId: string;
+        tieId: string;
+        winner: string;
+        penalties: { home: string[]; away: string[] } | null;
+        shootout: ReturnType<typeof simulatePenaltyShootoutOnly> | null;
+      } | null = null;
+      if (match.goldCupPlayoffId && match.goldCupTieId && match.goldCupLeg === 2) {
+        const playoff = getGoldCupPlayoff(state.goldCup, match.goldCupPlayoffId);
+        const tie = playoff.ties.find(candidate => candidate.id === match.goldCupTieId);
+        if (!tie || tie.firstLeg.homeGoals === null || tie.firstLeg.awayGoals === null) {
+          throw new Error(`Gold Cup playoff tie "${match.goldCupTieId}" has no completed first leg.`);
+        }
+        const aggregateTeam1 = tie.firstLeg.homeGoals + awayGoals;
+        const aggregateTeam2 = tie.firstLeg.awayGoals + homeGoals;
+        let winner: string;
+        let shootout: ReturnType<typeof simulatePenaltyShootoutOnly> | null = null;
+        let penalties: { home: string[]; away: string[] } | null = null;
+        if (aggregateTeam1 !== aggregateTeam2) {
+          winner = aggregateTeam1 > aggregateTeam2 ? tie.team1 : tie.team2;
+        } else {
+          shootout = simulatePenaltyShootoutOnly(
+            { ID: 0, Team: tie.team1, Overall: state.nations[tie.team1].actualOverall } as unknown as Team,
+            { ID: 0, Team: tie.team2, Overall: state.nations[tie.team2].actualOverall } as unknown as Team
+          );
+          winner = parseKOMatchWinner(shootout).Team;
+          penalties = {
+            home: shootout.homeGoalInfo.penalties ?? [],
+            away: shootout.awayGoalInfo.penalties ?? []
+          };
+        }
+        playoffResolution = {
+          playoffId: match.goldCupPlayoffId,
+          tieId: match.goldCupTieId,
+          winner,
+          penalties,
+          shootout
+        };
+      }
 
       const importance = MATCH_IMPORTANCE[match.kind];
-      const homeOutcome: MatchOutcome = homeGoals > awayGoals ? "win" : homeGoals < awayGoals ? "loss" : "draw";
+      const hasShootout = Boolean(
+        (result.homeGoalInfo.penalties && result.awayGoalInfo.penalties) ||
+        (playoffResolution?.shootout && homeGoals === awayGoals)
+      );
+      const homeOutcome: MatchOutcome = hasShootout
+        ? playoffResolution?.shootout
+          ? playoffResolution.winner === match.home ? "win" : "loss"
+          : parseKOMatchWinner(result) === homeTeam ? "win" : "loss"
+        : homeGoals > awayGoals ? "win" : homeGoals < awayGoals ? "loss" : "draw";
       const awayOutcome: MatchOutcome = homeOutcome === "win" ? "loss" : homeOutcome === "loss" ? "win" : "draw";
-      const homeChange = rankingPointChange(home.points, away.points, importance, homeOutcome);
-      const awayChange = rankingPointChange(away.points, home.points, importance, awayOutcome);
+      const homeChange = rankingPointChange(home.points, away.points, importance, homeOutcome, { shootout: hasShootout });
+      const awayChange = rankingPointChange(away.points, home.points, importance, awayOutcome, { shootout: hasShootout });
 
       home.points = round2(home.points + homeChange);
       away.points = round2(away.points + awayChange);
@@ -491,9 +632,82 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
       match.awayGoals = awayGoals;
       match.homeChange = round2(homeChange);
       match.awayChange = round2(awayChange);
+      match.homePenalties = result.homeGoalInfo.penalties ?? (
+        playoffResolution?.shootout && homeGoals === awayGoals
+          ? [...(playoffResolution.shootout.awayGoalInfo.penalties ?? [])]
+          : undefined
+      );
+      match.awayPenalties = result.awayGoalInfo.penalties ?? (
+        playoffResolution?.shootout && homeGoals === awayGoals
+          ? [...(playoffResolution.shootout.homeGoalInfo.penalties ?? [])]
+          : undefined
+      );
+      if (playoffResolution) {
+        resolveGoldCupPlayoffTie(
+          state.goldCup,
+          playoffResolution.playoffId,
+          playoffResolution.tieId,
+          playoffResolution.winner,
+          playoffResolution.penalties
+        );
+      }
+
+      if (match.goldCupEditionId && match.goldCupKnockoutMatchId) {
+        const edition = state.goldCup.editions.find(candidate => candidate.id === match.goldCupEditionId);
+        if (!edition) throw new Error(`Unknown Gold Cup edition "${match.goldCupEditionId}".`);
+        const winner = hasShootout ? parseKOMatchWinner(result).Team : homeGoals > awayGoals ? match.home : match.away;
+        match.goldCupWinner = winner;
+        setInternationalCupKnockoutWinner(edition, match.goldCupKnockoutMatchId, winner);
+      }
+      if (match.copaAmericaEditionId && match.copaAmericaKnockoutMatchId) {
+        const edition = state.copaAmerica.editions.find(candidate => candidate.id === match.copaAmericaEditionId);
+        if (!edition) throw new Error(`Unknown Copa América edition "${match.copaAmericaEditionId}".`);
+        const winner = hasShootout ? parseKOMatchWinner(result).Team : homeGoals > awayGoals ? match.home : match.away;
+        match.copaAmericaWinner = winner;
+        setInternationalCupKnockoutWinner(edition, match.copaAmericaKnockoutMatchId, winner);
+      }
 
       awardCaps(match.home);
       awardCaps(match.away);
+    }
+
+    if (round.kind === "goldCupPlayoff" && round.label?.endsWith("Second leg")) {
+      const playoffId = round.matches[0]?.goldCupPlayoffId;
+      if (playoffId) completeGoldCupPlayoff(state.goldCup, playoffId);
+    }
+    if (round.kind === "goldCup") {
+      const match = round.matches[0];
+      if (match?.goldCupEditionId) {
+        const edition = state.goldCup.editions.find(candidate => candidate.id === match.goldCupEditionId);
+        if (!edition) throw new Error(`Unknown Gold Cup edition "${match.goldCupEditionId}".`);
+        let nextRound: InternationalRound | null = null;
+        if (match.goldCupStage === "group") {
+          nextRound = advanceInternationalCupRound(edition, -1);
+        } else {
+          const knockoutRoundIndex = edition.knockout?.findIndex(knockoutRound =>
+            knockoutRound.matches.some(knockoutMatch => round.matches.includes(knockoutMatch.fixture))
+          ) ?? -1;
+          nextRound = advanceInternationalCupRound(edition, knockoutRoundIndex);
+        }
+        if (nextRound) window.rounds.push(nextRound);
+      }
+    }
+    if (round.kind === "copaAmerica") {
+      const match = round.matches[0];
+      if (match?.copaAmericaEditionId) {
+        const edition = state.copaAmerica.editions.find(candidate => candidate.id === match.copaAmericaEditionId);
+        if (!edition) throw new Error(`Unknown Copa América edition "${match.copaAmericaEditionId}".`);
+        let nextRound: InternationalRound | null = null;
+        if (match.copaAmericaStage === "group") {
+          nextRound = advanceInternationalCupRound(edition, -1, "copaAmerica");
+        } else {
+          const knockoutRoundIndex = edition.knockout?.findIndex(knockoutRound =>
+            knockoutRound.matches.some(knockoutMatch => round.matches.includes(knockoutMatch.fixture))
+          ) ?? -1;
+          nextRound = advanceInternationalCupRound(edition, knockoutRoundIndex, "copaAmerica");
+        }
+        if (nextRound) window.rounds.push(nextRound);
+      }
     }
   }
 
@@ -549,6 +763,9 @@ export interface NationMatchRow {
   outcome: MatchOutcome;
   pointsChange: number;
   kind: string;
+  competitionLink?: string;
+  stage?: string;
+  penaltyShootout?: { goalsFor: number; goalsAgainst: number };
 }
 
 /** Played international matches for a nation, oldest first. */
@@ -563,6 +780,13 @@ export function getNationMatches(state: InternationalState, code: string): Natio
         const isHome = match.home === code;
         const goalsFor = isHome ? match.homeGoals : match.awayGoals;
         const goalsAgainst = isHome ? match.awayGoals : match.homeGoals;
+        const shootoutFor = isHome ? match.homePenalties : match.awayPenalties;
+        const shootoutAgainst = isHome ? match.awayPenalties : match.homePenalties;
+        const outcome = shootoutFor && shootoutAgainst
+          ? shootoutFor.filter(kick => kick === "O").length > shootoutAgainst.filter(kick => kick === "O").length
+            ? "win"
+            : "loss"
+          : goalsFor > goalsAgainst ? "win" : goalsFor < goalsAgainst ? "loss" : "draw";
         rows.push({
           year: window.year,
           windowId: window.windowId,
@@ -571,9 +795,39 @@ export function getNationMatches(state: InternationalState, code: string): Natio
           home: isHome,
           goalsFor,
           goalsAgainst,
-          outcome: goalsFor > goalsAgainst ? "win" : goalsFor < goalsAgainst ? "loss" : "draw",
+          outcome,
           pointsChange: (isHome ? match.homeChange : match.awayChange) ?? 0,
-          kind: match.kind
+          kind: match.kind,
+          stage: match.kind === "goldCupGroup"
+            ? "Gold Cup GS"
+            : match.kind === "goldCupKnockout"
+              ? `Gold Cup ${match.goldCupKnockoutMatchId?.startsWith("QF") ? "QF"
+                : match.goldCupKnockoutMatchId?.startsWith("SF") ? "SF"
+                  : match.goldCupKnockoutMatchId === "F" ? "Final" : "Knockout"}`
+              : match.kind === "goldCupPlayoff"
+                ? `Gold Cup Playoff · Leg ${match.goldCupLeg ?? "—"}`
+                : match.kind === "copaAmericaGroup"
+                  ? "Copa América GS"
+                  : match.kind === "copaAmericaKnockout"
+                    ? `Copa América ${match.copaAmericaKnockoutMatchId?.startsWith("QF") ? "QF"
+                      : match.copaAmericaKnockoutMatchId?.startsWith("SF") ? "SF"
+                        : match.copaAmericaKnockoutMatchId === "F" ? "Final" : "Knockout"}`
+                : undefined,
+          penaltyShootout: shootoutFor && shootoutAgainst
+            ? {
+                goalsFor: shootoutFor.filter(kick => kick === "O").length,
+                goalsAgainst: shootoutAgainst.filter(kick => kick === "O").length
+              }
+            : undefined,
+          competitionLink: match.kind === "nationsLeague"
+            ? `/nations-league/${getNationConfederation(code)}`
+            : match.kind === "goldCupPlayoff"
+              ? "/gold-cup-playoff"
+              : match.kind === "goldCupGroup" || match.kind === "goldCupKnockout"
+                ? "/gold-cup"
+                : match.kind === "copaAmericaGroup" || match.kind === "copaAmericaKnockout"
+                  ? "/copa-america"
+                : undefined
         });
       }
     }

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useGame } from "../../store/gameStore";
-import { getNationClubs, getNationPlayers, getWorldRankings } from "../../engine/game";
+import { getAllSeasonViews, getNationClubs, getNationPlayers, getWorldRankings } from "../../engine/game";
 import { getConfederation, getNationName } from "../../engine/nations";
 import { getNationMatches, getNationRankingHistory } from "../../engine/international";
 import { LEAGUE_NAMES, seasonDisplay } from "../../engine/constants";
@@ -10,7 +10,7 @@ import {
 } from "../components/common";
 import { FlagIcon } from "../components/FlagIcon";
 
-type Tab = "overview" | "players" | "ranking" | "matches";
+type Tab = "overview" | "players" | "ranking" | "matches" | "history";
 
 /** Seasons of ranking history shown ("past 5 years"). */
 const RANKING_HISTORY_YEARS = 10;
@@ -163,7 +163,6 @@ function RankingTab(props: { code: string }) {
 
 function MatchesTab(props: { code: string }) {
   const game = useGame();
-  const confederation = getConfederation(props.code);
   const matches = getNationMatches(game.season.international, props.code);
   const years = [...new Set(matches.map(match => match.year))];
   if (!years.includes(game.season.year)) years.push(game.season.year);
@@ -183,17 +182,24 @@ function MatchesTab(props: { code: string }) {
           <div className="overflow-x-auto">
             <table className="tbl">
               <thead>
-                <tr><th>Window</th><th>Competition</th><th>Opponent</th><th></th><th>Result</th><th className="num">Rating</th></tr>
+                <tr><th>Window</th><th>Competition</th><th>Stage</th><th>Opponent</th><th></th><th>Result</th><th className="num">Rating</th></tr>
               </thead>
               <tbody>
                 {rows.map((match, index) => (
                   <tr key={index}>
                     <td className="text-navy-200">{match.windowLabel}</td>
                     <td>
-                      {match.kind === "friendly" ? "Friendly" : match.kind === "nationsLeague" ? (
-                        <Link className="link" to={`/nations-league/${confederation}`}>Nations League</Link>
+                      {match.kind === "friendly" ? "Friendly" : match.competitionLink ? (
+                        <Link className="link" to={match.competitionLink}>
+                          {match.kind === "nationsLeague" ? "Nations League"
+                            : match.kind === "goldCupPlayoff" ? "Gold Cup Playoff"
+                              : match.kind === "copaAmericaGroup" || match.kind === "copaAmericaKnockout"
+                                ? "Copa América"
+                                : "Gold Cup"}
+                        </Link>
                       ) : match.kind}
                     </td>
+                    <td className="text-xs text-navy-300">{match.stage ?? "–"}</td>
                     <td><NationLink code={match.opponent} /></td>
                     <td className="text-xs text-navy-300">{match.home ? "H" : "A"}</td>
                     <td className="tabular-nums">
@@ -201,6 +207,11 @@ function MatchesTab(props: { code: string }) {
                         {match.outcome === "win" ? "W" : match.outcome === "loss" ? "L" : "D"}
                       </span>
                       {match.goalsFor}-{match.goalsAgainst}
+                      {match.penaltyShootout && (
+                        <span className="ml-1.5 text-navy-300">
+                          ({match.penaltyShootout.goalsFor}-{match.penaltyShootout.goalsAgainst} PSO)
+                        </span>
+                      )}
                     </td>
                     <td className={`num ${match.pointsChange > 0 ? "text-accent-yellow" : "text-navy-300"}`}>{signed(match.pointsChange)}</td>
                   </tr>
@@ -211,6 +222,44 @@ function MatchesTab(props: { code: string }) {
         )}
       </Panel>
     </div>
+  );
+}
+
+function NationHistoryTab(props: { code: string }) {
+  const game = useGame();
+  const trophies = getAllSeasonViews(game).flatMap(archive => [
+    ...(archive.goldCup?.completed && archive.goldCup.winner === props.code
+      ? [{ name: "Gold Cup Winners", year: archive.goldCup.year + 1 }]
+      : []),
+    ...(archive.copaAmerica?.completed && archive.copaAmerica.winner === props.code
+      ? [{ name: "Copa América Winners", year: archive.copaAmerica.year + 1 }]
+      : [])
+  ]).sort((a, b) => b.year - a.year);
+  const grouped = new Map<string, number[]>();
+  for (const trophy of trophies) {
+    const years = grouped.get(trophy.name) ?? [];
+    years.push(trophy.year);
+    grouped.set(trophy.name, years);
+  }
+
+  return (
+    <Panel title={`Trophies (${trophies.length})`}>
+      {trophies.length === 0 ? <Empty>No trophies won yet.</Empty> : (
+        <div className="divide-y divide-navy-700/60">
+          {[...grouped.entries()].map(([name, years]) => (
+            <div key={name} className="flex items-center gap-4 px-4 py-3">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-accent-yellow font-bold text-navy-950">
+                {years.length}
+              </span>
+              <div>
+                <div className="font-semibold">{name}</div>
+                <div className="text-xs text-navy-300">{years.join(", ")}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </Panel>
   );
 }
 
@@ -250,7 +299,8 @@ export default function NationPage() {
           { id: "overview", label: "Overview" },
           { id: "players", label: "Best players" },
           { id: "ranking", label: "Ranking history" },
-          { id: "matches", label: "Match history" }
+          { id: "matches", label: "Match history" },
+          { id: "history", label: "History" }
         ]}
         value={tab}
         onChange={setTab}
@@ -312,6 +362,7 @@ export default function NationPage() {
       {tab === "players" && <PlayersTab code={code} />}
       {tab === "ranking" && <RankingTab code={code} />}
       {tab === "matches" && <MatchesTab code={code} />}
+      {tab === "history" && <NationHistoryTab code={code} />}
     </div>
   );
 }

@@ -39,6 +39,8 @@ Run `npm run typecheck` to check TypeScript or `npm run build` to create a produ
 - International windows follow the four-year confederation schedule in `team_windows.csv`. Nations League
   editions use the configured draw pots, home-and-away group fixtures, ranking-point importance, and
   promotion/relegation; their standings and edition history are available from the International Windows page.
+  The schedule also runs the CONCACAF Gold Cup and its qualifying playoff, plus the four-year Copa América
+  with CONMEBOL teams, Gold Cup semi-finalists, and the highest-ranked remaining CONCACAF teams.
 - God Mode can add players to free agency or another club through the Add Player page, with potential up
   to 99. It is available in Observer Mode as well, where it is limited to adding players to other clubs
   or free agency. The Add Team page can add non-English clubs to the appropriate European or continental

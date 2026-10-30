@@ -1,0 +1,20 @@
+{
+  "GC": [
+    "USA",
+    "MEX",
+    "CAN",
+    "CRC|PAN",
+    "JAM|HAI"
+  ],
+  "COPA": [
+    "BRA",
+    "ARG",
+    "COL",
+    "ECU",
+    "CHI",
+    "BOL",
+    "PAR",
+    "PER",
+    "URU"
+  ]
+}

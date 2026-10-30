@@ -5,5 +5,10 @@
   "continentalGroup": 35,
   "continentalKnockout": 40,
   "worldCupGroup": 50,
-  "worldCupKnockout": 60
+  "worldCupKnockout": 60,
+  "goldCupPlayoff": 25,
+  "goldCupGroup": 35,
+  "goldCupKnockout": 40,
+  "copaAmericaGroup": 35,
+  "copaAmericaKnockout": 40
 }

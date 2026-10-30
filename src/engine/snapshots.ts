@@ -12,6 +12,9 @@ import { CLUB_WORLD_CUP_NAME } from "./clubWorldCup";
 import type { ClubWorldCup } from "./clubWorldCup";
 import { CONTINENTAL_TOURNAMENT_MATCHDAY } from "./continentalTournaments";
 import type { ContinentalTournament } from "./continentalTournaments";
+import type { GoldCupEdition, GoldCupPlayoffEdition } from "./goldCup";
+import type { CopaAmericaEdition } from "./copaAmerica";
+import type { InternationalMatch } from "./international";
 
 // ---------------------------------------------------------------------------
 // Plain-data snapshot types. Snapshots never reference live engine objects, so a
@@ -212,6 +215,9 @@ export interface SeasonArchive {
   european: Record<string, EuroSnap> | null;
   clubWorldCup?: ClubWorldCupSnap | null;
   continentalTournaments?: Record<string, ContinentalTournamentSnap>;
+  goldCup?: GoldCupEdition | null;
+  goldCupPlayoff?: GoldCupPlayoffEdition | null;
+  copaAmerica?: CopaAmericaEdition | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -561,7 +567,66 @@ export function snapshotSeason(season: Season): SeasonArchive {
     cup: snapshotCup(season),
     european: snapshotEuropean(season),
     clubWorldCup: snapshotClubWorldCup(season.clubWorldCup),
-    continentalTournaments: snapshotContinentalTournaments(season.continentalTournaments)
+    continentalTournaments: snapshotContinentalTournaments(season.continentalTournaments),
+    goldCup: snapshotGoldCup(season.international.goldCup.editions.find(edition => edition.year === season.year) ?? null),
+    goldCupPlayoff: snapshotGoldCupPlayoff(
+      season.international.goldCup.playoffEditions.find(edition => edition.year === season.year) ?? null
+    ),
+    copaAmerica: snapshotCopaAmerica(
+      season.international.copaAmerica.editions.find(edition => edition.year === season.year) ?? null
+    )
+  };
+}
+
+function snapshotInternationalMatch(match: InternationalMatch): InternationalMatch {
+  return {
+    ...match,
+    homePenalties: match.homePenalties ? [...match.homePenalties] : undefined,
+    awayPenalties: match.awayPenalties ? [...match.awayPenalties] : undefined
+  };
+}
+
+function snapshotGoldCup(edition: GoldCupEdition | null): GoldCupEdition | null {
+  if (!edition) return null;
+  return {
+    ...edition,
+    hosts: [...edition.hosts],
+    teams: [...edition.teams],
+    pots: edition.pots.map(pot => [...pot]),
+    seedRanks: { ...edition.seedRanks },
+    groups: edition.groups.map(group => ({
+      ...group,
+      teams: [...group.teams],
+      matches: group.matches.map(round => round.map(snapshotInternationalMatch))
+    })),
+    knockout: edition.knockout?.map(round => ({
+      ...round,
+      matches: round.matches.map(match => ({
+        ...match,
+        fixture: snapshotInternationalMatch(match.fixture)
+      }))
+    })) ?? null,
+    semifinalists: [...edition.semifinalists]
+  };
+}
+
+function snapshotCopaAmerica(edition: CopaAmericaEdition | null): CopaAmericaEdition | null {
+  return snapshotGoldCup(edition);
+}
+
+function snapshotGoldCupPlayoff(edition: GoldCupPlayoffEdition | null): GoldCupPlayoffEdition | null {
+  if (!edition) return null;
+  return {
+    ...edition,
+    directQualifiers: [...edition.directQualifiers],
+    entrants: [...edition.entrants],
+    qualifiers: [...edition.qualifiers],
+    ties: edition.ties.map(tie => ({
+      ...tie,
+      firstLeg: snapshotInternationalMatch(tie.firstLeg),
+      secondLeg: snapshotInternationalMatch(tie.secondLeg),
+      penalties: tie.penalties ? { home: [...tie.penalties.home], away: [...tie.penalties.away] } : null
+    }))
   };
 }
 

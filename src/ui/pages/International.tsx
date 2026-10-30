@@ -37,6 +37,9 @@ function WindowView(props: { window: WindowRecord }) {
     round.kind === "friendly" || (!round.kind && round.matches.every(match => match.kind === "friendly"))
   );
   const nationsLeagueRounds = window.rounds.filter(round => round.kind === "nationsLeague");
+  const goldCupPlayoffRounds = window.rounds.filter(round => round.kind === "goldCupPlayoff");
+  const goldCupRounds = window.rounds.filter(round => round.kind === "goldCup");
+  const copaAmericaRounds = window.rounds.filter(round => round.kind === "copaAmerica");
 
   const renderRounds = (rounds: typeof window.rounds, separateByConfederation = false) =>
     rounds.map((round, index) => {
@@ -93,6 +96,24 @@ function WindowView(props: { window: WindowRecord }) {
           {renderRounds(nationsLeagueRounds, true)}
         </section>
       )}
+      {goldCupPlayoffRounds.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">Gold Cup Playoff</h2>
+          {renderRounds(goldCupPlayoffRounds)}
+        </section>
+      )}
+      {goldCupRounds.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">Gold Cup</h2>
+          {renderRounds(goldCupRounds)}
+        </section>
+      )}
+      {copaAmericaRounds.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">Copa América</h2>
+          {renderRounds(copaAmericaRounds)}
+        </section>
+      )}
     </div>
   );
 }
@@ -113,7 +134,7 @@ export default function International() {
     <div>
       <PageHeader
         title="International Windows"
-        subtitle="Friendlies and Nations League matches played during international breaks"
+        subtitle="Friendlies and continental competition matches played during international breaks"
         right={
           <SeasonSelect
             years={years.map(y => ({ year: y, label: seasonDisplay(y) }))}

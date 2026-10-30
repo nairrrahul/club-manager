@@ -22,6 +22,9 @@ import AddTeam from "./ui/pages/AddTeam";
 import ClubWorldCupPage from "./ui/pages/ClubWorldCupPage";
 import ContinentalTournamentsPage from "./ui/pages/ContinentalTournamentsPage";
 import NationsLeaguePage from "./ui/pages/NationsLeaguePage";
+import GoldCupPage from "./ui/pages/GoldCupPage";
+import GoldCupPlayoffPage from "./ui/pages/GoldCupPlayoffPage";
+import CopaAmericaPage from "./ui/pages/CopaAmericaPage";
 
 export default function App() {
   useGameStore(state => state.tick);
@@ -43,6 +46,9 @@ export default function App() {
         <Route path="/nation/:code" element={<NationPage />} />
         <Route path="/international" element={<International />} />
         <Route path="/nations-league/:confederation" element={<NationsLeaguePage />} />
+        <Route path="/gold-cup" element={<GoldCupPage />} />
+        <Route path="/gold-cup-playoff" element={<GoldCupPlayoffPage />} />
+        <Route path="/copa-america" element={<CopaAmericaPage />} />
         <Route path="/add-player" element={game.godMode ? <AddPlayer /> : <Navigate to="/" replace />} />
         <Route path="/add-team" element={game.godMode ? <AddTeam /> : <Navigate to="/" replace />} />
         <Route path="/player/:id" element={<PlayerPage />} />

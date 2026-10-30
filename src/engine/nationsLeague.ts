@@ -8,12 +8,19 @@ import type { InternationalMatch } from "./international";
 import { Team } from "./team";
 
 type NationsLeagueCompetition = "NL1" | "NL2";
-type WindowType = "FR" | NationsLeagueCompetition;
+type WindowType = "FR" | NationsLeagueCompetition | "GCPO" | "GC" | "COPA";
 
 interface InitialDivision {
   numUp: number;
   numDown: number;
   [pot: string]: number | string[];
+}
+
+export function getGoldCupWindowType(year: number, windowId: string): "GCPO" | "GC" | null {
+  const type = typeAt("CONCACAF", globalWindowIndex(year, windowId));
+  if (type.startsWith("GCPO")) return "GCPO";
+  if (type.startsWith("GC")) return "GC";
+  return null;
 }
 
 interface NationsLeagueInitialAllocations {
@@ -67,7 +74,6 @@ export interface NationsLeagueState {
 const initialAllocations = initialAllocationsRaw as NationsLeagueInitialAllocations;
 const WINDOW_COUNT_PER_YEAR = 6;
 const CYCLE_WINDOW_COUNT = 24;
-const EDITION_WINDOW_COUNT = 4;
 
 function parseTeamWindows(csv: string): Map<string, WindowType[]> {
   const rows = csv.trim().split(/\r?\n/).map(line => line.split(",").map(cell => cell.trim()));
@@ -77,10 +83,13 @@ function parseTeamWindows(csv: string): Map<string, WindowType[]> {
       throw new Error(`team_windows.csv row ${rowIndex + 1} must contain a confederation and 24 window types.`);
     }
     const types = values.map(value => {
-      if (value !== "FR" && value !== "NL1" && value !== "NL2") {
+      if (value !== "FR" && value !== "NL1" && value !== "NL2" &&
+        !/^GCPO[12]?$/.test(value) && !/^GC[12]?$/.test(value) && value !== "COPA") {
         throw new Error(`Unknown team_windows.csv window type "${value}" for ${confederation}.`);
       }
-      return value;
+      if (value.startsWith("GCPO")) return "GCPO";
+      if (value.startsWith("GC")) return "GC";
+      return value as WindowType;
     });
     parsed.set(confederation, types);
   }
@@ -115,6 +124,13 @@ function typeAt(confederation: string, index: number): WindowType {
   if (!types) throw new Error(`No team-window schedule is configured for ${confederation}.`);
   const cycleIndex = ((index % CYCLE_WINDOW_COUNT) + CYCLE_WINDOW_COUNT) % CYCLE_WINDOW_COUNT;
   return types[cycleIndex];
+}
+
+function competitionWindowCount(confederation: string, startWindowIndex: number, competition: NationsLeagueCompetition): number {
+  let count = 0;
+  while (count < CYCLE_WINDOW_COUNT && typeAt(confederation, startWindowIndex + count) === competition) count++;
+  if (count === 0) throw new Error(`No international windows are assigned to ${competition} for ${confederation}.`);
+  return count;
 }
 
 export function getInternationalWindowType(confederation: string, year: number, windowId: string): WindowType {
@@ -175,6 +191,7 @@ function createEdition(
   const matches: InternationalMatch[] = [];
   const currentDivisions = state.divisions[confederation];
   const currentPots = state.pots[confederation];
+  const competitionWindowCountForEdition = competitionWindowCount(confederation, startWindowIndex, competition);
   if (!currentDivisions || !currentPots) {
     throw new Error(`Nations League divisions are not initialized for ${confederation}.`);
   }
@@ -189,8 +206,8 @@ function createEdition(
       rounds.forEach(([roundValue, fixtures]) => {
         const round = Number(roundValue);
         const windowSlot = Math.min(
-          EDITION_WINDOW_COUNT - 1,
-          Math.floor((round - 1) * EDITION_WINDOW_COUNT / rounds.length)
+          competitionWindowCountForEdition - 1,
+          Math.floor((round - 1) * competitionWindowCountForEdition / rounds.length)
         );
         const location = windowLocation(startWindowIndex + windowSlot);
         for (const fixture of fixtures) {
@@ -233,7 +250,7 @@ function createEdition(
 
 function isFirstCompetitionWindow(confederation: string, index: number): boolean {
   const type = typeAt(confederation, index);
-  return type !== "FR" && typeAt(confederation, index - 1) !== type;
+  return (type === "NL1" || type === "NL2") && typeAt(confederation, index - 1) !== type;
 }
 
 /** Draws the groups in the international window immediately before a new edition starts. */
@@ -243,7 +260,7 @@ export function prepareNationsLeagueDraws(state: NationsLeagueState, year: numbe
   for (const confederation of Object.keys(initialAllocations)) {
     if (!isFirstCompetitionWindow(confederation, startWindowIndex)) continue;
     const competition = typeAt(confederation, startWindowIndex);
-    if (competition === "FR") continue;
+    if (competition !== "NL1" && competition !== "NL2") continue;
     const cycle = Math.floor(startWindowIndex / CYCLE_WINDOW_COUNT);
     const id = `${confederation}-${competition}-${cycle}`;
     if (state.editions.some(edition => edition.id === id)) continue;
@@ -259,7 +276,7 @@ export function getNationsLeagueRoundsForWindow(
 ): { edition: NationsLeagueEdition; rounds: { label: string; matches: InternationalMatch[] }[] } | null {
   const index = globalWindowIndex(year, windowId);
   const competition = typeAt(confederation, index);
-  if (competition === "FR") return null;
+  if (competition !== "NL1" && competition !== "NL2") return null;
   const edition = [...state.editions].reverse().find(candidate =>
     candidate.confederation === confederation &&
     candidate.competition === competition &&
