@@ -356,11 +356,16 @@ export function applySeasonOverallChanges(season: Season): OverallChange[] {
 
       const randNum = Math.floor(Math.random() * 10000) + 1;
 
-      if (team.BaseOverall < 75 && randNum < 5) {
-        change += 5;
+      if (team.BaseOverall < 75 && randNum < 15) {
+        if(Number(tier) > 3) {
+          change += Math.floor(Math.random()*4) + 5;
+        }
+        else{
+          change += 5;
+        }
         reasons.push("Tycoon Takeover");
         applyOwnershipRatingChange(team, "tycoon");
-      } else if (team.BaseOverall < 80 && randNum >= 5 && randNum < 100) {
+      } else if (team.BaseOverall < 80 && randNum >= 15 && randNum < 100) {
         change += 2;
         reasons.push("New, Steady Ownership Group");
         applyOwnershipRatingChange(team, "steady");

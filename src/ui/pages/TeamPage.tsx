@@ -19,10 +19,10 @@ import { ordinal } from "../format";
 
 type Tab = "overview" | "players" | "fixtures" | "history";
 
-function GodRating(props: { label: string; value: number; which: "scouting" | "experience" | "training" }) {
+function GodRating(props: { teamID: number; label: string; value: number; which: "scouting" | "experience" | "training" }) {
   const setRating = useGameStore(s => s.godRating);
   return (
-    <select className="input py-0.5 text-xs" value={props.value} onChange={e => setRating(props.which, Number(e.target.value))} aria-label={`Set ${props.label}`}>
+    <select className="input py-0.5 text-xs" value={props.value} onChange={e => setRating(props.teamID, props.which, Number(e.target.value))} aria-label={`Set ${props.label}`}>
       {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}</option>)}
     </select>
   );
@@ -314,21 +314,21 @@ export default function TeamPage() {
                 <dt className="text-navy-300">Training facilities</dt>
                 <dd className="flex items-center gap-3">
                   <RatingDots value={profile.facilityRating} />
-                  {profile.isManaged && game.godMode && <GodRating label="training rating" value={profile.facilityRating} which="training" />}
+                  {game.godMode && <GodRating teamID={teamID} label="training rating" value={profile.facilityRating} which="training" />}
                 </dd>
               </div>
               <div className="flex items-center justify-between px-5 py-2.5">
                 <dt className="text-navy-300">Youth scouting rating</dt>
                 <dd className="flex items-center gap-3">
                   <RatingDots value={profile.scoutingRating} />
-                  {profile.isManaged && game.godMode && <GodRating label="scouting rating" value={profile.scoutingRating} which="scouting" />}
+                  {game.godMode && <GodRating teamID={teamID} label="scouting rating" value={profile.scoutingRating} which="scouting" />}
                 </dd>
               </div>
               <div className="flex items-center justify-between px-5 py-2.5">
                 <dt className="text-navy-300">Youth scouting experience</dt>
                 <dd className="flex items-center gap-3">
                   <RatingDots value={profile.scoutingExperience} />
-                  {profile.isManaged && game.godMode && <GodRating label="scouting experience" value={profile.scoutingExperience} which="experience" />}
+                  {game.godMode && <GodRating teamID={teamID} label="scouting experience" value={profile.scoutingExperience} which="experience" />}
                 </dd>
               </div>
             </dl>

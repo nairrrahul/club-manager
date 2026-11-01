@@ -71,7 +71,10 @@ export interface EuropeanCompetition {
 }
 
 function weightedPickIndex(teams: Team[]): number {
-  const weights = teams.map(team => Math.max(1, Math.pow(Math.max(1, team.BaseOverall - 50), 3)));
+  const weights = teams.map(team => {
+    const overall = team.BaseOverall + (team.playerBonus ?? 0);
+    return Math.max(1, Math.pow(Math.max(1, overall - 50), 3));
+  });
   const total = weights.reduce((sum, weight) => sum + weight, 0);
   let random = Math.random() * total;
 
@@ -175,10 +178,18 @@ function getEnglandQualifiedTeams(previousSeason: Season): Entrants {
   return result;
 }
 
-function allocateForeignCountry(countryCode: string, customTeams: Team[]): Entrants {
+function allocateForeignCountry(
+  countryCode: string,
+  customTeams: Team[],
+  clubPlayers: Season["freeAgents"]["clubPlayers"]
+): Entrants {
   const teams = getForeignPoolTeams(countryCode, customTeams);
   const allocation = europeanAllocations[countryCode];
   if (!allocation) return { UCL: [], UEL: [], UECL: [] };
+
+  for (const team of teams) {
+    team.playerBonus = clubStarBonus(clubPlayers, team.ID, team.BaseOverall);
+  }
 
   const guaranteed: string[] = europeanAllocations.guaranteedUCL?.[countryCode] ?? [];
   const ranked = weightedRankTeams(teams, guaranteed);
@@ -282,7 +293,9 @@ function applyEuropeanChampionQualification(
         .filter(team =>
           !protectedIDs.has(team.ID) && team.isEuropeanGuest && !guaranteedNames.includes(team.Team)
         )
-        .sort((a, b) => a.BaseOverall - b.BaseOverall)[0];
+        .sort((a, b) =>
+          a.BaseOverall + (a.playerBonus ?? 0) - b.BaseOverall - (b.playerBonus ?? 0)
+        )[0];
     }
     if (!victim) throw new Error(`Unable to find a team to swap out of the ${target} for the champion.`);
 
@@ -326,7 +339,11 @@ function buildEuropeanEntrants(previousSeason: Season): Entrants {
 
   const poolGroups = [...new Set(Object.keys(europeanTeamPool))];
   for (const countryCode of poolGroups) {
-    const allocation = allocateForeignCountry(countryCode, previousSeason.customTeams ?? []);
+    const allocation = allocateForeignCountry(
+      countryCode,
+      previousSeason.customTeams ?? [],
+      previousSeason.freeAgents.clubPlayers
+    );
     for (const competition of Object.keys(entrants) as (keyof Entrants)[]) {
       entrants[competition].push(...allocation[competition]);
       allocation[competition].forEach(team => groupOf.set(team.ID, countryCode));
@@ -349,7 +366,8 @@ function buildEuropeanEntrants(previousSeason: Season): Entrants {
 
 function createPots(teams: Team[]): Team[][] {
   const ranked = [...teams].sort((a, b) =>
-    b.BaseOverall - a.BaseOverall || a.Team.localeCompare(b.Team)
+    b.BaseOverall + (b.playerBonus ?? 0) - a.BaseOverall - (a.playerBonus ?? 0) ||
+    a.Team.localeCompare(b.Team)
   );
 
   return Array.from({ length: 4 }, (_, index) =>

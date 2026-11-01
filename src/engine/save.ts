@@ -54,8 +54,9 @@ export const SAVE_FORMAT = "soccer-season-simulator-save";
  * v15: persists custom teams added through God Mode.
  * v16: adds CONCACAF Gold Cup and Gold Cup Playoff state.
  * v17: adds Copa América state.
+ * v18: persists God Mode club rating overrides.
  */
-export const SAVE_VERSION = 17;
+export const SAVE_VERSION = 18;
 
 export interface SaveMeta {
   mode: "manager" | "observer";
@@ -81,6 +82,7 @@ interface GameRoot {
   mode: "manager" | "observer";
   managerTeam: Team | null;
   godMode: boolean;
+  clubRatingOverrides?: Game["clubRatingOverrides"];
 }
 
 type Kind = "array" | "plain" | "team";
@@ -301,7 +303,13 @@ export function compareGraphs(a: unknown, b: unknown): string | null {
 // ---------------------------------------------------------------------------
 
 function gameRoot(game: Game): GameRoot {
-  return { season: game.season, mode: game.mode, managerTeam: game.managerTeam, godMode: game.godMode };
+  return {
+    season: game.season,
+    mode: game.mode,
+    managerTeam: game.managerTeam,
+    godMode: game.godMode,
+    clubRatingOverrides: game.clubRatingOverrides
+  };
 }
 
 export function gameToSave(game: Game): SaveFile {
@@ -380,7 +388,13 @@ function validateRoot(root: unknown): GameRoot {
     !!season.international.nationsLeague.divisions && !!season.international.nationsLeague.pots &&
     Array.isArray(season.international.nationsLeague.editions);
   if (!valid) throw new Error("The save file is corrupted: the game data is missing or inconsistent.");
-  return { season: season!, mode, managerTeam: team as Team | null, godMode: candidate!.godMode === true };
+  return {
+    season: season!,
+    mode,
+    managerTeam: team as Team | null,
+    godMode: candidate!.godMode === true,
+    clubRatingOverrides: candidate!.clubRatingOverrides ?? {}
+  };
 }
 
 /**
@@ -637,9 +651,9 @@ export function gameFromSave(file: SaveFile): Game {
     }
     schedulePlayerRetirements(loadedSeason);
   }
-  const { season, managerTeam, mode, godMode } = validateRoot(root);
+  const { season, managerTeam, mode, godMode, clubRatingOverrides } = validateRoot(root);
   resetTeamDirectory(season.customTeams);
-  return { season, managerTeam, mode, godMode, version: 0, liveCache: null };
+  return { season, managerTeam, mode, godMode, clubRatingOverrides: clubRatingOverrides ?? {}, version: 0, liveCache: null };
 }
 
 /**

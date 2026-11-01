@@ -2,7 +2,7 @@ import windowsRaw from "./data/international_windows.json";
 import importanceRaw from "./data/match_importance.json";
 import { nationInfo, getNationName } from "./nations";
 import { parseKOMatchWinner, simulateMatch, simulatePenaltyShootoutOnly } from "./matchEngine";
-import { SEASON_END_MATCHDAY } from "./constants";
+import { SEASON_END_MATCHDAY, SEASON_START_YEAR } from "./constants";
 import { STAR_PLAYER_FACTOR, starBonus } from "./squadStrength";
 import { POSITION_GROUP } from "./formation";
 import {
@@ -15,7 +15,7 @@ import {
   createGoldCupState, findLatestGoldCupPlayoff, getGoldCupPlayoff,
   resolveGoldCupPlayoffTie, setInternationalCupKnockoutWinner
 } from "./goldCup";
-import type { GoldCupState } from "./goldCup";
+import type { GoldCupEdition, GoldCupState } from "./goldCup";
 import {
   createCopaAmericaEdition, createCopaAmericaState
 } from "./copaAmerica";
@@ -40,6 +40,85 @@ export const WINDOW_DEFS: WindowDef[] = (windowsRaw as { windows: WindowDef[] })
 /** FIFA-style match importance coefficients (I in the ranking formula). */
 export const MATCH_IMPORTANCE = importanceRaw as Record<string, number>;
 export type MatchKind = keyof typeof importanceRaw;
+
+interface LocatedWindow {
+  year: number;
+  def: WindowDef;
+  offset: number;
+}
+
+function findUpcomingWindow(
+  year: number,
+  windowId: string,
+  matches: (year: number, def: WindowDef) => boolean
+): LocatedWindow | null {
+  const currentIndex = WINDOW_DEFS.findIndex(def => def.id === windowId);
+  if (currentIndex === -1) throw new Error(`Unknown international window ID "${windowId}".`);
+
+  for (let offset = 1; offset <= WINDOW_DEFS.length * 4; offset++) {
+    const absoluteIndex = (year - SEASON_START_YEAR) * WINDOW_DEFS.length + currentIndex + offset;
+    const candidateYear = SEASON_START_YEAR + Math.floor(absoluteIndex / WINDOW_DEFS.length);
+    const candidateDef = WINDOW_DEFS[absoluteIndex % WINDOW_DEFS.length];
+    if (matches(candidateYear, candidateDef)) return { year: candidateYear, def: candidateDef, offset };
+  }
+  return null;
+}
+
+function createCupGroupRounds(
+  edition: GoldCupEdition,
+  competition: "goldCup" | "copaAmerica"
+): InternationalRound[] {
+  return [0, 1, 2].map(roundIndex => ({
+    kind: competition,
+    label: `${competition === "goldCup" ? "Gold Cup" : "Copa América"} · Group stage · Matchday ${roundIndex + 1}`,
+    leftOut: null,
+    matches: edition.groups.flatMap(group => group.matches[roundIndex])
+  }));
+}
+
+function drawGoldCupAfterPlayoff(
+  state: InternationalState,
+  playoffId: string,
+  year: number,
+  windowId: string
+): void {
+  const playoff = getGoldCupPlayoff(state.goldCup, playoffId);
+  const tournamentWindow = findUpcomingWindow(year, windowId, (candidateYear, candidateDef) =>
+    getGoldCupWindowType(candidateYear, candidateDef.id) === "GC"
+  );
+  if (!tournamentWindow) throw new Error(`No Gold Cup tournament window follows playoff "${playoffId}".`);
+
+  const worldRanks = Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]));
+  createGoldCupEdition(
+    state.goldCup,
+    playoffId,
+    playoff.directQualifiers,
+    tournamentWindow.year,
+    tournamentWindow.def.id,
+    tournamentWindow.def.afterMatchday,
+    worldRanks
+  );
+}
+
+function drawCopaAmericaIfDue(state: InternationalState, year: number, windowId: string): void {
+  const tournamentWindow = findUpcomingWindow(year, windowId, (candidateYear, candidateDef) =>
+    getInternationalWindowType("CONMEBOL", candidateYear, candidateDef.id) === "COPA"
+  );
+  if (!tournamentWindow || tournamentWindow.offset !== 2) return;
+  if (state.copaAmerica.editions.some(edition =>
+    edition.year === tournamentWindow.year && edition.windowId === tournamentWindow.def.id
+  )) return;
+
+  const worldRanks = Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]));
+  createCopaAmericaEdition(
+    state.copaAmerica,
+    state.goldCup,
+    tournamentWindow.year,
+    tournamentWindow.def.id,
+    tournamentWindow.def.afterMatchday,
+    worldRanks
+  );
+}
 
 // ---------------------------------------------------------------------------
 // State
@@ -440,23 +519,41 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
   // Confederations use the window type assigned to this position in the four-year cycle.
   const rounds: InternationalRound[] = [];
   const played = new Set<string>();
-  const copaAmericaRounds: InternationalRound[] = [];
   let copaAmericaTeams: string[] = [];
-  if (getInternationalWindowType("CONMEBOL", season.year, def.id) === "COPA") {
+  const goldCupWindowType = getGoldCupWindowType(season.year, def.id);
+  let goldCupPlayoff: ReturnType<typeof createGoldCupPlayoffEdition> | null = null;
+  if (goldCupWindowType === "GCPO") {
+    const nationsLeagueEdition = latestCompletedConcacafNationsLeague(state);
     const worldRanks = Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]));
-    const created = createCopaAmericaEdition(
-      state.copaAmerica,
-      state.goldCup,
+    goldCupPlayoff = createGoldCupPlayoffEdition(
+      nationsLeagueEdition,
       season.year,
       def.id,
       def.afterMatchday,
       worldRanks
     );
-    copaAmericaTeams = created.edition.teams;
-    copaAmericaRounds.push(...created.rounds);
+  }
+  if (getInternationalWindowType("CONMEBOL", season.year, def.id) === "COPA") {
+    let edition = state.copaAmerica.editions.find(item => item.year === season.year && item.windowId === def.id);
+    if (!edition) {
+      const worldRanks = Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]));
+      edition = createCopaAmericaEdition(
+        state.copaAmerica,
+        state.goldCup,
+        season.year,
+        def.id,
+        def.afterMatchday,
+        worldRanks
+      ).edition;
+    }
+    copaAmericaTeams = edition.teams;
+    rounds.push(...createCupGroupRounds(edition, "copaAmerica"));
   }
   const friendlyNations = Object.keys(state.nations).filter(code =>
-    getInternationalWindowType(getNationConfederation(code), season.year, def.id) === "FR" &&
+    (getInternationalWindowType(getNationConfederation(code), season.year, def.id) === "FR" ||
+      (goldCupPlayoff !== null &&
+        getNationConfederation(code) === "CONCACAF" &&
+        !goldCupPlayoff.edition.entrants.includes(code))) &&
     !copaAmericaTeams.includes(code)
   );
   if (friendlyNations.length > 1) {
@@ -489,41 +586,27 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
     }
   }
   rounds.push(...nationsLeagueRounds.values());
-  rounds.push(...copaAmericaRounds);
 
-  const goldCupWindowType = getGoldCupWindowType(season.year, def.id);
-  if (goldCupWindowType === "GCPO") {
-    const nationsLeagueEdition = latestCompletedConcacafNationsLeague(state);
-    const worldRanks = Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]));
-    const created = createGoldCupPlayoffEdition(
-      nationsLeagueEdition,
-      season.year,
-      def.id,
-      def.afterMatchday,
-      worldRanks
-    );
-    state.goldCup.playoffEditions.push(created.edition);
-    rounds.push(...created.rounds);
+  if (goldCupPlayoff) {
+    state.goldCup.playoffEditions.push(goldCupPlayoff.edition);
+    rounds.push(...goldCupPlayoff.rounds);
   } else if (goldCupWindowType === "GC") {
-    const playoff = findLatestGoldCupPlayoff(state.goldCup);
-    if (!playoff) throw new Error("A completed Gold Cup playoff is required before the Gold Cup draw.");
-    const nationsLeagueEdition = state.nationsLeague.editions.find(
-      edition => edition.id === playoff.nationsLeagueEditionId
-    );
-    if (!nationsLeagueEdition || nationsLeagueEdition.status !== "complete") {
-      throw new Error(`The Nations League edition for Gold Cup playoff "${playoff.id}" is unavailable.`);
+    let edition = state.goldCup.editions.find(item => item.year === season.year && item.windowId === def.id);
+    if (!edition) {
+      const playoff = findLatestGoldCupPlayoff(state.goldCup);
+      if (!playoff) throw new Error("A completed Gold Cup playoff is required before the Gold Cup draw.");
+      const worldRanks = Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]));
+      edition = createGoldCupEdition(
+        state.goldCup,
+        playoff.id,
+        playoff.directQualifiers,
+        season.year,
+        def.id,
+        def.afterMatchday,
+        worldRanks
+      ).edition;
     }
-    const worldRanks = Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]));
-    const created = createGoldCupEdition(
-      state.goldCup,
-      playoff.id,
-      playoff.directQualifiers,
-      season.year,
-      def.id,
-      def.afterMatchday,
-      worldRanks
-    );
-    rounds.push(...created.rounds);
+    rounds.push(...createCupGroupRounds(edition, "goldCup"));
   }
 
   const record: WindowRecord = {
@@ -673,7 +756,10 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
 
     if (round.kind === "goldCupPlayoff" && round.label?.endsWith("Second leg")) {
       const playoffId = round.matches[0]?.goldCupPlayoffId;
-      if (playoffId) completeGoldCupPlayoff(state.goldCup, playoffId);
+      if (playoffId) {
+        completeGoldCupPlayoff(state.goldCup, playoffId);
+        drawGoldCupAfterPlayoff(state, playoffId, window.year, window.windowId);
+      }
     }
     if (round.kind === "goldCup") {
       const match = round.matches[0];
@@ -711,6 +797,7 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
     }
   }
 
+  drawCopaAmericaIfDue(state, window.year, window.windowId);
   window.status = "played";
   completeNationsLeagueEditions(state.nationsLeague);
   state.rankingHistory.push({

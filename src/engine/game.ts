@@ -41,6 +41,7 @@ export interface Game {
   mode: "manager" | "observer";
   managerTeam: Team | null;
   godMode: boolean;
+  clubRatingOverrides: Record<number, Partial<Pick<TeamDirectoryEntry, "facilityRating" | "youthScouting" | "youthExperience">>>;
   /** Bumped by the store after every mutation; used to invalidate caches. */
   version: number;
   liveCache: { version: number; snap: SeasonArchive } | null;
@@ -172,7 +173,7 @@ export function createGame(teamID: number | null): Game {
     generateClubRegens(season);
     refreshAllClubOveralls(season);
     schedulePlayerRetirements(season);
-    return { season, mode: "observer", managerTeam: null, godMode: false, version: 0, liveCache: null };
+    return { season, mode: "observer", managerTeam: null, godMode: false, clubRatingOverrides: {}, version: 0, liveCache: null };
   }
   const team = getTeamFromSeason(season, teamID);
   if (!team) throw new Error(`No team found with ID ${teamID}.`);
@@ -183,7 +184,7 @@ export function createGame(teamID: number | null): Game {
   refreshAllClubOveralls(season);
   schedulePlayerRetirements(season);
 
-  return { season, mode: "manager", managerTeam: team, godMode: false, version: 0, liveCache: null };
+  return { season, mode: "manager", managerTeam: team, godMode: false, clubRatingOverrides: {}, version: 0, liveCache: null };
 }
 
 /** Snapshot of the in-progress season (cached per game version). */
@@ -267,9 +268,9 @@ export function getTeamProfile(game: Game, teamID: number) {
     // In-season overall (base + player-based bonus + form, whole number). A club that is not part of
     // this season's simulation has no form, so its resting overall is shown.
     overall: live ? base.Overall : clubRestingOverall(game.season.freeAgents.clubPlayers, entry.id, entry.baseOverall),
-    facilityRating: base.facilityRating,
-    scoutingRating: base.scoutingRating,
-    scoutingExperience: base.scoutingExperience,
+    facilityRating: game.clubRatingOverrides[teamID]?.facilityRating ?? base.facilityRating,
+    scoutingRating: game.clubRatingOverrides[teamID]?.youthScouting ?? base.scoutingRating,
+    scoutingExperience: game.clubRatingOverrides[teamID]?.youthExperience ?? base.scoutingExperience,
     isManaged: teamID === game.managerTeam?.ID,
     league,
     europe,
@@ -486,21 +487,27 @@ export function setGodMode(game: Game, enabled: boolean): void {
   game.godMode = enabled;
 }
 
-export function setGodRating(game: Game, which: "scouting" | "experience" | "training", rating: number): ActionResult {
+export function setGodRating(game: Game, teamID: number, which: "scouting" | "experience" | "training", rating: number): ActionResult {
   if (!game.godMode) return fail("God Mode is not enabled.");
-  const team = game.managerTeam;
-  if (!team) return fail("Club ratings are unavailable in Observer Mode.");
+  const directoryEntry = TEAM_DIRECTORY.get(teamID);
+  if (!directoryEntry) return fail("Club not found.");
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) return fail("Rating must be an integer from 1 to 5.");
+  const field = which === "scouting" ? "youthScouting" : which === "experience" ? "youthExperience" : "facilityRating";
+  game.clubRatingOverrides[teamID] = { ...game.clubRatingOverrides[teamID], [field]: rating };
+  const team = getLiveTeam(game, teamID);
+  if (team) {
+    if (which === "scouting") team.scoutingRating = rating;
+    else if (which === "experience") team.scoutingExperience = rating;
+    else team.facilityRating = rating;
+  }
+  const clubName = directoryEntry.name;
   if (which === "scouting") {
-    team.scoutingRating = rating;
-    return ok(`Youth scouting rating set to ${rating}.`);
+    return ok(`${clubName} youth scouting rating set to ${rating}.`);
   }
   if (which === "experience") {
-    team.scoutingExperience = rating;
-    return ok(`Youth scouting experience rating set to ${rating}.`);
+    return ok(`${clubName} youth scouting experience rating set to ${rating}.`);
   }
-  team.facilityRating = rating;
-  return ok(`Training rating set to ${rating}.`);
+  return ok(`${clubName} training facilities rating set to ${rating}.`);
 }
 
 export function godChangePosition(game: Game, playerID: string, position: Position): ActionResult {

@@ -64,7 +64,7 @@ interface GameStore {
   explicitClubWorldCup: (explicit: boolean) => void;
 
   godMode: (enabled: boolean) => void;
-  godRating: (which: "scouting" | "experience" | "training", rating: number) => void;
+  godRating: (teamID: number, which: "scouting" | "experience" | "training", rating: number) => void;
   godPosition: (playerID: string, position: Position) => void;
   godAddPlayer: (input: GodAddPlayerInput) => ActionResult & { playerID?: string };
   godAddTeam: (input: GodAddTeamInput) => ActionResult & { teamID?: number };
@@ -184,7 +184,7 @@ export const useGameStore = create<GameStore>()((set, get) => {
     godMode: enabled => {
       act(game => { setGodMode(game, enabled); return { ok: true, message: enabled ? "God Mode enabled." : "God Mode disabled." }; });
     },
-    godRating: (which, rating) => { act(game => setGodRating(game, which, rating)); },
+    godRating: (teamID, which, rating) => { act(game => setGodRating(game, teamID, which, rating)); },
     godPosition: (id, position) => { act(game => godChangePosition(game, id, position)); },
     godAddPlayer: input => {
       let playerID: string | undefined;

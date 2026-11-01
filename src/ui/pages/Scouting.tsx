@@ -9,12 +9,12 @@ import {
 import { Empty, NationTag, OvrBadge, PageHeader, Panel, PosBadge, RatingDots } from "../components/common";
 import type { Position } from "../../engine/types";
 
-function GodSelect(props: { value: number; which: "scouting" | "experience" | "training"; label: string }) {
+function GodSelect(props: { teamID: number; value: number; which: "scouting" | "experience" | "training"; label: string }) {
   const setRating = useGameStore(s => s.godRating);
   return (
     <label className="flex items-center gap-2 text-xs text-navy-200">
       {props.label}
-      <select className="input py-0.5 text-xs" value={props.value} onChange={e => setRating(props.which, Number(e.target.value))}>
+      <select className="input py-0.5 text-xs" value={props.value} onChange={e => setRating(props.teamID, props.which, Number(e.target.value))}>
         {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}</option>)}
       </select>
     </label>
@@ -249,9 +249,9 @@ export default function Scouting() {
           {game.godMode && (
             <Panel title="God Mode">
               <div className="p-4 space-y-3">
-                <GodSelect label="Scouting rating" which="scouting" value={team.scoutingRating} />
-                <GodSelect label="Scouting experience" which="experience" value={team.scoutingExperience} />
-                <GodSelect label="Training rating" which="training" value={team.facilityRating} />
+                <GodSelect teamID={team.ID} label="Scouting rating" which="scouting" value={team.scoutingRating} />
+                <GodSelect teamID={team.ID} label="Scouting experience" which="experience" value={team.scoutingExperience} />
+                <GodSelect teamID={team.ID} label="Training rating" which="training" value={team.facilityRating} />
               </div>
             </Panel>
           )}

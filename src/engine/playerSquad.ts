@@ -8,6 +8,7 @@ import type { Team } from "./team";
 import { openStint } from "./playerHistory";
 import { randInt, randomSortCopy } from "./utils";
 import type { PeakRange, Player, PlayerType, Position } from "./types";
+import { getConfederation } from "./nations";
 
 const tierPlayerInfo = tierPlayerInfoRaw as Record<string, Record<string, number>>;
 const tierPlayerAges = tierPlayerAgesRaw as Record<string, Record<string, number>>;
@@ -208,7 +209,9 @@ export function createRegenPlayer(
   club: { id: number; name: string; countryCode: string; scoutingRating: number; potentialShift: number }
 ): Player {
   const age = 17 + Math.floor(Math.random() * 4);
-  const nationality = Math.random() < 0.1
+  const confed = getConfederation(club.countryCode ?? "") ?? "UEFA";
+  const randProb = confed == "UEFA" ? 0.25 : 0.1;
+  const nationality = Math.random() < randProb
     ? getSecondaryNationality(club.countryCode) ?? club.countryCode
     : club.countryCode;
   const generated = generatePlayerName(nationality);

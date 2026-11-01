@@ -32,7 +32,7 @@ function buildZones(tier: number): { zones: LeagueZones; legend: { zone: string;
   return { zones, legend };
 }
 
-function Prediction(props: { league: LeagueSnap; highlightID: number }) {
+function Prediction(props: { league: LeagueSnap; highlightID?: number }) {
   return (
     <Panel title="Pre-season prediction">
       <div className="overflow-x-auto">
@@ -195,7 +195,7 @@ export default function LeaguePage() {
           )}
         </Panel>
       )}
-      {tab === "prediction" && game.managerTeam && <Prediction league={league} highlightID={game.managerTeam.ID} />}
+      {tab === "prediction" && <Prediction league={league} highlightID={game.managerTeam?.ID} />}
       {tab === "fixtures" && <Fixtures key={`${view.year}-${tier}`} league={league} />}
       {tab === "playoffs" && tier > 1 && <Playoffs league={league} />}
       {tab === "history" && (
