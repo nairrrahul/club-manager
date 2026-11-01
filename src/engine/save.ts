@@ -10,6 +10,8 @@ import { createCopaAmericaState } from "./international/copaAmerica";
 import { createAfconState } from "./international/afcon";
 import { createAfcCupState } from "./international/afcCup";
 import { createOfcCupState } from "./international/ofcCup";
+import { createEuroQualifiersState } from "./international/euroQualifiers";
+import { createEuroState } from "./international/euros";
 import { refreshAllClubOveralls } from "./squadStrength";
 import { collectSeasonPlayers } from "./playerIds";
 import { refreshStartingXI } from "./playerSquad";
@@ -61,8 +63,9 @@ export const SAVE_FORMAT = "soccer-season-simulator-save";
  * v19: adds AFCON and its qualifying editions.
  * v20: adds the AFC Cup and its qualifying editions.
  * v21: adds the OFC Cup and its qualifying editions.
+ * v22: adds UEFA EURO qualifying and tournament state.
  */
-export const SAVE_VERSION = 21;
+export const SAVE_VERSION = 22;
 
 export interface SaveMeta {
   mode: "manager" | "observer";
@@ -529,6 +532,12 @@ export function gameFromSave(file: SaveFile): Game {
   }
   if (loadedSeason?.international && loadedSeason.international.ofcCup === undefined) {
     loadedSeason.international.ofcCup = createOfcCupState();
+  }
+  if (loadedSeason?.international && loadedSeason.international.euroQualifiers === undefined) {
+    loadedSeason.international.euroQualifiers = createEuroQualifiersState();
+  }
+  if (loadedSeason?.international && loadedSeason.international.euro === undefined) {
+    loadedSeason.international.euro = createEuroState();
   }
   if (loadedSeason && file.version < 6) {
     // v5 -> v6: nobody is shortlisted and unsigned scouting candidates are discarded, as before.

@@ -30,6 +30,17 @@ import {
   startOfcCupSemiFinals
 } from "./ofcCup";
 import type { OfcCupState } from "./ofcCup";
+import {
+  completeEuroMainQualifying, createEuroQualifyingEdition, createEuroQualifiersState,
+  findEuroQualifyingEdition, getEuroPlayoffFinalRound, getEuroPlayoffRounds,
+  getEuroQualifyingRounds, getEuroQualifyingEdition, getEuroWindowType, recordEuroPlayoffRound
+} from "./euroQualifiers";
+import type { EuroQualifiersState } from "./euroQualifiers";
+import {
+  advanceEuroKnockoutRound, createEuroEdition, createEuroState, getEuroTournament,
+  getEuroTournamentRounds, setEuroKnockoutWinner, startEuroRoundOf16
+} from "./euros";
+import type { EuroState } from "./euros";
 import type { NationsLeagueState } from "./nationsLeague";
 import {
   completeGoldCupPlayoff, createGoldCupEdition, createGoldCupPlayoffEdition,
@@ -39,7 +50,7 @@ import {
 import type { GoldCupState } from "./goldCup";
 import {
   advanceInternationalCupRound, setInternationalCupKnockoutWinner,
-  getInternationalWindowType
+  getInternationalWindowType, getNextCompetitionWindow
 } from "./internationalCompetitionsUtils";
 import type { InternationalCompetitionEdition } from "./internationalCompetitionsUtils";
 import {
@@ -217,13 +228,24 @@ export interface InternationalMatch {
   ofcCupRound?: number;
   ofcCupKnockoutMatchId?: string;
   ofcCupWinner?: string;
+  euroEditionId?: string;
+  euroQualifierId?: string;
+  euroStage?: "qualifying" | "playoff" | "group" | "knockout";
+  euroGroup?: string;
+  euroRound?: number;
+  euroTournamentYear?: number;
+  euroPath?: string;
+  euroPathRound?: number;
+  euroPathMatch?: number;
+  euroWinner?: string;
+  euroKnockoutMatchId?: string;
   homePenalties?: string[];
   awayPenalties?: string[];
 }
 
 export interface InternationalRound {
   matches: InternationalMatch[];
-  kind?: "friendly" | "nationsLeague" | "goldCupPlayoff" | "goldCup" | "copaAmerica" | "afconQualifier" | "afcon" | "afcCupQualifier" | "afcCup" | "ofcCupQualifier" | "ofcCup";
+  kind?: "friendly" | "nationsLeague" | "goldCupPlayoff" | "goldCup" | "copaAmerica" | "afconQualifier" | "afcon" | "afcCupQualifier" | "afcCup" | "ofcCupQualifier" | "ofcCup" | "euroQualifier" | "euro";
   label?: string;
   afconQualifierId?: string;
   afconStage?: "preliminary" | "main" | "tournamentGroup" | "tournamentKnockout";
@@ -234,6 +256,10 @@ export interface InternationalRound {
   ofcCupQualifierId?: string;
   ofcCupStage?: "qualifying" | "group" | "knockout";
   ofcCupRound?: number;
+  euroQualifierId?: string;
+  euroStage?: "qualifying" | "playoff" | "group" | "knockout";
+  euroRound?: number;
+  euroTournamentYear?: number;
   /** The one nation without a match in this set of fixtures (there is an odd number of nations). */
   leftOut: string | null;
 }
@@ -267,6 +293,8 @@ export interface InternationalState {
   afcon: AfconState;
   afcCup: AfcCupState;
   ofcCup: OfcCupState;
+  euroQualifiers: EuroQualifiersState;
+  euro: EuroState;
   /** The nation left out of the most recent set of fixtures (never left out twice in a row). */
   lastLeftOut: string | null;
   /** When true, windows must be simulated explicitly instead of automatically. */
@@ -293,6 +321,8 @@ export function createInternationalState(): InternationalState {
     afcon: createAfconState(),
     afcCup: createAfcCupState(),
     ofcCup: createOfcCupState(),
+    euroQualifiers: createEuroQualifiersState(),
+    euro: createEuroState(),
     lastLeftOut: null,
     explicitWindows: false
   };
@@ -589,10 +619,12 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
   let afconTeams: string[] = [];
   let afcCupTeams: string[] = [];
   let ofcCupTeams: string[] = [];
+  let euroTeams: string[] = [];
   const afconWindowType = getAfconWindowType(season.year, def.id);
   const afconSuffix = afconWindowType?.slice(-1) as "1" | "2" | undefined;
   const afcCupWindowType = getAfcCupWindowType(season.year, def.id);
   const ofcCupWindowType = getOfcCupWindowType(season.year, def.id);
+  const euroWindowType = getEuroWindowType(season.year, def.id);
   const goldCupWindowType = getGoldCupWindowType(season.year, def.id);
   let goldCupPlayoff: ReturnType<typeof createGoldCupPlayoffEdition> | null = null;
   if (goldCupWindowType === "GCPO") {
@@ -673,6 +705,27 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
     ofcCupTeams = edition.teams;
     rounds.push(...getOfcCupTournamentRounds(edition));
   }
+  if (euroWindowType === "EUROQ") {
+    const tournamentWindow = getNextCompetitionWindow(season.year, def.id, (year, id) =>
+      getEuroWindowType(year, id) === "EURO"
+    );
+    const qualifier = findEuroQualifyingEdition(state.euroQualifiers, tournamentWindow.year);
+    if (!qualifier) throw new Error(`EURO qualifying for ${tournamentWindow.year} was not drawn in the preceding window.`);
+    rounds.push(...getEuroQualifyingRounds(qualifier, season.year, def.id, def.afterMatchday));
+    euroTeams = qualifier.groups.flatMap(group => group.teams);
+  } else if (euroWindowType === "EUROQP") {
+    const qualifier = state.euroQualifiers.editions.find(item =>
+      item.tournamentYear === season.year && item.completed && !item.playoffComplete
+    );
+    if (!qualifier) throw new Error(`EURO qualifying play-offs for ${season.year} have not been drawn.`);
+    rounds.push(...getEuroPlayoffRounds(qualifier, season.year, def.id, def.afterMatchday));
+    euroTeams = qualifier.playoffTeams;
+  } else if (euroWindowType === "EURO") {
+    const edition = getEuroTournament(state.euro, season.year);
+    if (!edition) throw new Error(`EURO edition for ${season.year} has not been drawn.`);
+    euroTeams = edition.teams;
+    rounds.push(...getEuroTournamentRounds(edition));
+  }
   if (getInternationalWindowType("CONMEBOL", season.year, def.id) === "COPA") {
     let edition = state.copaAmerica.editions.find(item => item.year === season.year && item.windowId === def.id);
     if (!edition) {
@@ -694,13 +747,15 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
       (afconWindowType !== null && getNationConfederation(code) === "CAF") ||
       (afcCupWindowType !== null && getNationConfederation(code) === "AFC") ||
       (ofcCupWindowType !== null && getNationConfederation(code) === "OFC") ||
+      (euroWindowType !== null && getNationConfederation(code) === "UEFA") ||
       (goldCupPlayoff !== null &&
         getNationConfederation(code) === "CONCACAF" &&
         !goldCupPlayoff.edition.entrants.includes(code))) &&
     !copaAmericaTeams.includes(code) &&
     !afconTeams.includes(code) &&
     !afcCupTeams.includes(code) &&
-    !ofcCupTeams.includes(code)
+    !ofcCupTeams.includes(code) &&
+    !euroTeams.includes(code)
   );
   if (friendlyNations.length > 1) {
     for (let i = 0; i < FRIENDLY_SETS_PER_WINDOW; i++) {
@@ -799,7 +854,8 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
       const awayTeam = { ID: 0, Team: away.code, Overall: away.actualOverall } as unknown as Team;
       const isKnockout = match.goldCupStage === "knockout" ||
         match.copaAmericaStage === "knockout" || match.afconStage === "knockout" ||
-        match.afcCupStage === "knockout" || match.ofcCupStage === "knockout";
+        match.afcCupStage === "knockout" || match.ofcCupStage === "knockout" ||
+        match.euroStage === "playoff" || match.euroStage === "knockout";
       const result = simulateMatch(homeTeam, awayTeam, isKnockout, "LEAGUE");
       const homeGoals = result.homeGoalInfo.homeGoals;
       const awayGoals = result.awayGoalInfo.awayGoals;
@@ -1016,6 +1072,17 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
         match.ofcCupWinner = winner;
         setOfcCupKnockoutWinner(edition, match.ofcCupKnockoutMatchId, winner);
       }
+      if (match.euroStage === "playoff" || match.euroStage === "knockout") {
+        const winner = hasShootout
+          ? parseKOMatchWinner(result).Team
+          : homeGoals > awayGoals ? match.home : match.away;
+        match.euroWinner = winner;
+        if (match.euroEditionId && match.euroKnockoutMatchId) {
+          const edition = state.euro.editions.find(candidate => candidate.id === match.euroEditionId);
+          if (!edition) throw new Error(`Unknown EURO edition "${match.euroEditionId}".`);
+          setEuroKnockoutWinner(edition, match.euroKnockoutMatchId, winner);
+        }
+      }
 
       awardCaps(match.home);
       awardCaps(match.away);
@@ -1099,6 +1166,44 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
           qualifier.id,
           window.year,
           window.windowId,
+          Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]))
+        );
+      }
+    }
+    if (round.kind === "euroQualifier" && round.euroStage === "qualifying" && round.euroQualifierId) {
+      const qualifier = getEuroQualifyingEdition(state.euroQualifiers, round.euroQualifierId);
+      qualifier.roundsPlayed++;
+      if (qualifier.roundsPlayed === 10) {
+        completeEuroMainQualifying(
+          qualifier,
+          state.nationsLeague.editions,
+          Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]))
+        );
+      }
+    }
+    if (round.kind === "euroQualifier" && round.euroStage === "playoff" && round.euroQualifierId) {
+      const qualifier = getEuroQualifyingEdition(state.euroQualifiers, round.euroQualifierId);
+      const playoffsComplete = recordEuroPlayoffRound(qualifier, round.matches);
+      if (!playoffsComplete && qualifier.playoffRoundsPlayed === 1) {
+        window.rounds.push(getEuroPlayoffFinalRound(
+          qualifier,
+          window.year,
+          window.windowId,
+          window.afterMatchday
+        ));
+      } else if (playoffsComplete) {
+        const tournamentWindow = getNextCompetitionWindow(window.year, window.windowId, (year, id) =>
+          getEuroWindowType(year, id) === "EURO"
+        );
+        createEuroEdition(
+          state.euro,
+          qualifier,
+          qualifier.playoffPaths.map(path => {
+            const final = path.bracket.rounds[1]?.[0];
+            if (!final?.winner) throw new Error(`EURO playoff Path ${path.name} has no winner.`);
+            return final.winner;
+          }),
+          tournamentWindow,
           Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]))
         );
       }
@@ -1188,6 +1293,23 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
         if (nextRound) window.rounds.push(nextRound);
       }
     }
+    if (round.kind === "euro") {
+      const match = round.matches[0];
+      if (match?.euroEditionId) {
+        const edition = state.euro.editions.find(candidate => candidate.id === match.euroEditionId);
+        if (!edition) throw new Error(`Unknown EURO edition "${match.euroEditionId}".`);
+        let nextRound: InternationalRound | null = null;
+        if (match.euroStage === "group") {
+          nextRound = startEuroRoundOf16(edition);
+        } else if (match.euroStage === "knockout") {
+          const knockoutRoundIndex = edition.knockout?.findIndex(knockoutRound =>
+            knockoutRound.matches.some(knockoutMatch => round.matches.includes(knockoutMatch.fixture))
+          ) ?? -1;
+          nextRound = advanceEuroKnockoutRound(edition, knockoutRoundIndex);
+        }
+        if (nextRound) window.rounds.push(nextRound);
+      }
+    }
   }
 
   drawCopaAmericaIfDue(state, window.year, window.windowId);
@@ -1209,6 +1331,31 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
       upcomingOfcQualifier.year,
       Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]))
     );
+  }
+  const upcomingEuroQualifier = findUpcomingWindow(window.year, window.windowId, (candidateYear, candidateDef) =>
+    getEuroWindowType(candidateYear, candidateDef.id) === "EUROQ"
+  );
+  if (upcomingEuroQualifier && upcomingEuroQualifier.offset === 1) {
+    const tournamentWindow = getNextCompetitionWindow(
+      upcomingEuroQualifier.year,
+      upcomingEuroQualifier.def.id,
+      (year, id) => getEuroWindowType(year, id) === "EURO"
+    );
+    if (!findEuroQualifyingEdition(state.euroQualifiers, tournamentWindow.year)) {
+      const previousHosts = [...state.euro.editions]
+        .sort((a, b) => b.year - a.year)[0]?.hosts ?? [];
+      createEuroQualifyingEdition(
+        state.euroQualifiers,
+        tournamentWindow.year,
+        Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank])),
+        {
+          year: window.year,
+          windowId: window.windowId,
+          afterMatchday: window.afterMatchday
+        },
+        previousHosts
+      );
+    }
   }
   return window;
 }
@@ -1332,6 +1479,17 @@ export function getNationMatches(state: InternationalState, code: string): Natio
                                     : match.kind === "ofcCupKnockout"
                                       ? `OFC Cup ${match.ofcCupKnockoutMatchId?.startsWith("SF") ? "Semi-finals"
                                         : match.ofcCupKnockoutMatchId === "F" ? "Final" : "Knockout"}`
+                                      : match.kind === "euroQualifier"
+                                        ? match.euroStage === "playoff"
+                                          ? `EURO Play-off · Path ${match.euroPath ?? "—"} · ${match.euroPathRound === 1 ? "Semi-final" : "Final"}`
+                                          : `EURO Qualifying · Matchday ${match.euroRound ?? "—"}`
+                                        : match.kind === "euroGroup"
+                                          ? `EURO Group Stage · Matchday ${match.euroRound ?? "—"}`
+                                          : match.kind === "euroKnockout"
+                                            ? `EURO ${match.euroKnockoutMatchId?.startsWith("R16") ? "Round of 16"
+                                              : match.euroKnockoutMatchId?.startsWith("QF") ? "Quarter-finals"
+                                                : match.euroKnockoutMatchId?.startsWith("SF") ? "Semi-finals"
+                                                  : match.euroKnockoutMatchId === "F" ? "Final" : "Knockout"}`
                     : undefined,
           penaltyShootout: shootoutFor && shootoutAgainst
             ? {
@@ -1359,6 +1517,10 @@ export function getNationMatches(state: InternationalState, code: string): Natio
                               ? "/ofc-cup-qualifiers"
                               : match.kind === "ofcCupGroup" || match.kind === "ofcCupKnockout"
                                 ? "/ofc-cup"
+                                : match.kind === "euroQualifier"
+                                  ? "/euro-qualifiers"
+                                  : match.kind === "euroGroup" || match.kind === "euroKnockout"
+                                    ? "/euro"
                   : undefined
         });
       }

@@ -31,6 +31,8 @@ import AfcCupPage from "./ui/pages/internationals/AfcCupPage";
 import AfcCupQualifiersPage from "./ui/pages/internationals/AfcCupQualifiersPage";
 import OfcCupPage from "./ui/pages/internationals/OfcCupPage";
 import OfcCupQualifiersPage from "./ui/pages/internationals/OfcCupQualifiersPage";
+import EuroPage from "./ui/pages/internationals/EuroPage";
+import EuroQualifiersPage from "./ui/pages/internationals/EuroQualifiersPage";
 
 export default function App() {
   useGameStore(state => state.tick);
@@ -61,6 +63,8 @@ export default function App() {
         <Route path="/afc-cup-qualifiers" element={<AfcCupQualifiersPage />} />
         <Route path="/ofc-cup" element={<OfcCupPage />} />
         <Route path="/ofc-cup-qualifiers" element={<OfcCupQualifiersPage />} />
+        <Route path="/euro" element={<EuroPage />} />
+        <Route path="/euro-qualifiers" element={<EuroQualifiersPage />} />
         <Route path="/add-player" element={game.godMode ? <AddPlayer /> : <Navigate to="/" replace />} />
         <Route path="/add-team" element={game.godMode ? <AddTeam /> : <Navigate to="/" replace />} />
         <Route path="/player/:id" element={<PlayerPage />} />

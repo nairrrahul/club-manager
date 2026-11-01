@@ -16,17 +16,19 @@ interface InternationalCupPageProps {
   subtitle: string;
   editions: InternationalCompetitionEdition[];
   afconHighlights?: boolean;
+  groupHighlights?: Record<number, string>;
 }
 
 function GroupPanel(props: {
   edition: InternationalCompetitionEdition;
   group: InternationalCompetitionEdition["groups"][number];
   afconHighlights: boolean;
+  groupHighlights?: Record<number, string>;
 }) {
   const rows = getInternationalCupStandings(props.edition, props.group);
-  const highlights: Record<number, string> = props.afconHighlights
+  const highlights = props.groupHighlights ?? (props.afconHighlights
     ? { 1: "bg-green-500/10", 2: "bg-green-500/10", 3: "bg-yellow-400/10" }
-    : { 1: "bg-green-500/10", 2: "bg-green-500/10" };
+    : { 1: "bg-green-500/10", 2: "bg-green-500/10" });
   return (
     <Panel title={`Group ${props.group.name}`}>
       <InternationalGroupTable rows={rows} highlights={highlights} />
@@ -38,6 +40,7 @@ function GroupPanel(props: {
 function DrawResults(props: { title: string; edition: InternationalCompetitionEdition }) {
   const { edition } = props;
   const hosts = new Set(edition.hosts);
+  const playoffTeams = new Set(edition.playoffTeams ?? []);
   return (
     <div className="space-y-5">
       <Panel title={`Qualified teams · ${edition.teams.length}`}>
@@ -60,6 +63,9 @@ function DrawResults(props: { title: string; edition: InternationalCompetitionEd
                       <NationLink code={code} />
                       {hosts.has(code) && (
                         <span className="rounded bg-amber-400 px-2 py-0.5 text-xs font-bold text-black">Host</span>
+                      )}
+                      {playoffTeams.has(code) && (
+                        <span className="rounded bg-red-600 px-2 py-0.5 text-xs font-bold text-white">PO</span>
                       )}
                     </div>
                   ))}
@@ -204,6 +210,7 @@ export default function InternationalCupPage(props: InternationalCupPageProps) {
               edition={selected}
               group={group}
               afconHighlights={props.afconHighlights ?? false}
+              groupHighlights={props.groupHighlights}
             />
           ))}</div>
         </div>

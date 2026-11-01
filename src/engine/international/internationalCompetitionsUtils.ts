@@ -6,11 +6,11 @@ import type { Bracket } from "../types";
 import { shuffledCopy } from "../utils";
 import type { InternationalMatch, InternationalRound } from "./international";
 
-export type InternationalCup = "goldCup" | "copaAmerica" | "afcon" | "afcCup" | "ofcCup";
+export type InternationalCup = "goldCup" | "copaAmerica" | "afcon" | "afcCup" | "ofcCup" | "euro";
 export type InternationalWindowType =
   | "FR" | "NL1" | "NL2" | "GCPO" | "GC" | "COPA"
   | "CAFQP1" | "CAFQP2" | "CAFQM1" | "CAFQM2" | "AFCON1" | "AFCON2"
-  | "AFCQP" | "AFCQM" | "AFCCUP" | "OFCCUPQ" | "OFCCUP";
+  | "AFCQP" | "AFCQM" | "AFCCUP" | "OFCCUPQ" | "OFCCUP" | "EUROQ" | "EUROQP" | "EURO";
 export const INTERNATIONAL_CYCLE_WINDOW_COUNT = 24;
 
 export interface InternationalPlayoffPath {
@@ -118,6 +118,7 @@ export interface InternationalCompetitionEdition {
   winner: string | null;
   runnerUp: string | null;
   semifinalists: string[];
+  playoffTeams?: string[];
 }
 
 const WINDOW_COUNT_PER_YEAR = 6;
@@ -140,7 +141,8 @@ function parseTeamWindows(csv: string): Map<string, InternationalWindowType[]> {
         !/^GCPO[12]?$/.test(value) && !/^GC[12]?$/.test(value) && value !== "COPA" &&
         !/^(CAFQP|CAFQM|AFCON)[12]$/.test(value) &&
         value !== "AFCQP" && value !== "AFCQM" && value !== "AFCCUP" &&
-        value !== "OFCCUPQ" && value !== "OFCCUP") {
+        value !== "OFCCUPQ" && value !== "OFCCUP" &&
+        value !== "EUROQ" && value !== "EUROQP" && value !== "EURO") {
         throw new Error(`Unknown team_windows.csv window type "${value}" for ${confederation}.`);
       }
       if (value.startsWith("GCPO")) return "GCPO";
@@ -278,13 +280,14 @@ export function createInternationalCupGroupMatches(
   competitionEditionId?: string
 ): InternationalMatch[][] {
   const editionId = competitionEditionId ??
-    `${competition === "goldCup" ? "GC" : competition === "copaAmerica" ? "COPA" : competition === "afcon" ? "AFCON" : competition === "afcCup" ? "AFC" : "OFC"}-${year}-${windowId}`;
+    `${competition === "goldCup" ? "GC" : competition === "copaAmerica" ? "COPA" : competition === "afcon" ? "AFCON" : competition === "afcCup" ? "AFC" : competition === "ofcCup" ? "OFC" : "EURO"}-${year}-${windowId}`;
   const matchKinds: Record<InternationalCup, InternationalMatch["kind"]> = {
     goldCup: "goldCupGroup",
     copaAmerica: "copaAmericaGroup",
     afcon: "afconGroup",
     afcCup: "afcCupGroup",
-    ofcCup: "ofcCupGroup"
+    ofcCup: "ofcCupGroup",
+    euro: "euroGroup"
   };
   return GROUP_PAIRINGS.map((pairing, roundIndex) =>
     pairing.map(([homeIndex, awayIndex]) =>
@@ -317,11 +320,18 @@ export function createInternationalCupGroupMatches(
                 afcCupGroup: group,
                 afcCupRound: roundIndex + 1
               }
-            : {
+            : competition === "ofcCup"
+            ? {
                 ofcCupEditionId: editionId,
                 ofcCupStage: "group",
                 ofcCupGroup: group,
                 ofcCupRound: roundIndex + 1
+              }
+            : {
+                euroEditionId: editionId,
+                euroStage: "group",
+                euroGroup: group,
+                euroRound: roundIndex + 1
               })
     )
   );
@@ -377,7 +387,7 @@ function makeKnockoutMatch(
   id: string,
   home: string,
   away: string,
-  competition: Exclude<InternationalCup, "afcon" | "afcCup" | "ofcCup">
+  competition: Exclude<InternationalCup, "afcon" | "afcCup" | "ofcCup" | "euro">
 ): InternationalCompetitionKnockoutMatch {
   const isGoldCup = competition === "goldCup";
   const fixture = createMatch(
@@ -405,7 +415,7 @@ function makeKnockoutMatch(
 export function advanceInternationalCupRound(
   edition: InternationalCompetitionEdition,
   roundIndex: number,
-  competition: Exclude<InternationalCup, "afcon" | "afcCup" | "ofcCup"> = "goldCup"
+  competition: Exclude<InternationalCup, "afcon" | "afcCup" | "ofcCup" | "euro"> = "goldCup"
 ): InternationalRound | null {
   const roundKind = competition;
   const competitionLabel = competition === "goldCup" ? "Gold Cup" : "Copa América";

@@ -18,6 +18,7 @@ import type { CopaAmericaEdition } from "./international/copaAmerica";
 import type { AfconQualifyingEdition } from "./international/afcon";
 import type { AfcCupQualifyingEdition } from "./international/afcCup";
 import type { OfcCupQualifyingEdition } from "./international/ofcCup";
+import type { EuroQualifyingEdition } from "./international/euroQualifiers";
 import type { InternationalMatch } from "./international/international";
 
 // ---------------------------------------------------------------------------
@@ -228,6 +229,8 @@ export interface SeasonArchive {
   afcCupQualifying?: AfcCupQualifyingEdition | null;
   ofcCup?: InternationalCompetitionEdition | null;
   ofcCupQualifying?: OfcCupQualifyingEdition | null;
+  euro?: InternationalCompetitionEdition | null;
+  euroQualifying?: EuroQualifyingEdition | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -602,6 +605,15 @@ export function snapshotSeason(season: Season): SeasonArchive {
     ),
     ofcCupQualifying: snapshotOfcCupQualifying(
       season.international.ofcCup.qualifyingEditions.find(edition => edition.year === season.year) ?? null
+    ),
+    euro: snapshotGoldCup(
+      season.international.euro.editions.find(edition => edition.year === season.year) ?? null
+    ),
+    euroQualifying: snapshotEuroQualifying(
+      season.international.euroQualifiers.editions.find(edition =>
+        edition.tournamentYear === season.year ||
+        edition.groups.some(group => group.matches.flat().some(match => match.windowYear === season.year))
+      ) ?? null
     )
   };
 }
@@ -717,6 +729,37 @@ function snapshotOfcCupQualifying(edition: OfcCupQualifyingEdition | null): OfcC
       ...group,
       teams: [...group.teams],
       matches: group.matches.map(round => round.map(snapshotInternationalMatch))
+    }))
+  };
+}
+
+function snapshotEuroQualifying(edition: EuroQualifyingEdition | null): EuroQualifyingEdition | null {
+  if (!edition) return null;
+  return {
+    ...edition,
+    hosts: [...edition.hosts],
+    groups: edition.groups.map(group => ({
+      ...group,
+      teams: [...group.teams],
+      matches: group.matches.map(round => round.map(snapshotInternationalMatch))
+    })),
+    seedRanks: { ...edition.seedRanks },
+    directQualifiers: [...edition.directQualifiers],
+    playoffTeams: [...edition.playoffTeams],
+    playoffBottomSeeds: [...edition.playoffBottomSeeds],
+    playoffPots: edition.playoffPots.map(pot => [...pot]),
+    playoffPaths: edition.playoffPaths.map(path => ({
+      ...path,
+      teams: [...path.teams],
+      bracket: {
+        ...path.bracket,
+        rounds: path.bracket.rounds.map(round => round.map(match => ({
+          ...match,
+          player1: match.player1 ? { ...match.player1 } : null,
+          player2: match.player2 ? { ...match.player2 } : null,
+          sources: [...match.sources]
+        })))
+      }
     }))
   };
 }

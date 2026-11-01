@@ -19,5 +19,8 @@
   "afcCupKnockout": 40,
   "ofcCupQualifier": 25,
   "ofcCupGroup": 35,
-  "ofcCupKnockout": 40
+  "ofcCupKnockout": 40,
+  "euroQualifier": 25,
+  "euroGroup": 35,
+  "euroKnockout": 40
 }

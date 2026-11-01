@@ -207,6 +207,10 @@ function MatchesTab(props: { code: string }) {
                                           ? "OFC Cup Qualifiers"
                                           : match.kind === "ofcCupGroup" || match.kind === "ofcCupKnockout"
                                             ? "OFC Cup"
+                                            : match.kind === "euroQualifier"
+                                              ? "EURO Qualifiers"
+                                              : match.kind === "euroGroup" || match.kind === "euroKnockout"
+                                                ? "UEFA EURO"
                                 : "Gold Cup"}
                         </Link>
                       ) : match.kind}
@@ -254,6 +258,9 @@ function NationHistoryTab(props: { code: string }) {
       : []),
     ...(archive.ofcCup?.completed && archive.ofcCup.winner === props.code
       ? [{ name: "OFC Cup Winners", year: archive.ofcCup.year + 1 }]
+      : []),
+    ...(archive.euro?.completed && archive.euro.winner === props.code
+      ? [{ name: "EURO Winners", year: archive.euro.year + 1 }]
       : [])
   ]).sort((a, b) => b.year - a.year);
   const grouped = new Map<string, number[]>();
