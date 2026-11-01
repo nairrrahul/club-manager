@@ -83,6 +83,31 @@
     "IRL|NIR",
     "ENG|WAL",
     "CRO|SVN",
-    "ROU|BUL|SRB"
+    "ROU|BUL|SRB",
+    "GRE|TUR"
+  ],
+  "WC": [
+    "USA",
+    "USA|MEX|CAN",
+    "ESP|POR",
+    "ESP",
+    "FRA",
+    "FRA|GER",
+    "ENG",
+    "NOR|SWE|DEN",
+    "RSA",
+    "MAR",
+    "ESP|MAR",
+    "AUS",
+    "JPN|KOR",
+    "CHN",
+    "BRA",
+    "ARG|URU",
+    "ARG|URU|PAR",
+    "KSA",
+    "QAT|UAE",
+    "BRA|COL",
+    "MEX",
+    "GRE|TUR"
   ]
 }

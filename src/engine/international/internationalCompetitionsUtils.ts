@@ -1,17 +1,71 @@
 import teamWindowsRaw from "../data/team_windows.csv?raw";
-import windowsRaw from "../data/international_windows.json";
+import windowsRaw from "../data/intl/international_windows.json";
 import { SEASON_START_YEAR } from "../constants";
 import { createKnockoutBracket } from "../scheduler";
 import type { Bracket } from "../types";
 import { shuffledCopy } from "../utils";
+import hostGroupAllocationRaw from "../data/intl/host_group_allocation.json";
+import fixedCompetitionHostsRaw from "../data/intl/intl_competition_hosts.json";
+import teamBansRaw from "../data/intl/team_bans.json";
 import type { InternationalMatch, InternationalRound } from "./international";
 
 export type InternationalCup = "goldCup" | "copaAmerica" | "afcon" | "afcCup" | "ofcCup" | "euro";
+const fixedCompetitionHosts = fixedCompetitionHostsRaw as Record<string, Record<string, string>>;
+const teamBanYears = teamBansRaw as Record<string, number>;
+
+export function isInternationalTeamCompetitivelyEligible(code: string, seasonYear: number): boolean {
+  const banYear = teamBanYears[code];
+  return banYear === undefined || seasonYear >= banYear;
+}
+
+export function getCompetitivelyEligibleTeams(teams: string[], seasonYear: number): string[] {
+  return teams.filter(code => isInternationalTeamCompetitivelyEligible(code, seasonYear));
+}
+
+export function getFixedInternationalCompetitionHosts(
+  competition: string,
+  year: number
+): string[] | null {
+  const configuredHosts = fixedCompetitionHosts[competition]?.[String(year)];
+  if (!configuredHosts) return null;
+  const hosts = configuredHosts.split("|");
+  if (hosts.some(host => !host) || new Set(hosts).size !== hosts.length) {
+    throw new Error(`Invalid fixed host configuration for ${competition} ${year}.`);
+  }
+  return hosts;
+}
+
 export type InternationalWindowType =
   | "FR" | "NL1" | "NL2" | "GCPO" | "GC" | "COPA"
   | "CAFQP1" | "CAFQP2" | "CAFQM1" | "CAFQM2" | "AFCON1" | "AFCON2"
-  | "AFCQP" | "AFCQM" | "AFCCUP" | "OFCCUPQ" | "OFCCUP" | "EUROQ" | "EUROQP" | "EURO";
+  | "AFCQP" | "AFCQM" | "AFCCUP" | "OFCCUPQ" | "OFCCUP" | "EUROQ" | "EUROQP" | "EURO"
+  | "SAWCQ" | "CAFWCQ" | "CAFWCQP" | "CCWCQ1" | "CCWCQ2" | "CCWCQ3"
+  | "AFCWCQ1" | "AFCWCQ2" | "AFCWCQ3" | "OFCWCQ1" | "OFCWCQ2" | "OFCWCQ3"
+  | "UEFAWCQM" | "UEFAWCQP" | "ICPO" | "WC";
 export const INTERNATIONAL_CYCLE_WINDOW_COUNT = 24;
+
+export function getDistributedInternationalRoundSchedule(
+  confederation: string,
+  competitionType: string,
+  year: number,
+  windowId: string,
+  totalRounds: number
+): { start: number; count: number } {
+  if (!Number.isInteger(totalRounds) || totalRounds < 0) {
+    throw new Error(`Invalid matchday count for ${confederation} ${competitionType}: ${totalRounds}.`);
+  }
+  const cycleIndex = ((getInternationalWindowIndex(year, windowId) % INTERNATIONAL_CYCLE_WINDOW_COUNT) +
+    INTERNATIONAL_CYCLE_WINDOW_COUNT) % INTERNATIONAL_CYCLE_WINDOW_COUNT;
+  const slots = Array.from({ length: INTERNATIONAL_CYCLE_WINDOW_COUNT }, (_, index) => index)
+    .filter(index => getInternationalWindowTypeAt(confederation, index) === competitionType);
+  const slotIndex = slots.indexOf(cycleIndex);
+  if (slotIndex < 0) {
+    throw new Error(`${confederation} ${competitionType} is not scheduled in ${year} ${windowId}.`);
+  }
+  const start = Math.round(slotIndex * totalRounds / slots.length);
+  const end = Math.round((slotIndex + 1) * totalRounds / slots.length);
+  return { start, count: end - start };
+}
 
 export interface InternationalPlayoffPath {
   teams: string[];
@@ -98,7 +152,7 @@ export interface InternationalCompetitionKnockoutMatch {
 }
 
 export interface InternationalCompetitionKnockoutRound {
-  label: "Round of 16" | "Quarter-finals" | "Semi-finals" | "Final";
+  label: "Round of 32" | "Round of 16" | "Quarter-finals" | "Semi-finals" | "Final";
   matches: InternationalCompetitionKnockoutMatch[];
 }
 
@@ -142,7 +196,8 @@ function parseTeamWindows(csv: string): Map<string, InternationalWindowType[]> {
         !/^(CAFQP|CAFQM|AFCON)[12]$/.test(value) &&
         value !== "AFCQP" && value !== "AFCQM" && value !== "AFCCUP" &&
         value !== "OFCCUPQ" && value !== "OFCCUP" &&
-        value !== "EUROQ" && value !== "EUROQP" && value !== "EURO") {
+        value !== "EUROQ" && value !== "EUROQP" && value !== "EURO" &&
+        !/^(SAWCQ|CAFWCQ|CAFWCQP|CCWCQ[123]|AFCWCQ[123]|OFCWCQ[123]|UEFAWCQM|UEFAWCQP|ICPO|WC)$/.test(value)) {
         throw new Error(`Unknown team_windows.csv window type "${value}" for ${confederation}.`);
       }
       if (value.startsWith("GCPO")) return "GCPO";
@@ -247,7 +302,10 @@ export function drawInternationalCupGroups(
     throw new Error("International cup teams must divide evenly among the groups.");
   }
   const teamsPerGroup = teams.length / groupNames.length;
-  if (hosts.length > groupNames.length) throw new Error("The number of hosts exceeds the pot-one capacity.");
+  if (hosts.length > groupNames.length || new Set(hosts).size !== hosts.length ||
+      hosts.some(host => !teams.includes(host))) {
+    throw new Error("International cup hosts must be unique teams in the tournament field and fit in Pot 1.");
+  }
   const hostSet = new Set(hosts);
   const ranked = [...teams].sort((a, b) =>
     (worldRanks[a] ?? Number.MAX_SAFE_INTEGER) - (worldRanks[b] ?? Number.MAX_SAFE_INTEGER) ||
@@ -264,10 +322,47 @@ export function drawInternationalCupGroups(
       remaining.slice(index * groupNames.length, (index + 1) * groupNames.length))
   ];
   const groups = groupNames.map(() => [] as string[]);
-  for (const pot of pots) {
+  const hostGroupIndexes = assignHostsToGroups(groups, groupNames, hosts);
+  const firstPotTeams = shuffledCopy(pots[0].filter(team => !hostSet.has(team)));
+  const nonHostGroupIndexes = groups.map((_, index) => index).filter(index => !hostGroupIndexes.has(index));
+  if (firstPotTeams.length !== nonHostGroupIndexes.length) {
+    throw new Error("International cup Pot 1 does not match the available host-group slots.");
+  }
+  firstPotTeams.forEach((team, index) => groups[nonHostGroupIndexes[index]].push(team));
+  for (const pot of pots.slice(1)) {
     shuffledCopy(pot).forEach((team, index) => groups[index].push(team));
   }
   return { pots, groups };
+}
+
+const hostGroupAllocations = hostGroupAllocationRaw as Record<string, Record<string, string[]>>;
+
+export function assignHostsToGroups(
+  groups: string[][],
+  groupNames: string[],
+  hosts: string[]
+): Set<number> {
+  if (hosts.length === 0) return new Set();
+  const allocations = hostGroupAllocations[String(hosts.length)];
+  if (!allocations) {
+    throw new Error(`Host-group allocation is missing for ${hosts.length} hosts.`);
+  }
+  const configuredGroups = allocations[String(groupNames.length)] ?? allocations.Z;
+  if (!configuredGroups || configuredGroups.length !== hosts.length ||
+      new Set(configuredGroups).size !== hosts.length ||
+      configuredGroups.some(name => !groupNames.includes(name))) {
+    throw new Error(`Host-group allocation is invalid for ${hosts.length} hosts and ${groupNames.length} groups.`);
+  }
+  const hostGroupIndexes = new Set<number>();
+  shuffledCopy(hosts).forEach((host, index) => {
+    const groupIndex = groupNames.indexOf(configuredGroups[index]);
+    if (groupIndex < 0 || !groups[groupIndex]) {
+      throw new Error(`Could not assign host "${host}" to Group ${configuredGroups[index]}.`);
+    }
+    groups[groupIndex].push(host);
+    hostGroupIndexes.add(groupIndex);
+  });
+  return hostGroupIndexes;
 }
 
 export function createInternationalCupGroupMatches(

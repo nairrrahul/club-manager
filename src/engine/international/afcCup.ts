@@ -1,9 +1,10 @@
-import hostOptionsRaw from "../data/tournament_hosts.json";
+import hostOptionsRaw from "../data/intl/tournament_hosts.json";
 import { getCountriesByRegion } from "../nations";
 import { createTwentyFourTeamRoundOf16, pairKnockoutWinners } from "../knockout24";
 import { shuffledCopy } from "../utils";
 import {
   createInternationalCupGroupMatches, drawInternationalCupGroups, getInternationalCupStandings,
+  getCompetitivelyEligibleTeams, getDistributedInternationalRoundSchedule, getFixedInternationalCompetitionHosts,
   getInternationalWindowType, getNextCompetitionWindow
 } from "./internationalCompetitionsUtils";
 import type {
@@ -145,12 +146,17 @@ export function createAfcCupQualifierEdition(
   windowMatchday: number,
   worldRanks: Record<string, number>
 ): AfcCupQualifyingEdition {
-  const hostsOption = hostOptions[Math.floor(Math.random() * hostOptions.length)];
-  if (!hostsOption) throw new Error("No AFC Cup host configuration is available.");
-  const hosts = hostsOption.split("|");
+  const tournamentWindow = getNextCompetitionWindow(year, windowId, (candidateYear, candidateWindow) =>
+    getAfcCupWindowType(candidateYear, candidateWindow) === "AFCCUP"
+  );
+  const fixedHosts = getFixedInternationalCompetitionHosts("AFCCUP", tournamentWindow.year + 1);
+  const hostsOption = fixedHosts ? null : hostOptions[Math.floor(Math.random() * hostOptions.length)];
+  if (!fixedHosts && !hostsOption) throw new Error("No AFC Cup host configuration is available.");
+  const hosts = fixedHosts ?? hostsOption!.split("|");
   const hostSet = new Set(hosts);
-  const ranked = getCountriesByRegion("AFC").map(nation => nation.code);
-  if (ranked.length !== 46) throw new Error(`AFC Cup qualifying expects 46 AFC nations; found ${ranked.length}.`);
+  const allTeams = getCountriesByRegion("AFC").map(nation => nation.code);
+  if (allTeams.length !== 46) throw new Error(`AFC Cup qualifying expects 46 AFC nations; found ${allTeams.length}.`);
+  const ranked = getCompetitivelyEligibleTeams(allTeams, tournamentWindow.year);
   ranked.sort((a, b) =>
     (worldRanks[a] ?? Number.MAX_SAFE_INTEGER) - (worldRanks[b] ?? Number.MAX_SAFE_INTEGER) || a.localeCompare(b)
   );
@@ -276,16 +282,20 @@ export function getAfcCupMainRounds(
   windowMatchday: number
 ): InternationalRound[] {
   if (!edition.mainGroups) throw new Error(`AFC Cup main qualifying groups are not drawn for "${edition.id}".`);
-  return [0, 1].flatMap(offset => {
-    const roundIndex = edition.mainRoundsPlayed + offset;
-    if (roundIndex >= 6) return [];
+  const competitionType = getInternationalWindowType("AFC", year, windowId);
+  const schedule = getDistributedInternationalRoundSchedule("AFC", competitionType, year, windowId, 6);
+  if (edition.mainRoundsPlayed !== schedule.start) {
+    throw new Error(`AFC Cup qualifying expected matchday ${schedule.start + 1}, but ${edition.mainRoundsPlayed} matchdays have been played.`);
+  }
+  return Array.from({ length: schedule.count }, (_, offset) => {
+    const roundIndex = schedule.start + offset;
     const matches = edition.mainGroups!.flatMap(group => group.matches[roundIndex]);
     matches.forEach(match => {
       match.windowYear = year;
       match.windowId = windowId;
       match.windowMatchday = windowMatchday;
     });
-    return [{
+    return {
       kind: "afcCupQualifier" as const,
       label: `AFC Cup Qualifying · Main round · Matchday ${roundIndex + 1}`,
       leftOut: null,
@@ -293,7 +303,7 @@ export function getAfcCupMainRounds(
       afcCupStage: "main" as const,
       afcCupRound: roundIndex + 1,
       matches
-    }];
+    };
   });
 }
 

@@ -1,4 +1,4 @@
-import thirdPlaceAssignmentsRaw from "./data/p3_24.json";
+import thirdPlaceAssignmentsRaw from "./data/intl/p3_24.json";
 
 interface ThirdPlaceAssignmentMap {
   [qualifiedGroups: string]: string;

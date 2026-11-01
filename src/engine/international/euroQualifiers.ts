@@ -1,8 +1,12 @@
-import hostOptionsRaw from "../data/tournament_hosts.json";
+import hostOptionsRaw from "../data/intl/tournament_hosts.json";
 import { getCountriesByRegion } from "../nations";
 import type { Bracket } from "../types";
 import { shuffledCopy } from "../utils";
 import {
+  getCompetitivelyEligibleTeams,
+  getDistributedInternationalRoundSchedule,
+  getFixedInternationalCompetitionHosts,
+  isInternationalTeamCompetitivelyEligible,
   createInternationalPlayoffPaths,
   getInternationalCupStandings,
   getInternationalWindowType,
@@ -17,7 +21,6 @@ import type { NationsLeagueEdition } from "./nationsLeague";
 import type { InternationalMatch, InternationalRound } from "./international";
 
 const hostOptions = (hostOptionsRaw as Record<string, string[]>).EURO ?? [];
-const QUALIFYING_MATCHDAYS_PER_WINDOW = 2;
 
 export interface EuroQualifyingEdition {
   id: string;
@@ -135,19 +138,23 @@ export function createEuroQualifyingEdition(
   previousEditionHosts: string[] = []
 ): EuroQualifyingEdition {
   const priorHosts = new Set(previousEditionHosts);
+  const fixedHosts = getFixedInternationalCompetitionHosts("EURO", tournamentYear + 1);
   const eligibleHostOptions = hostOptions.filter(option =>
     option.split("|").every(code => !priorHosts.has(code))
   );
-  const hostOption = eligibleHostOptions[Math.floor(Math.random() * eligibleHostOptions.length)];
-  if (!hostOption) throw new Error("No eligible EURO host configuration avoids consecutive hosts.");
-  const hosts = hostOption.split("|");
+  const hostOption = fixedHosts
+    ? null
+    : eligibleHostOptions[Math.floor(Math.random() * eligibleHostOptions.length)];
+  if (!fixedHosts && !hostOption) throw new Error("No eligible EURO host configuration avoids consecutive hosts.");
+  const hosts = fixedHosts ?? hostOption!.split("|");
   if (hosts.length < 1 || hosts.length > 3) {
     throw new Error(`EURO host configuration must have one to three hosts; found ${hosts.length}.`);
   }
   const allTeams = getCountriesByRegion("UEFA").map(nation => nation.code);
   if (allTeams.length !== 55) throw new Error(`EURO qualifying expects 55 UEFA nations; found ${allTeams.length}.`);
+  const eligibleTeams = getCompetitivelyEligibleTeams(allTeams, tournamentYear);
   const hostSet = new Set(hosts);
-  const qualifyingTeams = allTeams.filter(code => !hostSet.has(code));
+  const qualifyingTeams = eligibleTeams.filter(code => !hostSet.has(code));
   const groupCount = hosts.length === 3 ? 9 : 10;
   const groups = groupPots(qualifyingTeams, groupCount, rankings);
   const id = `EUROQ-${tournamentYear}`;
@@ -214,10 +221,12 @@ export function getEuroQualifyingRounds(
   windowMatchday: number
 ): InternationalRound[] {
   const totalRounds = Math.max(...edition.groups.map(group => group.matches.length));
-  const count = Math.min(QUALIFYING_MATCHDAYS_PER_WINDOW, totalRounds - edition.roundsPlayed);
-  if (count <= 0) throw new Error(`EURO qualifying "${edition.id}" has no remaining matchdays.`);
-  return Array.from({ length: count }, (_, offset) => {
-    const roundIndex = edition.roundsPlayed + offset;
+  const schedule = getDistributedInternationalRoundSchedule("UEFA", "EUROQ", year, windowId, totalRounds);
+  if (edition.roundsPlayed !== schedule.start) {
+    throw new Error(`EURO qualifying expected matchday ${schedule.start + 1}, but ${edition.roundsPlayed} matchdays have been played.`);
+  }
+  return Array.from({ length: schedule.count }, (_, offset) => {
+    const roundIndex = schedule.start + offset;
     const matches = edition.groups.flatMap(group => group.matches[roundIndex] ?? []);
     matches.forEach(match => {
       match.windowYear = year;
@@ -283,7 +292,8 @@ export function completeEuroMainQualifying(
   ).rows;
   const excluded = new Set([...edition.hosts, ...direct, ...playoff]);
   const bottomSeeds = aggregate
-    .filter(row => !excluded.has(row.code))
+    .filter(row => !excluded.has(row.code) &&
+      isInternationalTeamCompetitivelyEligible(row.code, edition.tournamentYear))
     .slice(0, playoffSlots)
     .map(row => row.code);
   if (bottomSeeds.length !== playoffSlots) {

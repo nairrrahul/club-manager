@@ -1,11 +1,12 @@
-import initialAllocationsRaw from "../data/nations_league.json";
+import initialAllocationsRaw from "../data/intl/nations_league.json";
 import { getConfederation } from "../nations";
 import { scheduleLeague } from "../scheduler";
 import { shuffledCopy } from "../utils";
 import type { InternationalMatch } from "./international";
 import {
   assertInternationalWindowCoverage, getInternationalWindowIndex, getInternationalWindowLocation,
-  getInternationalWindowTypeAt, INTERNATIONAL_CYCLE_WINDOW_COUNT
+  getInternationalWindowTypeAt, getCompetitivelyEligibleTeams,
+  INTERNATIONAL_CYCLE_WINDOW_COUNT
 } from "./internationalCompetitionsUtils";
 import { Team } from "../team";
 
@@ -94,15 +95,19 @@ export function createNationsLeagueState(): NationsLeagueState {
   return { divisions, pots, editions: [] };
 }
 
-function buildGroups(pots: Record<string, string[]>): NationsLeagueGroup[] {
+function buildGroups(pots: Record<string, string[]>, seasonYear: number): NationsLeagueGroup[] {
   const potEntries = Object.entries(pots).sort(([a], [b]) => Number(a) - Number(b));
-  const groupCount = Math.max(...potEntries.map(([, teams]) => teams.length));
+  const eligiblePots = potEntries.map(([pot, teams]) => [
+    pot,
+    getCompetitivelyEligibleTeams(teams, seasonYear)
+  ] as const);
+  const groupCount = Math.max(...eligiblePots.map(([, teams]) => teams.length));
   if (groupCount < 1) throw new Error("A Nations League division must contain at least one group.");
   const groups = Array.from({ length: groupCount }, (_, index) => ({
     name: String(index + 1),
     teams: [] as string[]
   }));
-  for (const [, potTeams] of potEntries) {
+  for (const [, potTeams] of eligiblePots) {
     const drawnTeams = shuffledCopy(potTeams);
     drawnTeams.forEach((team, index) => groups[index].teams.push(team));
   }
@@ -128,13 +133,14 @@ function createEdition(
   const matches: InternationalMatch[] = [];
   const currentDivisions = state.divisions[confederation];
   const currentPots = state.pots[confederation];
+  const seasonYear = getInternationalWindowLocation(startWindowIndex).year;
   const competitionWindowCountForEdition = competitionWindowCount(confederation, startWindowIndex, competition);
   if (!currentDivisions || !currentPots) {
     throw new Error(`Nations League divisions are not initialized for ${confederation}.`);
   }
 
   for (const division of Object.keys(currentDivisions).sort()) {
-    const groups = buildGroups(currentPots[division]);
+    const groups = buildGroups(currentPots[division], seasonYear);
     divisionGroups[division] = groups;
     for (const group of groups) {
       const teams = createTeamStandIns(group.teams);
@@ -398,7 +404,11 @@ export function finalizeNationsLeagueEdition(state: NationsLeagueState, edition:
         divisionIndex === divisionOrder.length - 1 &&
         relegatedFromAboveRanked.length > targetGroupCount
       ) potNumber = potCount;
-      else potNumber = Math.min(potCount, placement.get(code) ?? potCount);
+      else {
+        const priorPot = Object.entries(state.pots[edition.confederation][division])
+          .find(([, members]) => members.includes(code))?.[0];
+        potNumber = Math.min(potCount, placement.get(code) ?? Number(priorPot ?? potCount));
+      }
       potMembers[potNumber - 1].push(code);
     }
     nextPots[division] = Object.fromEntries(potMembers.map((members, index) => [

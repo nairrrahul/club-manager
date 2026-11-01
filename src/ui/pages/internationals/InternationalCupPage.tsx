@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getNationName } from "../../../engine/nations";
+import { getConfederation, getNationName } from "../../../engine/nations";
 import { getInternationalCupStandings } from "../../../engine/international/internationalCompetitionsUtils";
 import type { InternationalCompetitionEdition } from "../../../engine/international/internationalCompetitionsUtils";
 import { seasonDisplay } from "../../../engine/constants";
@@ -17,6 +17,7 @@ interface InternationalCupPageProps {
   editions: InternationalCompetitionEdition[];
   afconHighlights?: boolean;
   groupHighlights?: Record<number, string>;
+  groupQualifiedByConfederation?: boolean;
 }
 
 function GroupPanel(props: {
@@ -37,16 +38,65 @@ function GroupPanel(props: {
   );
 }
 
-function DrawResults(props: { title: string; edition: InternationalCompetitionEdition }) {
+function DrawResults(props: {
+  title: string;
+  edition: InternationalCompetitionEdition;
+  groupQualifiedByConfederation?: boolean;
+}) {
   const { edition } = props;
   const hosts = new Set(edition.hosts);
   const playoffTeams = new Set(edition.playoffTeams ?? []);
   return (
     <div className="space-y-5">
       <Panel title={`Qualified teams · ${edition.teams.length}`}>
-        <div className="flex flex-wrap gap-x-4 gap-y-2 p-3">
-          {edition.teams.map(code => <NationLink key={code} code={code} />)}
-        </div>
+        {props.groupQualifiedByConfederation ? (
+          <div className="overflow-x-auto">
+            <table className="tbl">
+              <thead><tr><th>Confederation</th><th>Qualified teams</th></tr></thead>
+              <tbody>
+                {["UEFA", "CONMEBOL", "CONCACAF", "AFC", "CAF", "OFC", "Other"].flatMap(confederation => {
+                  const teams = edition.teams.filter(code =>
+                    (getConfederation(code) ?? "Other") === confederation
+                  );
+                  if (teams.length === 0) return [];
+                  return [(
+                    <tr key={confederation}>
+                      <td className="whitespace-nowrap font-semibold">{confederation}</td>
+                      <td><div className="flex flex-wrap gap-x-4 gap-y-2">
+                        {teams.map(code => <NationLink key={code} code={code} />)}
+                      </div></td>
+                    </tr>
+                  )];
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="tbl min-w-max">
+              <tbody>
+                {Array.from({ length: Math.ceil(edition.teams.length / 6) }, (_, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {Array.from({ length: 6 }, (_, columnIndex) => {
+                      const code = edition.teams[rowIndex * 6 + columnIndex];
+                      return (
+                        <td key={columnIndex} className="whitespace-nowrap">
+                          {code && (
+                            <div className="flex items-center gap-2">
+                              <NationLink code={code} />
+                              {hosts.has(code) && <span className="rounded bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-black">Host</span>}
+                              {playoffTeams.has(code) && <span className="rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white">PO</span>}
+                            </div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Panel>
       <div className="grid gap-4 xl:grid-cols-2">
         <Panel title={`${props.title} pots`}>
@@ -199,7 +249,11 @@ export default function InternationalCupPage(props: InternationalCupPageProps) {
       />
       {tab === "draw" && (!selected
         ? <Panel><Empty>The {title} draw has not been made yet.</Empty></Panel>
-        : <DrawResults title={title} edition={selected} />
+        : <DrawResults
+          title={title}
+          edition={selected}
+          groupQualifiedByConfederation={props.groupQualifiedByConfederation}
+        />
       )}
       {tab === "groups" && (!selected
         ? <Panel><Empty>The {title} group stage has not been drawn yet.</Empty></Panel>

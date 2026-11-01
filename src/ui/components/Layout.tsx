@@ -62,6 +62,7 @@ function Sidebar() {
         <NavSection title="International">
           <NavLink to="/rankings" className={navClass}>World Rankings</NavLink>
           <NavLink to="/international" className={navClass}>International Windows</NavLink>
+          <NavLink to="/world-cup" className={navClass}>World Cup</NavLink>
         </NavSection>
         <NavSection title="Cups">
           <NavLink to="/cup" className={navClass}>{CUP_NAME}</NavLink>

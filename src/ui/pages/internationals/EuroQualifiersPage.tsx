@@ -134,7 +134,7 @@ function History(props: { editions: EuroQualifyingEdition[]; onSelect: (year: nu
           <tbody>
             {[...props.editions].sort((a, b) => b.tournamentYear - a.tournamentYear).map(edition => (
               <tr key={edition.id}>
-                <td className="font-semibold">{edition.tournamentYear}</td>
+                <td className="font-semibold">{edition.tournamentYear+1}</td>
                 <td>{edition.hosts.map(getNationName).join(" / ")}</td>
                 <td>{edition.groupCount}</td>
                 <td>{edition.directQualifiers.length || "In progress"}</td>

@@ -1,9 +1,11 @@
-import hostOptionsRaw from "../data/tournament_hosts.json";
+import hostOptionsRaw from "../data/intl/tournament_hosts.json";
 import { getCountriesByRegion, getNationName } from "../nations";
 import type { InternationalRound } from "./international";
 import {
   drawInternationalCupGroups,
-  createInternationalCupGroupMatches
+  createInternationalCupGroupMatches,
+  getCompetitivelyEligibleTeams,
+  getFixedInternationalCompetitionHosts
 } from "./internationalCompetitionsUtils";
 import type { InternationalCompetitionEdition } from "./internationalCompetitionsUtils";
 import type { GoldCupState } from "./goldCup";
@@ -41,13 +43,18 @@ export function createCopaAmericaEdition(
     throw new Error(`Gold Cup edition "${previousGoldCup.id}" does not have four semi-finalists.`);
   }
 
-  const conmebolTeams = getCountriesByRegion("CONMEBOL").map(nation => nation.code);
+  const conmebolTeams = getCompetitivelyEligibleTeams(
+    getCountriesByRegion("CONMEBOL").map(nation => nation.code),
+    year
+  );
   if (conmebolTeams.length !== 10) {
     throw new Error(`Copa América requires 10 CONMEBOL teams, but found ${conmebolTeams.length}.`);
   }
   const qualified = new Set([...conmebolTeams, ...goldCupSemiFinalists]);
-  const additionalConcacafTeams = getCountriesByRegion("CONCACAF")
-    .map(nation => nation.code)
+  const additionalConcacafTeams = getCompetitivelyEligibleTeams(
+    getCountriesByRegion("CONCACAF").map(nation => nation.code),
+    year
+  )
     .filter(code => !qualified.has(code))
     .sort((a, b) =>
       (worldRanks[a] ?? Number.MAX_SAFE_INTEGER) - (worldRanks[b] ?? Number.MAX_SAFE_INTEGER) ||
@@ -59,13 +66,17 @@ export function createCopaAmericaEdition(
     throw new Error(`Copa América requires 16 unique qualified teams, but received ${teams.length}.`);
   }
 
+  const fixedHosts = getFixedInternationalCompetitionHosts("COPA", year + 1);
   const eligibleHosts = (hostOptions.COPA ?? []).filter(option =>
     option.split("|").every(code => teams.includes(code))
   );
-  if (eligibleHosts.length === 0) {
+  if (!fixedHosts && eligibleHosts.length === 0) {
     throw new Error("No Copa América host configuration is eligible among the qualified teams.");
   }
-  const hosts = eligibleHosts[Math.floor(Math.random() * eligibleHosts.length)].split("|");
+  const hosts = fixedHosts ?? eligibleHosts[Math.floor(Math.random() * eligibleHosts.length)].split("|");
+  if (hosts.some(host => !teams.includes(host))) {
+    throw new Error(`Configured Copa América hosts for ${year} must be in the tournament field.`);
+  }
   const { pots, groups } = drawInternationalCupGroups(teams, hosts, worldRanks);
   const id = `COPA-${year}-${windowId}`;
   const edition: CopaAmericaEdition = {

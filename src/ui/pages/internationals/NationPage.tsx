@@ -211,6 +211,10 @@ function MatchesTab(props: { code: string }) {
                                               ? "EURO Qualifiers"
                                               : match.kind === "euroGroup" || match.kind === "euroKnockout"
                                                 ? "UEFA EURO"
+                                               : match.kind === "worldCupQualifier"
+                                                 ? "World Cup Qualifiers"
+                                                 : match.kind === "worldCupGroup" || match.kind === "worldCupKnockout"
+                                                   ? "World Cup"
                                 : "Gold Cup"}
                         </Link>
                       ) : match.kind}
@@ -261,6 +265,9 @@ function NationHistoryTab(props: { code: string }) {
       : []),
     ...(archive.euro?.completed && archive.euro.winner === props.code
       ? [{ name: "EURO Winners", year: archive.euro.year + 1 }]
+      : []),
+    ...(archive.worldCup?.tournament?.completed && archive.worldCup.tournament.winner === props.code
+      ? [{ name: "World Cup Winners", year: archive.worldCup.tournament.year + 1 }]
       : [])
   ]).sort((a, b) => b.year - a.year);
   const grouped = new Map<string, number[]>();

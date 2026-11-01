@@ -4,8 +4,6 @@
   "qualifier": 25,
   "continentalGroup": 35,
   "continentalKnockout": 40,
-  "worldCupGroup": 50,
-  "worldCupKnockout": 60,
   "goldCupPlayoff": 25,
   "goldCupGroup": 35,
   "goldCupKnockout": 40,
@@ -22,5 +20,8 @@
   "ofcCupKnockout": 40,
   "euroQualifier": 25,
   "euroGroup": 35,
-  "euroKnockout": 40
+  "euroKnockout": 40,
+  "worldCupQualifier": 25,
+  "worldCupGroup": 50,
+  "worldCupKnockout": 60
 }

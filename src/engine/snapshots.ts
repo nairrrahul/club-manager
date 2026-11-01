@@ -19,6 +19,7 @@ import type { AfconQualifyingEdition } from "./international/afcon";
 import type { AfcCupQualifyingEdition } from "./international/afcCup";
 import type { OfcCupQualifyingEdition } from "./international/ofcCup";
 import type { EuroQualifyingEdition } from "./international/euroQualifiers";
+import type { WorldCupEdition, WorldCupPath } from "./international/worldcup/types";
 import type { InternationalMatch } from "./international/international";
 
 // ---------------------------------------------------------------------------
@@ -231,6 +232,7 @@ export interface SeasonArchive {
   ofcCupQualifying?: OfcCupQualifyingEdition | null;
   euro?: InternationalCompetitionEdition | null;
   euroQualifying?: EuroQualifyingEdition | null;
+  worldCup?: WorldCupEdition | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -572,6 +574,13 @@ export function snapshotSeason(season: Season): SeasonArchive {
     leagues[Number(tier)] = snapshotLeague(season, tier);
   }
 
+  const worldCup = season.international.worldCup.editions.find(edition =>
+    edition.year === season.year ||
+    Object.values(edition.regions).some(region => Object.values(region.phases).some(phase =>
+      phase.groups.some(group => group.matches.flat().some(match => match.windowYear === season.year)) ||
+      phase.ties.some(tie => tie.firstLeg.windowYear === season.year || tie.secondLeg.windowYear === season.year)
+    ))
+  ) ?? null;
   return {
     year: season.year,
     label: seasonDisplay(season.year),
@@ -614,7 +623,88 @@ export function snapshotSeason(season: Season): SeasonArchive {
         edition.tournamentYear === season.year ||
         edition.groups.some(group => group.matches.flat().some(match => match.windowYear === season.year))
       ) ?? null
-    )
+    ),
+    worldCup: snapshotWorldCupEdition(worldCup)
+  };
+}
+
+function snapshotWorldCupPath(path: WorldCupPath): WorldCupPath {
+  return {
+    ...path,
+    teams: [...path.teams],
+    results: Object.fromEntries(Object.entries(path.results).map(([id, result]) => [id, {
+      ...result,
+      homePenalties: result.homePenalties ? [...result.homePenalties] : undefined,
+      awayPenalties: result.awayPenalties ? [...result.awayPenalties] : undefined
+    }])),
+    bracket: {
+      ...path.bracket,
+      rounds: path.bracket.rounds.map(round => round.map(match => ({
+        ...match,
+        player1: match.player1 ? { ...match.player1 } : null,
+        player2: match.player2 ? { ...match.player2 } : null,
+        sources: [...match.sources]
+      })))
+    }
+  };
+}
+
+function snapshotWorldCupEdition(edition: WorldCupEdition | null): WorldCupEdition | null {
+  if (!edition) return null;
+  const snapshotRegion = (region: WorldCupEdition["intercontinental"]) => ({
+    ...region,
+    teams: [...region.teams],
+    qualified: [...region.qualified],
+    intercontinental: [...region.intercontinental],
+    playoffQualifiers: [...region.playoffQualifiers],
+    playoffBottomSeeds: [...region.playoffBottomSeeds],
+    phases: Object.fromEntries(Object.entries(region.phases).map(([name, phase]) => [name, {
+      ...phase,
+      groups: phase.groups.map(group => ({
+        ...group,
+        teams: [...group.teams],
+        matches: group.matches.map(round => round.map(snapshotInternationalMatch))
+      })),
+      qualifiers: [...phase.qualifiers],
+      playoffTeams: [...phase.playoffTeams],
+      bottomSeeds: [...phase.bottomSeeds],
+      ties: phase.ties.map(tie => ({
+        ...tie,
+        firstLeg: snapshotInternationalMatch(tie.firstLeg),
+        secondLeg: snapshotInternationalMatch(tie.secondLeg)
+      })),
+      paths: phase.paths.map(snapshotWorldCupPath)
+    }]))
+  });
+  const tournament = edition.tournament ? {
+    ...edition.tournament,
+    hosts: [...edition.tournament.hosts],
+    teams: [...edition.tournament.teams],
+    pots: edition.tournament.pots.map(pot => [...pot]),
+    seedRanks: { ...edition.tournament.seedRanks },
+    playoffTeams: [...edition.tournament.playoffTeams],
+    semifinalists: [...edition.tournament.semifinalists],
+    groups: edition.tournament.groups.map(group => ({
+      ...group,
+      teams: [...group.teams],
+      matches: group.matches.map(round => round.map(snapshotInternationalMatch))
+    })),
+    knockout: edition.tournament.knockout?.map(round => ({
+      ...round,
+      matches: round.matches.map(match => ({
+        ...match,
+        fixture: snapshotInternationalMatch(match.fixture)
+      }))
+    })) ?? null
+  } : null;
+  return {
+    ...edition,
+    hosts: [...edition.hosts],
+    blockedConfederations: [...edition.blockedConfederations],
+    seedRanks: { ...edition.seedRanks },
+    regions: Object.fromEntries(Object.entries(edition.regions).map(([key, region]) => [key, snapshotRegion(region)])) as WorldCupEdition["regions"],
+    intercontinental: snapshotRegion(edition.intercontinental),
+    tournament
   };
 }
 

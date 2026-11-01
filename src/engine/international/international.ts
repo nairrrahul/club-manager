@@ -1,4 +1,4 @@
-import windowsRaw from "../data/international_windows.json";
+import windowsRaw from "../data/intl/international_windows.json";
 import importanceRaw from "../data/match_importance.json";
 import { nationInfo, getNationName } from "../nations";
 import { parseKOMatchWinner, simulateMatch, simulatePenaltyShootoutOnly } from "../matchEngine";
@@ -41,6 +41,41 @@ import {
   getEuroTournamentRounds, setEuroKnockoutWinner, startEuroRoundOf16
 } from "./euros";
 import type { EuroState } from "./euros";
+import {
+  completeAfricaQualifying, completeAfricaPlayoff, createAfricaQualifying
+} from "./worldcup/africa";
+import {
+  completeConcacafPreliminary, completeConcacafSecondRound, completeConcacafThirdRound,
+  createConcacafQualifying
+} from "./worldcup/concacaf";
+import {
+  completeAsiaPreliminary, completeAsiaSecondRound, completeAsiaThirdRound, createAsiaQualifying
+} from "./worldcup/asia";
+import {
+  completeOceaniaPreliminary, completeOceaniaSecondRound, completeOceaniaThirdRound,
+  createOceaniaQualifying
+} from "./worldcup/oceania";
+import {
+  completeEuropePlayoff, completeEuropeQualifying, createEuropeQualifying
+} from "./worldcup/europe";
+import { completeSouthAmericaQualifying, createSouthAmericaQualifying } from "./worldcup/southAmerica";
+import {
+  createIntercontinentalPlayoff, getIntercontinentalPlayoffRounds,
+  recordIntercontinentalPlayoffRound
+} from "./worldcup/intercontinental";
+import {
+  advanceWorldCupKnockout, createWorldCupTournament, getWorldCupGroupRounds,
+  recordWorldCupKnockoutWinner, startWorldCupRoundOf32
+} from "./worldcup/tournament";
+import {
+  createWorldCupState, ensureWorldCupEdition, findWorldCupEdition,
+  getWorldCupEdition, getWorldCupSeasonForWindow, getWorldCupWindowType
+} from "./worldcup/worldCup";
+import {
+  createGroupFixtures, createWorldCupGroupRounds, findWorldCupTie,
+  getWorldCupPathRound, getWorldCupTieRounds, recordWorldCupPathRound
+} from "./worldcup/utils";
+import type { WorldCupState, WorldCupEdition, WorldCupPhase } from "./worldcup/types";
 import type { NationsLeagueState } from "./nationsLeague";
 import {
   completeGoldCupPlayoff, createGoldCupEdition, createGoldCupPlayoffEdition,
@@ -50,9 +85,11 @@ import {
 import type { GoldCupState } from "./goldCup";
 import {
   advanceInternationalCupRound, setInternationalCupKnockoutWinner,
-  getInternationalWindowType, getNextCompetitionWindow
+  getDistributedInternationalRoundSchedule, getFixedInternationalCompetitionHosts,
+  getInternationalWindowType, getNextCompetitionWindow, isInternationalTeamCompetitivelyEligible
 } from "./internationalCompetitionsUtils";
 import type { InternationalCompetitionEdition } from "./internationalCompetitionsUtils";
+import { getWorldCupHostConfederations } from "./worldcup/hosts";
 import {
   createCopaAmericaEdition, createCopaAmericaState
 } from "./copaAmerica";
@@ -239,13 +276,26 @@ export interface InternationalMatch {
   euroPathMatch?: number;
   euroWinner?: string;
   euroKnockoutMatchId?: string;
+  worldCupEditionId?: string;
+  worldCupStage?: string;
+  worldCupPhase?: string;
+  worldCupGroup?: string;
+  worldCupRound?: number;
+  worldCupLeg?: 1 | 2;
+  worldCupTieId?: string;
+  worldCupPath?: string;
+  worldCupPathRound?: number;
+  worldCupPathMatch?: number;
+  worldCupMatchIndex?: number;
+  worldCupWinner?: string;
+  worldCupKnockoutMatchId?: string;
   homePenalties?: string[];
   awayPenalties?: string[];
 }
 
 export interface InternationalRound {
   matches: InternationalMatch[];
-  kind?: "friendly" | "nationsLeague" | "goldCupPlayoff" | "goldCup" | "copaAmerica" | "afconQualifier" | "afcon" | "afcCupQualifier" | "afcCup" | "ofcCupQualifier" | "ofcCup" | "euroQualifier" | "euro";
+  kind?: "friendly" | "nationsLeague" | "goldCupPlayoff" | "goldCup" | "copaAmerica" | "afconQualifier" | "afcon" | "afcCupQualifier" | "afcCup" | "ofcCupQualifier" | "ofcCup" | "euroQualifier" | "euro" | "worldCupQualifier" | "worldCup";
   label?: string;
   afconQualifierId?: string;
   afconStage?: "preliminary" | "main" | "tournamentGroup" | "tournamentKnockout";
@@ -260,6 +310,10 @@ export interface InternationalRound {
   euroStage?: "qualifying" | "playoff" | "group" | "knockout";
   euroRound?: number;
   euroTournamentYear?: number;
+  worldCupEditionId?: string;
+  worldCupStage?: string;
+  worldCupPhase?: string;
+  worldCupRound?: number;
   /** The one nation without a match in this set of fixtures (there is an odd number of nations). */
   leftOut: string | null;
 }
@@ -295,6 +349,7 @@ export interface InternationalState {
   ofcCup: OfcCupState;
   euroQualifiers: EuroQualifiersState;
   euro: EuroState;
+  worldCup: WorldCupState;
   /** The nation left out of the most recent set of fixtures (never left out twice in a row). */
   lastLeftOut: string | null;
   /** When true, windows must be simulated explicitly instead of automatically. */
@@ -311,6 +366,7 @@ export function createInternationalState(): InternationalState {
       points: info.rankingPts
     };
   }
+
   return {
     nations,
     windows: [],
@@ -323,9 +379,54 @@ export function createInternationalState(): InternationalState {
     ofcCup: createOfcCupState(),
     euroQualifiers: createEuroQualifiersState(),
     euro: createEuroState(),
+    worldCup: createWorldCupState(),
     lastLeftOut: null,
     explicitWindows: false
   };
+}
+
+export function migrateFixedInternationalHosts(state: InternationalState): void {
+  const updateCompletedEdition = (edition: InternationalCompetitionEdition, competition: string) => {
+    if (!edition.completed) return;
+    const hosts = getFixedInternationalCompetitionHosts(competition, edition.year + 1);
+    if (hosts) edition.hosts = hosts;
+  };
+
+  state.goldCup.editions.forEach(edition => updateCompletedEdition(edition, "GC"));
+  state.copaAmerica.editions.forEach(edition => updateCompletedEdition(edition, "COPA"));
+  state.afcon.qualifyingEditions.forEach(edition => {
+    if (!edition.completed) return;
+    const hosts = getFixedInternationalCompetitionHosts("AFCON", edition.year + 1);
+    if (hosts) edition.hosts = hosts;
+  });
+  state.afcon.editions.forEach(edition => updateCompletedEdition(edition, "AFCON"));
+  state.afcCup.qualifyingEditions.forEach(edition => {
+    if (!edition.completed) return;
+    const hosts = getFixedInternationalCompetitionHosts("AFCCUP", edition.year + 1);
+    if (hosts) edition.hosts = hosts;
+  });
+  state.afcCup.editions.forEach(edition => updateCompletedEdition(edition, "AFCCUP"));
+  state.ofcCup.qualifyingEditions.forEach(edition => {
+    if (!edition.completed) return;
+    const hosts = getFixedInternationalCompetitionHosts("OFCCUP", edition.year + 1);
+    if (hosts) edition.hosts = hosts;
+  });
+  state.ofcCup.editions.forEach(edition => updateCompletedEdition(edition, "OFCCUP"));
+  state.euroQualifiers.editions.forEach(edition => {
+    if (!edition.completed) return;
+    const hosts = getFixedInternationalCompetitionHosts("EURO", edition.tournamentYear + 1);
+    if (hosts) edition.hosts = hosts;
+  });
+  state.euro.editions.forEach(edition => updateCompletedEdition(edition, "EURO"));
+
+  for (const edition of state.worldCup.editions) {
+    if (!edition.tournament?.completed) continue;
+    const hosts = getFixedInternationalCompetitionHosts("WC", edition.year + 1);
+    if (!hosts) continue;
+    edition.hosts = hosts;
+    edition.blockedConfederations = getWorldCupHostConfederations(hosts);
+    edition.tournament.hosts = hosts;
+  }
 }
 
 const round2 = (value: number): number => Math.round(value * 100) / 100;
@@ -620,6 +721,7 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
   let afcCupTeams: string[] = [];
   let ofcCupTeams: string[] = [];
   let euroTeams: string[] = [];
+  let worldCupTeams: string[] = [];
   const afconWindowType = getAfconWindowType(season.year, def.id);
   const afconSuffix = afconWindowType?.slice(-1) as "1" | "2" | undefined;
   const afcCupWindowType = getAfcCupWindowType(season.year, def.id);
@@ -726,6 +828,140 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
     euroTeams = edition.teams;
     rounds.push(...getEuroTournamentRounds(edition));
   }
+  const worldCupCodes = ["UEFA", "CONCACAF", "CONMEBOL", "OFC", "AFC", "CAF"] as const;
+  const worldCupTypes = Object.fromEntries(worldCupCodes.map(confederation => [
+    confederation,
+    getWorldCupWindowType(confederation, season.year, def.id)
+  ])) as Record<typeof worldCupCodes[number], string | null>;
+  const worldCupTypeSet = new Set([
+    "SAWCQ", "CAFWCQ", "CAFWCQP", "CCWCQ1", "CCWCQ2", "CCWCQ3",
+    "AFCWCQ1", "AFCWCQ2", "AFCWCQ3", "OFCWCQ1", "OFCWCQ2", "OFCWCQ3",
+    "UEFAWCQM", "UEFAWCQP", "ICPO", "WC"
+  ]);
+  if (Object.values(worldCupTypes).some(type => type !== null && worldCupTypeSet.has(type))) {
+    const tournamentYear = getWorldCupSeasonForWindow(season.year, def.id);
+    const edition = ensureWorldCupEdition(
+      state.worldCup,
+      tournamentYear,
+      Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]))
+    );
+    const addPhaseTeams = (phaseName: string, regionName?: keyof WorldCupEdition["regions"]): WorldCupPhase | null => {
+      const region = regionName ? edition.regions[regionName] : edition.intercontinental;
+      const phase = region.phases[phaseName];
+      if (!phase) return null;
+      worldCupTeams.push(
+        ...phase.groups.flatMap(group => group.teams),
+        ...phase.ties.flatMap(tie => [tie.team1, tie.team2]),
+        ...phase.playoffTeams
+      );
+      return phase;
+    };
+    const addGroups = (phaseName: string, regionName: keyof WorldCupEdition["regions"]) => {
+      const phase = addPhaseTeams(phaseName, regionName);
+      if (!phase) throw new Error(`${regionName} World Cup phase ${phaseName} was not drawn.`);
+      const totalRounds = Math.max(...phase.groups.map(group => group.matches.length));
+      const schedule = getDistributedInternationalRoundSchedule(
+        regionName,
+        phaseName,
+        season.year,
+        def.id,
+        totalRounds
+      );
+      rounds.push(...createWorldCupGroupRounds(
+        phase, edition.id, phaseName, "worldCupQualifier",
+        season.year, def.id, def.afterMatchday, schedule.count, totalRounds, schedule.start
+      ));
+    };
+    const addTies = (phaseName: string, regionName: keyof WorldCupEdition["regions"]) => {
+      const phase = addPhaseTeams(phaseName, regionName);
+      if (!phase) throw new Error(`${regionName} World Cup phase ${phaseName} was not drawn.`);
+      rounds.push(...getWorldCupTieRounds(
+        phase, edition.id, phaseName, season.year, def.id, def.afterMatchday
+      ));
+    };
+    const addPaths = (phaseName: string, regionName: keyof WorldCupEdition["regions"]) => {
+      const phase = addPhaseTeams(phaseName, regionName);
+      if (!phase) throw new Error(`${regionName} World Cup phase ${phaseName} was not drawn.`);
+      const round = getWorldCupPathRound(
+        phase, edition.id, phaseName, season.year, def.id, def.afterMatchday
+      );
+      if (round) rounds.push(round);
+    };
+    const initialize = (regionName: keyof WorldCupEdition["regions"], phaseName: string, create: () => void) => {
+      if (!edition.regions[regionName].phases[phaseName]) create();
+    };
+    const ranksNow = () => Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]));
+
+    if (worldCupTypes.CONMEBOL === "SAWCQ") {
+      initialize("CONMEBOL", "SAWCQ", () => createSouthAmericaQualifying(edition));
+      addGroups("SAWCQ", "CONMEBOL");
+    }
+    if (worldCupTypes.CAF === "CAFWCQ") {
+      initialize("CAF", "CAFWCQ", () => createAfricaQualifying(edition));
+      addGroups("CAFWCQ", "CAF");
+    }
+    if (worldCupTypes.CAF === "CAFWCQP") {
+      const phase = addPhaseTeams("CAFWCQP", "CAF");
+      if (!phase) throw new Error("CAF World Cup playoff was not drawn after the main qualifying round.");
+      if (phase.ties.length > 0) addTies("CAFWCQP", "CAF");
+      else addPaths("CAFWCQP", "CAF");
+    }
+    if (worldCupTypes.CONCACAF === "CCWCQ1") {
+      initialize("CONCACAF", "CCWCQ1", () => createConcacafQualifying(edition, season.year, def.id, def.afterMatchday));
+      addTies("CCWCQ1", "CONCACAF");
+    }
+    if (worldCupTypes.CONCACAF === "CCWCQ2") addGroups("CCWCQ2", "CONCACAF");
+    if (worldCupTypes.CONCACAF === "CCWCQ3") addGroups("CCWCQ3", "CONCACAF");
+    if (worldCupTypes.AFC === "AFCWCQ1") {
+      initialize("AFC", "AFCWCQ1", () => createAsiaQualifying(edition, season.year, def.id, def.afterMatchday));
+      addTies("AFCWCQ1", "AFC");
+    }
+    if (worldCupTypes.AFC === "AFCWCQ2") addGroups("AFCWCQ2", "AFC");
+    if (worldCupTypes.AFC === "AFCWCQ3") addGroups("AFCWCQ3", "AFC");
+    if (worldCupTypes.OFC === "OFCWCQ1") {
+      initialize("OFC", "OFCWCQ1", () => createOceaniaQualifying(edition));
+      addPaths("OFCWCQ1", "OFC");
+    }
+    if (worldCupTypes.OFC === "OFCWCQ2") addGroups("OFCWCQ2", "OFC");
+    if (worldCupTypes.OFC === "OFCWCQ3") {
+      const phase = addPhaseTeams("OFCWCQ3", "OFC");
+      if (!phase) throw new Error("OFC third qualifying round was not drawn after the main round.");
+      if (phase.ties.length > 0) addTies("OFCWCQ3", "OFC");
+      else addPaths("OFCWCQ3", "OFC");
+    }
+    if (worldCupTypes.UEFA === "UEFAWCQM") {
+      initialize("UEFA", "UEFAWCQM", () => createEuropeQualifying(edition));
+      addGroups("UEFAWCQM", "UEFA");
+    }
+    if (worldCupTypes.UEFA === "UEFAWCQP") addPaths("UEFAWCQP", "UEFA");
+    if (Object.values(worldCupTypes).includes("ICPO")) {
+      if (!edition.intercontinental.phases.ICPO) {
+        createIntercontinentalPlayoff(edition, season.year, def.id, def.afterMatchday);
+      }
+      addPhaseTeams("ICPO");
+      rounds.push(...getIntercontinentalPlayoffRounds(edition, season.year, def.id, def.afterMatchday));
+    }
+    if (Object.values(worldCupTypes).includes("WC")) {
+      if (!edition.tournament) {
+        const uefaPlayoffWinners = edition.regions.UEFA.phases.UEFAWCQP?.qualifiers ?? [];
+        const playoffSet = new Set(uefaPlayoffWinners);
+        const direct = Object.values(edition.regions).flatMap(region =>
+          region.qualified.filter(code => !playoffSet.has(code))
+        );
+        edition.tournament = createWorldCupTournament(
+          season.year,
+          edition.hosts,
+          direct,
+          edition.intercontinental.qualified,
+          uefaPlayoffWinners,
+          ranksNow()
+        );
+      }
+      worldCupTeams.push(...edition.tournament.teams);
+      rounds.push(...getWorldCupGroupRounds(edition.tournament));
+    }
+    worldCupTeams = [...new Set(worldCupTeams)];
+  }
   if (getInternationalWindowType("CONMEBOL", season.year, def.id) === "COPA") {
     let edition = state.copaAmerica.editions.find(item => item.year === season.year && item.windowId === def.id);
     if (!edition) {
@@ -742,12 +978,28 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
     copaAmericaTeams = edition.teams;
     rounds.push(...createCupGroupRounds(edition, "copaAmerica"));
   }
+  const worldCupFixtureTeams = new Set(rounds
+    .filter(round => round.kind === "worldCupQualifier")
+    .flatMap(round => round.matches.flatMap(match => [match.home, match.away])));
+  for (const round of rounds) {
+    if (round.kind === "friendly") continue;
+    for (const match of round.matches) {
+      for (const code of [match.home, match.away]) {
+        if (!isInternationalTeamCompetitivelyEligible(code, season.year)) {
+          throw new Error(`${code} is banned from competitive international matches in the ${season.year}-${String(season.year + 1).slice(-2)} season.`);
+        }
+      }
+    }
+  }
   const friendlyNations = Object.keys(state.nations).filter(code =>
-    (getInternationalWindowType(getNationConfederation(code), season.year, def.id) === "FR" ||
+    (!isInternationalTeamCompetitivelyEligible(code, season.year) ||
+      getInternationalWindowType(getNationConfederation(code), season.year, def.id) === "FR" ||
       (afconWindowType !== null && getNationConfederation(code) === "CAF") ||
       (afcCupWindowType !== null && getNationConfederation(code) === "AFC") ||
       (ofcCupWindowType !== null && getNationConfederation(code) === "OFC") ||
       (euroWindowType !== null && getNationConfederation(code) === "UEFA") ||
+      (getWorldCupWindowType(getNationConfederation(code), season.year, def.id) !== null &&
+        worldCupTypeSet.has(getWorldCupWindowType(getNationConfederation(code), season.year, def.id)!)) ||
       (goldCupPlayoff !== null &&
         getNationConfederation(code) === "CONCACAF" &&
         !goldCupPlayoff.edition.entrants.includes(code))) &&
@@ -755,7 +1007,9 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
     !afconTeams.includes(code) &&
     !afcCupTeams.includes(code) &&
     !ofcCupTeams.includes(code) &&
-    !euroTeams.includes(code)
+    !euroTeams.includes(code) &&
+    !worldCupTeams.includes(code) &&
+    !worldCupFixtureTeams.has(code)
   );
   if (friendlyNations.length > 1) {
     for (let i = 0; i < FRIENDLY_SETS_PER_WINDOW; i++) {
@@ -764,6 +1018,11 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
       round.matches.forEach(match => played.add(pairKey(match.home, match.away)));
       rounds.push(round);
     }
+  }
+  if (rounds.some(round => round.kind === "friendly" && round.matches.some(match =>
+    worldCupFixtureTeams.has(match.home) || worldCupFixtureTeams.has(match.away)
+  ))) {
+    throw new Error("A nation cannot be scheduled for both a World Cup qualifier and a friendly in the same window.");
   }
 
   const nationsLeagueRounds = new Map<string, InternationalRound>();
@@ -855,7 +1114,8 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
       const isKnockout = match.goldCupStage === "knockout" ||
         match.copaAmericaStage === "knockout" || match.afconStage === "knockout" ||
         match.afcCupStage === "knockout" || match.ofcCupStage === "knockout" ||
-        match.euroStage === "playoff" || match.euroStage === "knockout";
+        match.euroStage === "playoff" || match.euroStage === "knockout" ||
+        match.worldCupPathMatch !== undefined || match.worldCupKnockoutMatchId !== undefined;
       const result = simulateMatch(homeTeam, awayTeam, isKnockout, "LEAGUE");
       const homeGoals = result.homeGoalInfo.homeGoals;
       const awayGoals = result.awayGoalInfo.awayGoals;
@@ -880,6 +1140,7 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
         penalties: { home: string[]; away: string[] } | null;
         shootout: ReturnType<typeof simulatePenaltyShootoutOnly> | null;
       } | null = null;
+      let worldCupTieResolution: { edition: WorldCupEdition; tieId: string; winner: string; shootout: ReturnType<typeof simulatePenaltyShootoutOnly> | null } | null = null;
       if (match.goldCupPlayoffId && match.goldCupTieId && match.goldCupLeg === 2) {
         const playoff = getGoldCupPlayoff(state.goldCup, match.goldCupPlayoffId);
         const tie = playoff.ties.find(candidate => candidate.id === match.goldCupTieId);
@@ -976,17 +1237,37 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
           shootout
         };
       }
+      if (match.worldCupEditionId && match.worldCupTieId && match.worldCupLeg === 2) {
+        const edition = state.worldCup.editions.find(item => item.id === match.worldCupEditionId);
+        const tie = edition ? findWorldCupTie(edition, match.worldCupTieId) : null;
+        if (!edition || !tie || tie.firstLeg.homeGoals === null || tie.firstLeg.awayGoals === null) {
+          throw new Error(`World Cup qualifying tie "${match.worldCupTieId}" has no completed first leg.`);
+        }
+        const aggregateTeam1 = tie.firstLeg.homeGoals + awayGoals;
+        const aggregateTeam2 = tie.firstLeg.awayGoals + homeGoals;
+        let winner = aggregateTeam1 > aggregateTeam2 ? tie.team1 : tie.team2;
+        let shootout: ReturnType<typeof simulatePenaltyShootoutOnly> | null = null;
+        if (aggregateTeam1 === aggregateTeam2) {
+          shootout = simulatePenaltyShootoutOnly(
+            { ID: 0, Team: tie.team1, Overall: state.nations[tie.team1].actualOverall } as unknown as Team,
+            { ID: 0, Team: tie.team2, Overall: state.nations[tie.team2].actualOverall } as unknown as Team
+          );
+          winner = parseKOMatchWinner(shootout).Team;
+        }
+        worldCupTieResolution = { edition, tieId: tie.id, winner, shootout };
+      }
 
       const importance = MATCH_IMPORTANCE[match.kind];
       const hasShootout = Boolean(
         (result.homeGoalInfo.penalties && result.awayGoalInfo.penalties) ||
         (playoffResolution?.shootout && homeGoals === awayGoals) ||
         (afconTieResolution?.shootout && homeGoals === awayGoals) ||
-        (afcCupTieResolution?.shootout && homeGoals === awayGoals)
+        (afcCupTieResolution?.shootout && homeGoals === awayGoals) ||
+        (worldCupTieResolution?.shootout && homeGoals === awayGoals)
       );
       const homeOutcome: MatchOutcome = hasShootout
-        ? playoffResolution?.shootout || afconTieResolution?.shootout || afcCupTieResolution?.shootout
-          ? (playoffResolution?.winner ?? afconTieResolution?.winner ?? afcCupTieResolution?.winner) === match.home ? "win" : "loss"
+        ? playoffResolution?.shootout || afconTieResolution?.shootout || afcCupTieResolution?.shootout || worldCupTieResolution?.shootout
+        ? (playoffResolution?.winner ?? afconTieResolution?.winner ?? afcCupTieResolution?.winner ?? worldCupTieResolution?.winner) === match.home ? "win" : "loss"
           : parseKOMatchWinner(result) === homeTeam ? "win" : "loss"
         : homeGoals > awayGoals ? "win" : homeGoals < awayGoals ? "loss" : "draw";
       const awayOutcome: MatchOutcome = homeOutcome === "win" ? "loss" : homeOutcome === "loss" ? "win" : "draw";
@@ -1000,13 +1281,13 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
       match.homeChange = round2(homeChange);
       match.awayChange = round2(awayChange);
       match.homePenalties = result.homeGoalInfo.penalties ?? (
-        (playoffResolution?.shootout || afconTieResolution?.shootout || afcCupTieResolution?.shootout) && homeGoals === awayGoals
-          ? [...((playoffResolution?.shootout ?? afconTieResolution?.shootout ?? afcCupTieResolution?.shootout)?.awayGoalInfo.penalties ?? [])]
+        (playoffResolution?.shootout || afconTieResolution?.shootout || afcCupTieResolution?.shootout || worldCupTieResolution?.shootout) && homeGoals === awayGoals
+          ? [...((playoffResolution?.shootout ?? afconTieResolution?.shootout ?? afcCupTieResolution?.shootout ?? worldCupTieResolution?.shootout)?.awayGoalInfo.penalties ?? [])]
           : undefined
       );
       match.awayPenalties = result.awayGoalInfo.penalties ?? (
-        (playoffResolution?.shootout || afconTieResolution?.shootout || afcCupTieResolution?.shootout) && homeGoals === awayGoals
-          ? [...((playoffResolution?.shootout ?? afconTieResolution?.shootout ?? afcCupTieResolution?.shootout)?.homeGoalInfo.penalties ?? [])]
+        (playoffResolution?.shootout || afconTieResolution?.shootout || afcCupTieResolution?.shootout || worldCupTieResolution?.shootout) && homeGoals === awayGoals
+          ? [...((playoffResolution?.shootout ?? afconTieResolution?.shootout ?? afcCupTieResolution?.shootout ?? worldCupTieResolution?.shootout)?.homeGoalInfo.penalties ?? [])]
           : undefined
       );
       if (playoffResolution) {
@@ -1035,6 +1316,11 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
           afcCupTieResolution.winner,
           afcCupTieResolution.penalties
         );
+      }
+      if (worldCupTieResolution) {
+        const tie = findWorldCupTie(worldCupTieResolution.edition, worldCupTieResolution.tieId);
+        if (!tie) throw new Error(`Unknown World Cup qualifying tie "${worldCupTieResolution.tieId}".`);
+        tie.winner = worldCupTieResolution.winner;
       }
 
       if (match.goldCupEditionId && match.goldCupKnockoutMatchId) {
@@ -1082,6 +1368,15 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
           if (!edition) throw new Error(`Unknown EURO edition "${match.euroEditionId}".`);
           setEuroKnockoutWinner(edition, match.euroKnockoutMatchId, winner);
         }
+      }
+      if (match.worldCupStage === "knockout" && match.worldCupEditionId && match.worldCupKnockoutMatchId) {
+        const edition = getWorldCupEdition(state.worldCup, match.worldCupEditionId);
+        const winner = hasShootout ? parseKOMatchWinner(result).Team : homeGoals > awayGoals ? match.home : match.away;
+        match.worldCupWinner = winner;
+        if (edition.tournament) recordWorldCupKnockoutWinner(edition.tournament, match.worldCupKnockoutMatchId, winner);
+      } else if (match.worldCupPathMatch !== undefined) {
+        const winner = hasShootout ? parseKOMatchWinner(result).Team : homeGoals > awayGoals ? match.home : match.away;
+        match.worldCupWinner = winner;
       }
 
       awardCaps(match.home);
@@ -1310,6 +1605,71 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
         if (nextRound) window.rounds.push(nextRound);
       }
     }
+    if (round.kind === "worldCupQualifier" && round.worldCupEditionId && round.worldCupPhase) {
+      const edition = getWorldCupEdition(state.worldCup, round.worldCupEditionId);
+      edition.seedRanks = Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]));
+      const phaseName = round.worldCupPhase;
+      const region = phaseName === "ICPO"
+        ? edition.intercontinental
+        : Object.values(edition.regions).find(item => item.phases[phaseName]);
+      const phase = region?.phases[phaseName];
+      if (!phase) throw new Error(`Unknown World Cup qualifying phase "${phaseName}".`);
+
+      if (phase.groups.length > 0) {
+        phase.roundsPlayed++;
+        const totalRounds = Math.max(...phase.groups.map(group => group.matches.length));
+        if (phase.roundsPlayed >= totalRounds) {
+          phase.completed = true;
+          if (phaseName === "SAWCQ") completeSouthAmericaQualifying(edition);
+          else if (phaseName === "CAFWCQ") completeAfricaQualifying(edition, window.year, window.windowId, window.afterMatchday);
+          else if (phaseName === "CCWCQ2") completeConcacafSecondRound(edition);
+          else if (phaseName === "CCWCQ3") completeConcacafThirdRound(edition);
+          else if (phaseName === "AFCWCQ2") completeAsiaSecondRound(edition);
+          else if (phaseName === "AFCWCQ3") completeAsiaThirdRound(edition);
+          else if (phaseName === "OFCWCQ2") completeOceaniaSecondRound(edition, window.year, window.windowId, window.afterMatchday);
+          else if (phaseName === "UEFAWCQM") {
+            completeEuropeQualifying(edition, state.nationsLeague.editions);
+          }
+        }
+      } else if (phase.ties.length > 0 && round.worldCupRound === 2) {
+        if (phase.ties.some(tie => tie.winner === null)) {
+          throw new Error(`World Cup qualifying ties in ${phaseName} have not all completed.`);
+        }
+        phase.completed = true;
+        if (phaseName === "CCWCQ1") completeConcacafPreliminary(edition);
+        else if (phaseName === "AFCWCQ1") completeAsiaPreliminary(edition);
+        else if (phaseName === "CAFWCQP") completeAfricaPlayoff(edition);
+        else if (phaseName === "OFCWCQ3") completeOceaniaThirdRound(edition);
+      } else if (phase.paths.length > 0) {
+        const pathsComplete = phaseName === "ICPO"
+          ? recordIntercontinentalPlayoffRound(edition, round.matches)
+          : recordWorldCupPathRound(phase, round.matches);
+        if (pathsComplete) {
+          if (phaseName === "OFCWCQ1") completeOceaniaPreliminary(edition);
+          else if (phaseName === "OFCWCQ3") completeOceaniaThirdRound(edition);
+          else if (phaseName === "CAFWCQP") completeAfricaPlayoff(edition);
+          else if (phaseName === "UEFAWCQP") completeEuropePlayoff(edition);
+        } else {
+          const next = phaseName === "ICPO"
+            ? getIntercontinentalPlayoffRounds(edition, window.year, window.windowId, window.afterMatchday)[0] ?? null
+            : getWorldCupPathRound(phase, edition.id, phaseName, window.year, window.windowId, window.afterMatchday);
+          if (next) window.rounds.push(next);
+        }
+      }
+    }
+    if (round.kind === "worldCup" && round.worldCupEditionId && round.worldCupStage) {
+      const edition = getWorldCupEdition(state.worldCup, round.worldCupEditionId);
+      if (round.worldCupStage === "group" && round.worldCupRound === 3 && edition.tournament) {
+        const knockout = startWorldCupRoundOf32(edition.tournament);
+        if (knockout) window.rounds.push(knockout);
+      } else if (round.worldCupStage === "knockout" && edition.tournament) {
+        const knockoutRoundIndex = edition.tournament.knockout?.findIndex(knockoutRound =>
+          knockoutRound.matches.some(knockoutMatch => round.matches.includes(knockoutMatch.fixture))
+        ) ?? -1;
+        const next = advanceWorldCupKnockout(edition.tournament, knockoutRoundIndex);
+        if (next) window.rounds.push(next);
+      }
+    }
   }
 
   drawCopaAmericaIfDue(state, window.year, window.windowId);
@@ -1326,9 +1686,15 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
   );
   if (upcomingOfcQualifier && upcomingOfcQualifier.offset === 1 &&
     !findOfcCupQualifier(state.ofcCup, upcomingOfcQualifier.year)) {
+    const tournamentWindow = getNextCompetitionWindow(
+      upcomingOfcQualifier.year,
+      upcomingOfcQualifier.def.id,
+      (year, id) => getOfcCupWindowType(year, id) === "OFCCUP"
+    );
     createOfcCupQualifierEdition(
       state.ofcCup,
       upcomingOfcQualifier.year,
+      tournamentWindow.year,
       Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]))
     );
   }
@@ -1354,6 +1720,84 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
           afterMatchday: window.afterMatchday
         },
         previousHosts
+      );
+    }
+  }
+  const upcomingWorldCupDrawTypes = ["UEFA", "CONCACAF", "CONMEBOL", "OFC", "AFC", "CAF"] as const;
+  const worldCupQualifyingComplete = (edition: WorldCupEdition): boolean => {
+    const requiredPhases = [
+      edition.regions.CONMEBOL.phases.SAWCQ,
+      edition.regions.CAF.phases.CAFWCQ,
+      edition.regions.CAF.phases.CAFWCQP,
+      edition.regions.CONCACAF.phases.CCWCQ1,
+      edition.regions.CONCACAF.phases.CCWCQ2,
+      edition.regions.CONCACAF.phases.CCWCQ3,
+      edition.regions.AFC.phases.AFCWCQ1,
+      edition.regions.AFC.phases.AFCWCQ2,
+      edition.regions.AFC.phases.AFCWCQ3,
+      edition.regions.OFC.phases.OFCWCQ1,
+      edition.regions.OFC.phases.OFCWCQ2,
+      edition.regions.OFC.phases.OFCWCQ3,
+      edition.regions.UEFA.phases.UEFAWCQM,
+      edition.regions.UEFA.phases.UEFAWCQP
+    ];
+    const intercontinental = edition.intercontinental.phases.ICPO;
+    return requiredPhases.every(phase => phase?.completed) &&
+      intercontinental?.completed === true &&
+      intercontinental.playoffComplete;
+  };
+  for (const confederation of upcomingWorldCupDrawTypes) {
+    const upcoming = findUpcomingWindow(window.year, window.windowId, (candidateYear, candidateDef) =>
+      getWorldCupWindowType(confederation, candidateYear, candidateDef.id) !== null
+    );
+    if (!upcoming || upcoming.offset !== 1) continue;
+    const upcomingType = getWorldCupWindowType(confederation, upcoming.year, upcoming.def.id);
+    if (!upcomingType) continue;
+    const tournamentYear = getWorldCupSeasonForWindow(upcoming.year, upcoming.def.id);
+    const edition = ensureWorldCupEdition(
+      state.worldCup,
+      tournamentYear,
+      Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]))
+    );
+    if (upcomingType === "SAWCQ" && !edition.regions.CONMEBOL.phases.SAWCQ) {
+      createSouthAmericaQualifying(edition);
+    } else if (upcomingType === "CAFWCQ" && !edition.regions.CAF.phases.CAFWCQ) {
+      createAfricaQualifying(edition);
+    } else if (upcomingType === "CCWCQ1" && !edition.regions.CONCACAF.phases.CCWCQ1) {
+      createConcacafQualifying(edition, upcoming.year, upcoming.def.id, upcoming.def.afterMatchday);
+    } else if (upcomingType === "AFCWCQ1" && !edition.regions.AFC.phases.AFCWCQ1) {
+      createAsiaQualifying(edition, upcoming.year, upcoming.def.id, upcoming.def.afterMatchday);
+    } else if (upcomingType === "OFCWCQ1" && !edition.regions.OFC.phases.OFCWCQ1) {
+      createOceaniaQualifying(edition);
+    } else if (upcomingType === "UEFAWCQM" && !edition.regions.UEFA.phases.UEFAWCQM) {
+      createEuropeQualifying(edition);
+    } else if (upcomingType === "ICPO" && !edition.intercontinental.phases.ICPO) {
+      createIntercontinentalPlayoff(edition, upcoming.year, upcoming.def.id, upcoming.def.afterMatchday);
+    } else if (upcomingType === "WC" && !edition.tournament) {
+      if (!worldCupQualifyingComplete(edition)) continue;
+      const uefaPlayoffWinners = edition.regions.UEFA.phases.UEFAWCQP?.qualifiers ?? [];
+      const playoffSet = new Set(uefaPlayoffWinners);
+      const direct = Object.values(edition.regions).flatMap(region =>
+        region.qualified.filter(code => !playoffSet.has(code))
+      );
+      const tournamentTeams = [
+        ...edition.hosts,
+        ...direct,
+        ...edition.intercontinental.qualified,
+        ...uefaPlayoffWinners
+      ];
+      if (tournamentTeams.length !== 48 || new Set(tournamentTeams).size !== 48) {
+        throw new Error(
+          `World Cup qualification completed with ${tournamentTeams.length} entries (${new Set(tournamentTeams).size} unique); expected 48.`
+        );
+      }
+      edition.tournament = createWorldCupTournament(
+        upcoming.year,
+        edition.hosts,
+        direct,
+        edition.intercontinental.qualified,
+        uefaPlayoffWinners,
+        Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]))
       );
     }
   }
@@ -1404,6 +1848,27 @@ export interface NationMatchRow {
   competitionLink?: string;
   stage?: string;
   penaltyShootout?: { goalsFor: number; goalsAgainst: number };
+}
+
+function getWorldCupPhaseLabel(phase?: string): string {
+  const labels: Record<string, string> = {
+    SAWCQ: "South American Qualifying",
+    CAFWCQ: "African Qualifying",
+    CAFWCQP: "African Play-off",
+    CCWCQ1: "CONCACAF Preliminary Round",
+    CCWCQ2: "CONCACAF Second Round",
+    CCWCQ3: "CONCACAF Third Round",
+    AFCWCQ1: "Asian Preliminary Round",
+    AFCWCQ2: "Asian Second Round",
+    AFCWCQ3: "Asian Third Round",
+    OFCWCQ1: "OFC Preliminary Round",
+    OFCWCQ2: "OFC Second Round",
+    OFCWCQ3: "OFC Third Round",
+    UEFAWCQM: "European Qualifying",
+    UEFAWCQP: "European Play-off",
+    ICPO: "Intercontinental Play-off"
+  };
+  return labels[phase ?? ""] ?? (phase || "Qualifying");
 }
 
 /** Played international matches for a nation, oldest first. */
@@ -1490,6 +1955,22 @@ export function getNationMatches(state: InternationalState, code: string): Natio
                                               : match.euroKnockoutMatchId?.startsWith("QF") ? "Quarter-finals"
                                                 : match.euroKnockoutMatchId?.startsWith("SF") ? "Semi-finals"
                                                   : match.euroKnockoutMatchId === "F" ? "Final" : "Knockout"}`
+                                              : match.kind === "worldCupQualifier"
+                                                ? `World Cup ${getWorldCupPhaseLabel(match.worldCupPhase ?? match.worldCupStage)}${
+                                                  match.worldCupPath
+                                                    ? ` · Path ${match.worldCupPath} · Round ${match.worldCupPathRound ?? "—"}`
+                                                  : match.worldCupTieId
+                                                    ? ` · Leg ${match.worldCupLeg ?? "—"}`
+                                                    : ` · Matchday ${match.worldCupRound ?? "—"}`
+                                                }`
+                                                : match.kind === "worldCupGroup"
+                                                  ? `World Cup Group Stage · Matchday ${match.worldCupRound ?? "—"}`
+                                                  : match.kind === "worldCupKnockout"
+                                                    ? `World Cup ${match.worldCupKnockoutMatchId?.startsWith("R32") ? "Round of 32"
+                                                      : match.worldCupKnockoutMatchId?.startsWith("R16") ? "Round of 16"
+                                                        : match.worldCupKnockoutMatchId?.startsWith("QF") ? "Quarter-finals"
+                                                          : match.worldCupKnockoutMatchId?.startsWith("SF") ? "Semi-finals"
+                                                            : match.worldCupKnockoutMatchId === "F" ? "Final" : "Knockout"}`
                     : undefined,
           penaltyShootout: shootoutFor && shootoutAgainst
             ? {
@@ -1521,7 +2002,14 @@ export function getNationMatches(state: InternationalState, code: string): Natio
                                   ? "/euro-qualifiers"
                                   : match.kind === "euroGroup" || match.kind === "euroKnockout"
                                     ? "/euro"
-                  : undefined
+                                    : match.kind === "worldCupQualifier"
+                                      ? match.worldCupPhase === "ICPO"
+                                      || match.worldCupStage === "ICPO"
+                                        ? "/world-cup-intercontinental-playoff"
+                                        : `/world-cup-qualifiers/${getNationConfederation(code)}`
+                                      : match.kind === "worldCupGroup" || match.kind === "worldCupKnockout"
+                                        ? "/world-cup"
+                                        : undefined
         });
       }
     }

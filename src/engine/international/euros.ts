@@ -1,6 +1,7 @@
 import { createTwentyFourTeamRoundOf16, pairKnockoutWinners } from "../knockout24";
 import { shuffledCopy } from "../utils";
 import {
+  assignHostsToGroups,
   createInternationalCupGroupMatches,
   getInternationalCupStandings
 } from "./internationalCompetitionsUtils";
@@ -53,7 +54,13 @@ function drawEuroGroups(
     throw new Error("EURO draw must produce four pots of six teams.");
   }
   const groups = groupNames.map(() => [] as string[]);
-  for (const pot of pots) shuffledCopy(pot).forEach((team, index) => groups[index].push(team));
+  const hostGroupIndexes = assignHostsToGroups(groups, groupNames, hosts);
+  const nonHostGroupIndexes = groups.map((_, index) => index).filter(index => !hostGroupIndexes.has(index));
+  shuffledCopy(potOne.filter(team => !hostSet.has(team)))
+    .forEach((team, index) => groups[nonHostGroupIndexes[index]].push(team));
+  for (const pot of pots.slice(1)) {
+    shuffledCopy(pot).forEach((team, index) => groups[index].push(team));
+  }
   return { pots, groups };
 }
 

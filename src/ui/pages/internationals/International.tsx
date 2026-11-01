@@ -48,6 +48,8 @@ function WindowView(props: { window: WindowRecord }) {
   const ofcCupRounds = window.rounds.filter(round => round.kind === "ofcCup");
   const euroQualifierRounds = window.rounds.filter(round => round.kind === "euroQualifier");
   const euroRounds = window.rounds.filter(round => round.kind === "euro");
+  const worldCupQualifierRounds = window.rounds.filter(round => round.kind === "worldCupQualifier");
+  const worldCupRounds = window.rounds.filter(round => round.kind === "worldCup");
 
   const renderRounds = (rounds: typeof window.rounds, separateByConfederation = false) =>
     rounds.map((round, index) => {
@@ -168,6 +170,18 @@ function WindowView(props: { window: WindowRecord }) {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">UEFA EURO</h2>
           {renderRounds(euroRounds)}
+        </section>
+      )}
+      {worldCupQualifierRounds.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">World Cup Qualifiers</h2>
+          {renderRounds(worldCupQualifierRounds)}
+        </section>
+      )}
+      {worldCupRounds.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">World Cup</h2>
+          {renderRounds(worldCupRounds)}
         </section>
       )}
     </div>

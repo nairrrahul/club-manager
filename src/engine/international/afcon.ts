@@ -1,8 +1,9 @@
-import hostOptionsRaw from "../data/tournament_hosts.json";
+import hostOptionsRaw from "../data/intl/tournament_hosts.json";
 import { getCountriesByRegion } from "../nations";
 import { createTwentyFourTeamRoundOf16, pairKnockoutWinners } from "../knockout24";
 import {
   drawInternationalCupGroups, createInternationalCupGroupMatches, getInternationalCupStandings,
+  getCompetitivelyEligibleTeams, getDistributedInternationalRoundSchedule, getFixedInternationalCompetitionHosts,
   getInternationalWindowType, getNextCompetitionWindow
 } from "./internationalCompetitionsUtils";
 import type {
@@ -156,16 +157,19 @@ export function createAfconQualifierEdition(
 ): AfconQualifyingEdition {
   const previous = [...state.qualifyingEditions].sort((a, b) => b.year - a.year)[0];
   const previousHosts = new Set(previous?.hosts ?? []);
+  const tournamentWindow = getNextAfconTournamentWindow(year, windowId, suffix);
+  const fixedHosts = getFixedInternationalCompetitionHosts("AFCON", tournamentWindow.year + 1);
   const eligible = hostOptions
     .map(option => option.split("|"))
     .filter(option => option.every(code => !previousHosts.has(code)));
-  if (eligible.length === 0) {
+  if (!fixedHosts && eligible.length === 0) {
     throw new Error(`No AFCON ${suffix} host configuration avoids hosting the previous edition.`);
   }
-  const hosts = [...eligible[Math.floor(Math.random() * eligible.length)]];
+  const hosts = fixedHosts ?? [...eligible[Math.floor(Math.random() * eligible.length)]];
   const hostSet = new Set(hosts);
-  const ranked = getCountriesByRegion("CAF").map(nation => nation.code);
-  if (ranked.length !== 54) throw new Error(`AFCON qualifying expects 54 CAF nations, but found ${ranked.length}.`);
+  const allTeams = getCountriesByRegion("CAF").map(nation => nation.code);
+  if (allTeams.length !== 54) throw new Error(`AFCON qualifying expects 54 CAF nations, but found ${allTeams.length}.`);
+  const ranked = getCompetitivelyEligibleTeams(allTeams, tournamentWindow.year);
   ranked.sort((a, b) =>
     (worldRanks[a] ?? Number.MAX_SAFE_INTEGER) - (worldRanks[b] ?? Number.MAX_SAFE_INTEGER) || a.localeCompare(b)
   );
@@ -290,16 +294,20 @@ export function getAfconMainRounds(
 ): InternationalRound[] {
   if (!edition.mainGroups) throw new Error(`AFCON main qualifying groups are not drawn for "${edition.id}".`);
   const mainGroups = edition.mainGroups;
-  return [0, 1].flatMap(offset => {
-    const roundIndex = edition.mainRoundsPlayed + offset;
-    if (roundIndex >= 6) return [];
+  const competitionType = getInternationalWindowType("CAF", year, windowId);
+  const schedule = getDistributedInternationalRoundSchedule("CAF", competitionType, year, windowId, 6);
+  if (edition.mainRoundsPlayed !== schedule.start) {
+    throw new Error(`AFCON qualifying expected matchday ${schedule.start + 1}, but ${edition.mainRoundsPlayed} matchdays have been played.`);
+  }
+  return Array.from({ length: schedule.count }, (_, offset) => {
+    const roundIndex = schedule.start + offset;
     const matches = mainGroups.flatMap(group => group.matches[roundIndex]);
     matches.forEach(match => {
       match.windowYear = year;
       match.windowId = windowId;
       match.windowMatchday = windowMatchday;
     });
-    return [{
+    return {
       kind: "afconQualifier" as const,
       label: `AFCON Qualifying · Main round · Matchday ${roundIndex + 1}`,
       leftOut: null,
@@ -307,7 +315,7 @@ export function getAfconMainRounds(
       afconStage: "main" as const,
       afconRound: roundIndex + 1,
       matches
-    }];
+    };
   });
 }
 

@@ -152,7 +152,15 @@ export function runSearch(game: Game, rawQuery: string): SearchResult[] {
     { label: "OFC Cup", sub: "International · OFC", to: "/ofc-cup", extra: "ofc oceania cup" },
     { label: "OFC Cup Qualifiers", sub: "International · OFC", to: "/ofc-cup-qualifiers", extra: "ofc cup qualifiers" },
     { label: "UEFA EURO", sub: "International · UEFA", to: "/euro", extra: "uefa euro european championship euros" },
-    { label: "EURO Qualifiers", sub: "International · UEFA", to: "/euro-qualifiers", extra: "euro qualifiers playoff" }
+    { label: "EURO Qualifiers", sub: "International · UEFA", to: "/euro-qualifiers", extra: "euro qualifiers playoff" },
+    { label: "World Cup", sub: "International · FIFA", to: "/world-cup", extra: "fifa world cup" },
+    ...(["UEFA", "CONCACAF", "CONMEBOL", "OFC", "AFC", "CAF"] as const).map(confederation => ({
+      label: `${confederation} World Cup Qualifiers`,
+      sub: `International · ${confederation}`,
+      to: `/world-cup-qualifiers/${confederation}`,
+      extra: `world cup qualifiers ${confederation.toLowerCase()}`
+    })),
+    { label: "World Cup Intercontinental Playoff", sub: "International · FIFA", to: "/world-cup-intercontinental-playoff", extra: "world cup intercontinental playoff icpo" }
   ];
   for (const item of all) {
     if (normalizeText(`${item.label} ${item.extra}`).includes(query)) {

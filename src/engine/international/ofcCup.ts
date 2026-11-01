@@ -1,9 +1,12 @@
-import hostOptionsRaw from "../data/tournament_hosts.json";
+import hostOptionsRaw from "../data/intl/tournament_hosts.json";
 import { getCountriesByRegion } from "../nations";
 import { shuffledCopy } from "../utils";
 import {
   createInternationalCupGroupMatches,
   drawInternationalCupGroups,
+  getCompetitivelyEligibleTeams,
+  getDistributedInternationalRoundSchedule,
+  getFixedInternationalCompetitionHosts,
   getInternationalCupStandings,
   getInternationalWindowType,
   getNextCompetitionWindow
@@ -18,7 +21,6 @@ import type { InternationalMatch, InternationalRound } from "./international";
 const hostOptions = (hostOptionsRaw as Record<string, string[]>).OFCCUP ?? [];
 const qualifierGroupNames = ["A", "B"];
 const tournamentGroupNames = ["A", "B"];
-const QUALIFYING_MATCHDAYS_PER_WINDOW = [3, 3, 2, 2];
 
 export interface OfcCupQualifyingEdition {
   id: string;
@@ -120,13 +122,18 @@ export function getOfcCupQualifierStandings(
 export function createOfcCupQualifierEdition(
   state: OfcCupState,
   year: number,
+  tournamentYear: number,
   worldRanks: Record<string, number>
 ): OfcCupQualifyingEdition {
-  const hostOption = hostOptions[Math.floor(Math.random() * hostOptions.length)];
-  if (!hostOption) throw new Error("No OFC Cup host configuration is available.");
-  const hosts = hostOption.split("|");
+  const fixedHosts = getFixedInternationalCompetitionHosts("OFCCUP", tournamentYear + 1);
+  const hostOption = fixedHosts ? null : hostOptions[Math.floor(Math.random() * hostOptions.length)];
+  if (!fixedHosts && !hostOption) throw new Error("No OFC Cup host configuration is available.");
+  const hosts = fixedHosts ?? hostOption!.split("|");
   if (hosts.length !== 1) throw new Error(`OFC Cup requires one host; found ${hosts.length}.`);
-  const allTeams = getCountriesByRegion("OFC").map(nation => nation.code);
+  const allTeams = getCompetitivelyEligibleTeams(
+    getCountriesByRegion("OFC").map(nation => nation.code),
+    year
+  );
   const teams = allTeams.filter(code => !hosts.includes(code));
   if (teams.length !== 10) {
     throw new Error(`OFC Cup qualifying requires ten teams after hosting selection; found ${teams.length}.`);
@@ -175,17 +182,12 @@ export function getOfcCupQualifyingRounds(
   windowId: string,
   windowMatchday: number
 ): InternationalRound[] {
-  let scheduledStart = 0;
-  const matchdayCount = QUALIFYING_MATCHDAYS_PER_WINDOW.find(count => {
-    const startsHere = edition.roundsPlayed === scheduledStart;
-    scheduledStart += count;
-    return startsHere;
-  });
-  if (matchdayCount === undefined) {
-    throw new Error(`OFC Cup qualifying "${edition.id}" has no remaining scheduled matchdays.`);
+  const schedule = getDistributedInternationalRoundSchedule("OFC", "OFCCUPQ", year, windowId, 10);
+  if (edition.roundsPlayed !== schedule.start) {
+    throw new Error(`OFC Cup qualifying expected matchday ${schedule.start + 1}, but ${edition.roundsPlayed} matchdays have been played.`);
   }
-  return Array.from({ length: matchdayCount }, (_, offset) => {
-    const roundIndex = edition.roundsPlayed + offset;
+  return Array.from({ length: schedule.count }, (_, offset) => {
+    const roundIndex = schedule.start + offset;
     const matches = edition.groups.flatMap(group => group.matches[roundIndex]);
     matches.forEach(match => {
       match.windowYear = year;

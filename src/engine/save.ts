@@ -4,7 +4,9 @@ import type { Season } from "./season";
 import { seasonDisplay } from "./constants";
 import { createFreeAgentState, generateFreeAgents } from "./freeAgents";
 import { FREE_AGENTS_LABEL } from "./playerHistory";
-import { createInternationalState, startWindowIfDue, collectAllPlayers } from "./international/international";
+import {
+  createInternationalState, startWindowIfDue, collectAllPlayers, migrateFixedInternationalHosts
+} from "./international/international";
 import { createGoldCupState } from "./international/goldCup";
 import { createCopaAmericaState } from "./international/copaAmerica";
 import { createAfconState } from "./international/afcon";
@@ -12,6 +14,7 @@ import { createAfcCupState } from "./international/afcCup";
 import { createOfcCupState } from "./international/ofcCup";
 import { createEuroQualifiersState } from "./international/euroQualifiers";
 import { createEuroState } from "./international/euros";
+import { createWorldCupState } from "./international/worldcup/worldCup";
 import { refreshAllClubOveralls } from "./squadStrength";
 import { collectSeasonPlayers } from "./playerIds";
 import { refreshStartingXI } from "./playerSquad";
@@ -64,8 +67,10 @@ export const SAVE_FORMAT = "soccer-season-simulator-save";
  * v20: adds the AFC Cup and its qualifying editions.
  * v21: adds the OFC Cup and its qualifying editions.
  * v22: adds UEFA EURO qualifying and tournament state.
+ * v23: adds World Cup qualifying and tournament state.
+ * v24: stores World Cup playoff scores for bracket rendering.
  */
-export const SAVE_VERSION = 22;
+export const SAVE_VERSION = 25;
 
 export interface SaveMeta {
   mode: "manager" | "observer";
@@ -538,6 +543,21 @@ export function gameFromSave(file: SaveFile): Game {
   }
   if (loadedSeason?.international && loadedSeason.international.euro === undefined) {
     loadedSeason.international.euro = createEuroState();
+  }
+  if (loadedSeason?.international && loadedSeason.international.worldCup === undefined) {
+    loadedSeason.international.worldCup = createWorldCupState();
+  }
+  if (loadedSeason?.international?.worldCup && file.version < 24) {
+    for (const edition of loadedSeason.international.worldCup.editions) {
+      for (const region of [...Object.values(edition.regions), edition.intercontinental]) {
+        for (const phase of Object.values(region.phases)) {
+          for (const path of phase.paths) path.results ??= {};
+        }
+      }
+      if (loadedSeason?.international && file.version < 25) {
+        migrateFixedInternationalHosts(loadedSeason.international);
+      }
+    }
   }
   if (loadedSeason && file.version < 6) {
     // v5 -> v6: nobody is shortlisted and unsigned scouting candidates are discarded, as before.

@@ -33,6 +33,7 @@ import OfcCupPage from "./ui/pages/internationals/OfcCupPage";
 import OfcCupQualifiersPage from "./ui/pages/internationals/OfcCupQualifiersPage";
 import EuroPage from "./ui/pages/internationals/EuroPage";
 import EuroQualifiersPage from "./ui/pages/internationals/EuroQualifiersPage";
+import WorldCupQualifiersPage, { WorldCupPage } from "./ui/pages/internationals/worldcup/WorldCupQualifiersPage";
 
 export default function App() {
   useGameStore(state => state.tick);
@@ -65,6 +66,14 @@ export default function App() {
         <Route path="/ofc-cup-qualifiers" element={<OfcCupQualifiersPage />} />
         <Route path="/euro" element={<EuroPage />} />
         <Route path="/euro-qualifiers" element={<EuroQualifiersPage />} />
+        <Route path="/world-cup" element={<WorldCupPage />} />
+        <Route path="/world-cup-qualifiers/UEFA" element={<WorldCupQualifiersPage confederation="UEFA" />} />
+        <Route path="/world-cup-qualifiers/CONCACAF" element={<WorldCupQualifiersPage confederation="CONCACAF" />} />
+        <Route path="/world-cup-qualifiers/CONMEBOL" element={<WorldCupQualifiersPage confederation="CONMEBOL" />} />
+        <Route path="/world-cup-qualifiers/OFC" element={<WorldCupQualifiersPage confederation="OFC" />} />
+        <Route path="/world-cup-qualifiers/AFC" element={<WorldCupQualifiersPage confederation="AFC" />} />
+        <Route path="/world-cup-qualifiers/CAF" element={<WorldCupQualifiersPage confederation="CAF" />} />
+        <Route path="/world-cup-intercontinental-playoff" element={<WorldCupQualifiersPage confederation="ICPO" />} />
         <Route path="/add-player" element={game.godMode ? <AddPlayer /> : <Navigate to="/" replace />} />
         <Route path="/add-team" element={game.godMode ? <AddTeam /> : <Navigate to="/" replace />} />
         <Route path="/player/:id" element={<PlayerPage />} />

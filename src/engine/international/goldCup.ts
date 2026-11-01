@@ -1,10 +1,11 @@
-import hostOptionsRaw from "../data/tournament_hosts.json";
+import hostOptionsRaw from "../data/intl/tournament_hosts.json";
 import { getNationName } from "../nations";
 import { getNationsLeagueStandings, type NationsLeagueEdition } from "./nationsLeague";
 import type { InternationalMatch, InternationalRound } from "./international";
 import type { InternationalCompetitionEdition } from "./internationalCompetitionsUtils";
 import {
-  createInternationalCupGroupMatches, drawInternationalCupGroups, getInternationalWindowType
+  createInternationalCupGroupMatches, drawInternationalCupGroups,
+  getFixedInternationalCompetitionHosts, getInternationalWindowType
 } from "./internationalCompetitionsUtils";
 
 const hostOptions = hostOptionsRaw as Record<string, string[]>;
@@ -214,13 +215,17 @@ export function createGoldCupEdition(
     throw new Error(`The Gold Cup requires 16 unique qualified teams, but received ${teams.length}.`);
   }
   const qualified = new Set(teams);
+  const fixedHosts = getFixedInternationalCompetitionHosts("GC", year + 1);
   const eligibleHosts = (hostOptions.GC ?? []).filter(option =>
     option.split("|").every(code => qualified.has(code))
   );
-  if (eligibleHosts.length === 0) {
+  if (!fixedHosts && eligibleHosts.length === 0) {
     throw new Error("No Gold Cup host configuration is eligible among the qualified teams.");
   }
-  const chosenHosts = eligibleHosts[Math.floor(Math.random() * eligibleHosts.length)].split("|");
+  const chosenHosts = fixedHosts ?? eligibleHosts[Math.floor(Math.random() * eligibleHosts.length)].split("|");
+  if (chosenHosts.some(host => !qualified.has(host))) {
+    throw new Error(`Configured Gold Cup hosts for ${year} must qualify for the tournament.`);
+  }
   const { pots, groups } = drawInternationalCupGroups(teams, chosenHosts, worldRanks);
   const id = `GC-${year}-${windowId}`;
   const goldCup: InternationalCompetitionEdition = {

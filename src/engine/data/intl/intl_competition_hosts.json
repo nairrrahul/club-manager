@@ -1,0 +1,28 @@
+{
+  "AFCCUP": {
+    "2027": "KSA"
+  },
+  "EURO": {
+    "2028": "ENG|SCO|IRL",
+    "2032": "ITA|TUR"
+  },
+  "AFCON": {
+    "2027": "KEN|TAN|UGA",
+    "2029": "RSA|BOT"
+  },
+  "COPA": {
+    "2028": "ECU"
+  },
+  "OFCCUP": {
+    "2028": "NZL"
+  },
+  "GC": {
+    "2027": "USA|MEX",
+    "2029": "USA",
+    "2031": "MEX"
+  },
+  "WC": {
+    "2030": "ESP|POR|MAR",
+    "2034": "KSA"
+  }
+}
