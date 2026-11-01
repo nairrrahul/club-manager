@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useGameStore } from "../../../store/gameStore";
+import { TEAM_DIRECTORY } from "../../../engine/game";
 import type { GodAddTeamInput } from "../../../engine/game";
 import { europeanTeamPool } from "../../../engine/europeanCompetitions";
 import { getConfederation, getCountriesByRegion, getNationName, REGIONS } from "../../../engine/nations";
@@ -32,18 +33,122 @@ const countryOptions = REGIONS.map(region => ({
 const namedEuropeanPools = new Set(Object.keys(europeanTeamPool).filter(
   code => code !== "OTHER" && code !== "OTHER_UECL"
 ));
+const countries = REGIONS.flatMap(region => getCountriesByRegion(region.id));
+const countryByCode = new Map(countries.map(country => [country.code.toUpperCase(), country.code]));
+const countryByName = new Map(countries.map(country => [country.name.trim().toLocaleLowerCase(), country.code]));
+const csvColumns = ["name", "country", "overall", "facililty", "scouting", "experience"];
+
+function parseCsv(text: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let value = "";
+  let quoted = false;
+  const csv = text.replace(/^\uFEFF/, "");
+
+  for (let index = 0; index < csv.length; index++) {
+    const character = csv[index];
+    if (quoted) {
+      if (character === '"' && csv[index + 1] === '"') {
+        value += '"';
+        index++;
+      } else if (character === '"') {
+        quoted = false;
+      } else {
+        value += character;
+      }
+    } else if (character === '"' && value.length === 0) {
+      quoted = true;
+    } else if (character === ",") {
+      row.push(value.trim());
+      value = "";
+    } else if (character === "\n" || character === "\r") {
+      if (character === "\r" && csv[index + 1] === "\n") index++;
+      row.push(value.trim());
+      if (row.some(cell => cell !== "")) rows.push(row);
+      row = [];
+      value = "";
+    } else {
+      value += character;
+    }
+  }
+  if (quoted) throw new Error("The CSV contains an unclosed quoted field.");
+  row.push(value.trim());
+  if (row.some(cell => cell !== "")) rows.push(row);
+  return rows;
+}
+
+function parseTeamCsv(text: string): GodAddTeamInput[] {
+  const [header, ...rows] = parseCsv(text);
+  if (!header) throw new Error("The CSV is empty.");
+  const columnIndexes = new Map(header.map((column, index) => [column.toLocaleLowerCase(), index]));
+  const missingColumns = csvColumns.filter(column => !columnIndexes.has(column));
+  if (missingColumns.length) {
+    throw new Error(`Missing required CSV column${missingColumns.length === 1 ? "" : "s"}: ${missingColumns.join(", ")}.`);
+  }
+  if (rows.length === 0) throw new Error("The CSV has no team rows to import.");
+
+  const errors: string[] = [];
+  const teams: GodAddTeamInput[] = [];
+  const getCell = (row: string[], column: string) => row[columnIndexes.get(column)!] ?? "";
+  rows.forEach((row, index) => {
+    const rowNumber = index + 2;
+    const name = getCell(row, "name");
+    const countryInput = getCell(row, "country");
+    const countryCode = countryByCode.get(countryInput.toUpperCase()) ??
+      countryByName.get(countryInput.toLocaleLowerCase());
+    const ratingInputs = ["overall", "facililty", "scouting", "experience"].map(column => getCell(row, column));
+    const ratings = ratingInputs.map(Number);
+
+    if (!name) errors.push(`Row ${rowNumber}: team name is required.`);
+    if (!countryCode || countryCode === "ENG") {
+      errors.push(`Row ${rowNumber}: "${countryInput}" is not a valid non-English country name or code.`);
+    }
+    if (ratings.some((rating, ratingIndex) =>
+      ratingInputs[ratingIndex] === "" || !Number.isInteger(rating)
+    )) {
+      errors.push(`Row ${rowNumber}: overall, facililty, scouting, and experience must be whole numbers.`);
+    } else if (
+      ratings[0] < 20 || ratings[0] > 99 ||
+      ratings.slice(1).some(rating => rating < 1 || rating > 5)
+    ) {
+      errors.push(`Row ${rowNumber}: overall must be 20–99; facililty, scouting, and experience must be 1–5.`);
+    }
+    if (name && countryCode && countryCode !== "ENG" &&
+      ratings.every(Number.isInteger) && ratings[0] >= 20 && ratings[0] <= 99 &&
+      ratings.slice(1).every(rating => rating >= 1 && rating <= 5)) {
+      teams.push({
+        name,
+        countryCode,
+        overall: ratings[0],
+        facilityRating: ratings[1],
+        scoutingRating: ratings[2],
+        scoutingExperience: ratings[3],
+        conferenceLeagueOnly: false
+      });
+    }
+  });
+  if (errors.length) throw new Error(errors.join("\n"));
+  return teams;
+}
 
 export default function AddTeam() {
   const game = useGameStore(state => state.game);
   const addTeam = useGameStore(state => state.godAddTeam);
+  const csvInput = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState<TeamForm>(initialForm);
   const [error, setError] = useState<string | null>(null);
+  const [importMessage, setImportMessage] = useState<string | null>(null);
 
   if (!game?.godMode) return null;
 
   const confederation = getConfederation(form.countryCode);
   const showConferenceOnly = confederation === "UEFA" && !namedEuropeanPools.has(form.countryCode);
   const customTeams = game.season.customTeams;
+  const duplicateInCountry = form.name.trim() !== "" && Boolean(form.countryCode) &&
+    [...TEAM_DIRECTORY.values()].some(team =>
+      team.countrycode === form.countryCode &&
+      team.name.trim().toLocaleLowerCase() === form.name.trim().toLocaleLowerCase()
+    );
 
   const update = (key: keyof TeamForm, value: string | boolean) => {
     setForm(current => ({
@@ -52,6 +157,7 @@ export default function AddTeam() {
       ...(key === "countryCode" ? { conferenceLeagueOnly: false } : {})
     }));
     setError(null);
+    setImportMessage(null);
   };
 
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -74,6 +180,24 @@ export default function AddTeam() {
     setForm(current => ({ ...initialForm, countryCode: current.countryCode }));
   };
 
+  const importCsv = async (file: File | undefined) => {
+    if (!file) return;
+    setError(null);
+    setImportMessage(null);
+    try {
+      const inputs = parseTeamCsv(await file.text());
+      for (const input of inputs) {
+        const result = addTeam(input);
+        if (!result.ok) {
+          throw new Error(`Could not import "${input.name}": ${result.error ?? "Unable to add team."}`);
+        }
+      }
+      setImportMessage(`Imported ${inputs.length} team${inputs.length === 1 ? "" : "s"}.`);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to import the CSV file.");
+    }
+  };
+
   return (
     <div>
       <PageHeader
@@ -86,6 +210,11 @@ export default function AddTeam() {
             <label className="block text-sm text-navy-200">
               Team name
               <input className="input w-full mt-1" value={form.name} onChange={event => update("name", event.target.value)} required maxLength={80} />
+              {duplicateInCountry && (
+                <span className="mt-1 block text-xs text-accent-yellow">
+                  A team with this name already exists in {getNationName(form.countryCode)}. You can still add it.
+                </span>
+              )}
             </label>
             <label className="block text-sm text-navy-200">
               Country
@@ -145,7 +274,27 @@ export default function AddTeam() {
             </p>
           )}
           {error && <p role="alert" className="text-sm text-accent-yellow border border-accent-yellow/40 rounded-md px-3 py-2">{error}</p>}
-          <button type="submit" className="btn-primary">Add team</button>
+          {importMessage && <p role="status" className="text-sm text-navy-100">{importMessage}</p>}
+          <div className="flex flex-wrap gap-3">
+            <button type="submit" className="btn-primary">Add team</button>
+            <input
+              ref={csvInput}
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={event => {
+                const file = event.target.files?.[0];
+                event.target.value = "";
+                void importCsv(file);
+              }}
+            />
+            <button type="button" className="btn-ghost" onClick={() => csvInput.current?.click()}>
+              Batch Import
+            </button>
+          </div>
+          <p className="text-xs text-navy-400">
+            CSV columns: name, country, overall, facililty, scouting, experience. Country may be a three-letter code or full name.
+          </p>
         </form>
       </Panel>
       <Panel title={`Added teams (${customTeams.length})`} >
