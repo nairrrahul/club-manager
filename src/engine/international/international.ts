@@ -1,28 +1,47 @@
-import windowsRaw from "./data/international_windows.json";
-import importanceRaw from "./data/match_importance.json";
-import { nationInfo, getNationName } from "./nations";
-import { parseKOMatchWinner, simulateMatch, simulatePenaltyShootoutOnly } from "./matchEngine";
-import { SEASON_END_MATCHDAY, SEASON_START_YEAR } from "./constants";
-import { STAR_PLAYER_FACTOR, starBonus } from "./squadStrength";
-import { POSITION_GROUP } from "./formation";
+import windowsRaw from "../data/international_windows.json";
+import importanceRaw from "../data/match_importance.json";
+import { nationInfo, getNationName } from "../nations";
+import { parseKOMatchWinner, simulateMatch, simulatePenaltyShootoutOnly } from "../matchEngine";
+import { SEASON_END_MATCHDAY, SEASON_START_YEAR } from "../constants";
+import { STAR_PLAYER_FACTOR, starBonus } from "../squadStrength";
+import { POSITION_GROUP } from "../formation";
 import {
-  completeNationsLeagueEditions, createNationsLeagueState, getInternationalWindowType,
-  getGoldCupWindowType, getNationConfederation, getNationsLeagueRoundsForWindow, prepareNationsLeagueDraws
+  completeNationsLeagueEditions, createNationsLeagueState,
+  getNationConfederation, getNationsLeagueRoundsForWindow, prepareNationsLeagueDraws
 } from "./nationsLeague";
+import {
+  beginAfconQualifyingMainRounds, completeAfconMainQualifiers, completeAfconPreliminary,
+  createAfconQualifierEdition, createAfconState, findAfconQualifierForWindow, getAFCONTournament,
+  getAfconPreliminaryRounds, getAfconQualifier, getAfconTournamentRounds, getAfconWindowType, resolveAfconPreliminaryTie,
+  setAfconKnockoutWinner, startAfconRoundOf16, advanceAfconKnockoutRound
+} from "./afcon";
+import type { AfconState } from "./afcon";
+import {
+  completeAfcCupMainQualifiers, completeAfcCupPreliminary, createAfcCupQualifierEdition,
+  createAfcCupState, findAfcCupQualifier, getAfcCupMainRounds, getAfcCupPreliminaryRounds,
+  getAfcCupQualifier, getAfcCupTournament, getAfcCupTournamentRounds, getAfcCupWindowType,
+  resolveAfcCupPreliminaryTie, setAfcCupKnockoutWinner, startAfcCupRoundOf16, advanceAfcCupKnockoutRound
+} from "./afcCup";
+import type { AfcCupState } from "./afcCup";
 import type { NationsLeagueState } from "./nationsLeague";
 import {
-  advanceInternationalCupRound, completeGoldCupPlayoff, createGoldCupEdition, createGoldCupPlayoffEdition,
+  completeGoldCupPlayoff, createGoldCupEdition, createGoldCupPlayoffEdition,
   createGoldCupState, findLatestGoldCupPlayoff, getGoldCupPlayoff,
-  resolveGoldCupPlayoffTie, setInternationalCupKnockoutWinner
+  getGoldCupWindowType, resolveGoldCupPlayoffTie
 } from "./goldCup";
-import type { GoldCupEdition, GoldCupState } from "./goldCup";
+import type { GoldCupState } from "./goldCup";
+import {
+  advanceInternationalCupRound, setInternationalCupKnockoutWinner,
+  getInternationalWindowType
+} from "./internationalCompetitionsUtils";
+import type { InternationalCompetitionEdition } from "./internationalCompetitionsUtils";
 import {
   createCopaAmericaEdition, createCopaAmericaState
 } from "./copaAmerica";
 import type { CopaAmericaState } from "./copaAmerica";
-import type { Season } from "./season";
-import type { Team } from "./team";
-import type { Player } from "./types";
+import type { Season } from "../season";
+import type { Team } from "../team";
+import type { Player } from "../types";
 
 // ---------------------------------------------------------------------------
 // Data
@@ -65,7 +84,7 @@ function findUpcomingWindow(
 }
 
 function createCupGroupRounds(
-  edition: GoldCupEdition,
+  edition: InternationalCompetitionEdition,
   competition: "goldCup" | "copaAmerica"
 ): InternationalRound[] {
   return [0, 1, 2].map(roundIndex => ({
@@ -166,14 +185,38 @@ export interface InternationalMatch {
   copaAmericaRound?: number;
   copaAmericaKnockoutMatchId?: string;
   copaAmericaWinner?: string;
+  afconEditionId?: string;
+  afconQualifierId?: string;
+  afconTieId?: string;
+  afconStage?: "preliminary" | "main" | "group" | "knockout";
+  afconGroup?: string;
+  afconRound?: number;
+  afconLeg?: 1 | 2;
+  afconKnockoutMatchId?: string;
+  afconWinner?: string;
+  afcCupEditionId?: string;
+  afcCupQualifierId?: string;
+  afcCupTieId?: string;
+  afcCupStage?: "preliminary" | "main" | "group" | "knockout";
+  afcCupGroup?: string;
+  afcCupRound?: number;
+  afcCupLeg?: 1 | 2;
+  afcCupKnockoutMatchId?: string;
+  afcCupWinner?: string;
   homePenalties?: string[];
   awayPenalties?: string[];
 }
 
 export interface InternationalRound {
   matches: InternationalMatch[];
-  kind?: "friendly" | "nationsLeague" | "goldCupPlayoff" | "goldCup" | "copaAmerica";
+  kind?: "friendly" | "nationsLeague" | "goldCupPlayoff" | "goldCup" | "copaAmerica" | "afconQualifier" | "afcon" | "afcCupQualifier" | "afcCup";
   label?: string;
+  afconQualifierId?: string;
+  afconStage?: "preliminary" | "main" | "tournamentGroup" | "tournamentKnockout";
+  afconRound?: number;
+  afcCupQualifierId?: string;
+  afcCupStage?: "preliminary" | "main" | "group" | "knockout";
+  afcCupRound?: number;
   /** The one nation without a match in this set of fixtures (there is an odd number of nations). */
   leftOut: string | null;
 }
@@ -204,6 +247,8 @@ export interface InternationalState {
   nationsLeague: NationsLeagueState;
   goldCup: GoldCupState;
   copaAmerica: CopaAmericaState;
+  afcon: AfconState;
+  afcCup: AfcCupState;
   /** The nation left out of the most recent set of fixtures (never left out twice in a row). */
   lastLeftOut: string | null;
   /** When true, windows must be simulated explicitly instead of automatically. */
@@ -227,6 +272,8 @@ export function createInternationalState(): InternationalState {
     nationsLeague: createNationsLeagueState(),
     goldCup: createGoldCupState(),
     copaAmerica: createCopaAmericaState(),
+    afcon: createAfconState(),
+    afcCup: createAfcCupState(),
     lastLeftOut: null,
     explicitWindows: false
   };
@@ -520,6 +567,11 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
   const rounds: InternationalRound[] = [];
   const played = new Set<string>();
   let copaAmericaTeams: string[] = [];
+  let afconTeams: string[] = [];
+  let afcCupTeams: string[] = [];
+  const afconWindowType = getAfconWindowType(season.year, def.id);
+  const afconSuffix = afconWindowType?.slice(-1) as "1" | "2" | undefined;
+  const afcCupWindowType = getAfcCupWindowType(season.year, def.id);
   const goldCupWindowType = getGoldCupWindowType(season.year, def.id);
   let goldCupPlayoff: ReturnType<typeof createGoldCupPlayoffEdition> | null = null;
   if (goldCupWindowType === "GCPO") {
@@ -532,6 +584,62 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
       def.afterMatchday,
       worldRanks
     );
+  }
+  if (afconWindowType?.startsWith("CAFQP") && afconSuffix) {
+    let qualifier = findAfconQualifierForWindow(state.afcon, season.year, afconSuffix);
+    if (!qualifier) {
+      const worldRanks = Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]));
+      qualifier = createAfconQualifierEdition(
+        state.afcon,
+        season.year,
+        afconSuffix,
+        def.id,
+        def.afterMatchday,
+        worldRanks
+      );
+    }
+    rounds.push(...getAfconPreliminaryRounds(qualifier));
+    afconTeams = qualifier.preliminaryTeams;
+  } else if (afconWindowType?.startsWith("CAFQM") && afconSuffix) {
+    const qualifier = findAfconQualifierForWindow(state.afcon, season.year, afconSuffix);
+    if (!qualifier) throw new Error(`AFCON ${afconSuffix} qualifying has not started.`);
+    const mainRounds = beginAfconQualifyingMainRounds(
+      qualifier,
+      season.year,
+      def.id,
+      def.afterMatchday
+    );
+    rounds.push(...mainRounds);
+    afconTeams = qualifier.mainGroups?.flatMap(group => group.teams) ?? [];
+  } else if (afconWindowType?.startsWith("AFCON") && afconSuffix) {
+    const edition = getAFCONTournament(state.afcon, season.year, afconSuffix);
+    if (!edition) throw new Error(`AFCON ${afconSuffix} edition has not been drawn.`);
+    afconTeams = edition.teams;
+    rounds.push(...getAfconTournamentRounds(edition));
+  }
+  if (afcCupWindowType === "AFCQP") {
+    let qualifier = findAfcCupQualifier(state.afcCup, season.year);
+    if (!qualifier) {
+      qualifier = createAfcCupQualifierEdition(
+        state.afcCup,
+        season.year,
+        def.id,
+        def.afterMatchday,
+        Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]))
+      );
+    }
+    rounds.push(...getAfcCupPreliminaryRounds(qualifier));
+    afcCupTeams = qualifier.preliminaryTeams;
+  } else if (afcCupWindowType === "AFCQM") {
+    const qualifier = findAfcCupQualifier(state.afcCup, season.year);
+    if (!qualifier) throw new Error("AFC Cup qualifying has not started.");
+    rounds.push(...getAfcCupMainRounds(qualifier, season.year, def.id, def.afterMatchday));
+    afcCupTeams = qualifier.mainGroups?.flatMap(group => group.teams) ?? [];
+  } else if (afcCupWindowType === "AFCCUP") {
+    const edition = getAfcCupTournament(state.afcCup, season.year);
+    if (!edition) throw new Error("AFC Cup edition has not been drawn.");
+    afcCupTeams = edition.teams;
+    rounds.push(...getAfcCupTournamentRounds(edition));
   }
   if (getInternationalWindowType("CONMEBOL", season.year, def.id) === "COPA") {
     let edition = state.copaAmerica.editions.find(item => item.year === season.year && item.windowId === def.id);
@@ -551,10 +659,14 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
   }
   const friendlyNations = Object.keys(state.nations).filter(code =>
     (getInternationalWindowType(getNationConfederation(code), season.year, def.id) === "FR" ||
+      (afconWindowType !== null && getNationConfederation(code) === "CAF") ||
+      (afcCupWindowType !== null && getNationConfederation(code) === "AFC") ||
       (goldCupPlayoff !== null &&
         getNationConfederation(code) === "CONCACAF" &&
         !goldCupPlayoff.edition.entrants.includes(code))) &&
-    !copaAmericaTeams.includes(code)
+    !copaAmericaTeams.includes(code) &&
+    !afconTeams.includes(code) &&
+    !afcCupTeams.includes(code)
   );
   if (friendlyNations.length > 1) {
     for (let i = 0; i < FRIENDLY_SETS_PER_WINDOW; i++) {
@@ -651,12 +763,28 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
       // The match engine reads only `Overall`, so lightweight stand-ins are enough.
       const homeTeam = { ID: 0, Team: home.code, Overall: home.actualOverall } as unknown as Team;
       const awayTeam = { ID: 0, Team: away.code, Overall: away.actualOverall } as unknown as Team;
-      const isKnockout = match.goldCupStage === "knockout" || match.copaAmericaStage === "knockout";
+      const isKnockout = match.goldCupStage === "knockout" ||
+        match.copaAmericaStage === "knockout" || match.afconStage === "knockout" ||
+        match.afcCupStage === "knockout";
       const result = simulateMatch(homeTeam, awayTeam, isKnockout, "LEAGUE");
       const homeGoals = result.homeGoalInfo.homeGoals;
       const awayGoals = result.awayGoalInfo.awayGoals;
       let playoffResolution: {
         playoffId: string;
+        tieId: string;
+        winner: string;
+        penalties: { home: string[]; away: string[] } | null;
+        shootout: ReturnType<typeof simulatePenaltyShootoutOnly> | null;
+      } | null = null;
+      let afconTieResolution: {
+        qualifierId: string;
+        tieId: string;
+        winner: string;
+        penalties: { home: string[]; away: string[] } | null;
+        shootout: ReturnType<typeof simulatePenaltyShootoutOnly> | null;
+      } | null = null;
+      let afcCupTieResolution: {
+        qualifierId: string;
         tieId: string;
         winner: string;
         penalties: { home: string[]; away: string[] } | null;
@@ -694,15 +822,81 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
           shootout
         };
       }
+      if (match.afconQualifierId && match.afconTieId && match.afconLeg === 2) {
+        const qualifier = getAfconQualifier(state.afcon, match.afconQualifierId);
+        const tie = qualifier.preliminaryTies.find(candidate => candidate.id === match.afconTieId);
+        if (!tie || tie.firstLeg.homeGoals === null || tie.firstLeg.awayGoals === null) {
+          throw new Error(`AFCON preliminary tie "${match.afconTieId}" has no completed first leg.`);
+        }
+        const aggregateTeam1 = tie.firstLeg.homeGoals + awayGoals;
+        const aggregateTeam2 = tie.firstLeg.awayGoals + homeGoals;
+        let winner: string;
+        let shootout: ReturnType<typeof simulatePenaltyShootoutOnly> | null = null;
+        let penalties: { home: string[]; away: string[] } | null = null;
+        if (aggregateTeam1 !== aggregateTeam2) {
+          winner = aggregateTeam1 > aggregateTeam2 ? tie.team1 : tie.team2;
+        } else {
+          shootout = simulatePenaltyShootoutOnly(
+            { ID: 0, Team: tie.team1, Overall: state.nations[tie.team1].actualOverall } as unknown as Team,
+            { ID: 0, Team: tie.team2, Overall: state.nations[tie.team2].actualOverall } as unknown as Team
+          );
+          winner = parseKOMatchWinner(shootout).Team;
+          penalties = {
+            home: shootout.homeGoalInfo.penalties ?? [],
+            away: shootout.awayGoalInfo.penalties ?? []
+          };
+        }
+        afconTieResolution = {
+          qualifierId: match.afconQualifierId,
+          tieId: match.afconTieId,
+          winner,
+          penalties,
+          shootout
+        };
+      }
+      if (match.afcCupQualifierId && match.afcCupTieId && match.afcCupLeg === 2) {
+        const qualifier = getAfcCupQualifier(state.afcCup, match.afcCupQualifierId);
+        const tie = qualifier.preliminaryTies.find(candidate => candidate.id === match.afcCupTieId);
+        if (!tie || tie.firstLeg.homeGoals === null || tie.firstLeg.awayGoals === null) {
+          throw new Error(`AFC Cup preliminary tie "${match.afcCupTieId}" has no completed first leg.`);
+        }
+        const aggregateTeam1 = tie.firstLeg.homeGoals + awayGoals;
+        const aggregateTeam2 = tie.firstLeg.awayGoals + homeGoals;
+        let winner: string;
+        let shootout: ReturnType<typeof simulatePenaltyShootoutOnly> | null = null;
+        let penalties: { home: string[]; away: string[] } | null = null;
+        if (aggregateTeam1 !== aggregateTeam2) {
+          winner = aggregateTeam1 > aggregateTeam2 ? tie.team1 : tie.team2;
+        } else {
+          shootout = simulatePenaltyShootoutOnly(
+            { ID: 0, Team: tie.team1, Overall: state.nations[tie.team1].actualOverall } as unknown as Team,
+            { ID: 0, Team: tie.team2, Overall: state.nations[tie.team2].actualOverall } as unknown as Team
+          );
+          winner = parseKOMatchWinner(shootout).Team;
+          penalties = {
+            home: shootout.homeGoalInfo.penalties ?? [],
+            away: shootout.awayGoalInfo.penalties ?? []
+          };
+        }
+        afcCupTieResolution = {
+          qualifierId: match.afcCupQualifierId,
+          tieId: match.afcCupTieId,
+          winner,
+          penalties,
+          shootout
+        };
+      }
 
       const importance = MATCH_IMPORTANCE[match.kind];
       const hasShootout = Boolean(
         (result.homeGoalInfo.penalties && result.awayGoalInfo.penalties) ||
-        (playoffResolution?.shootout && homeGoals === awayGoals)
+        (playoffResolution?.shootout && homeGoals === awayGoals) ||
+        (afconTieResolution?.shootout && homeGoals === awayGoals) ||
+        (afcCupTieResolution?.shootout && homeGoals === awayGoals)
       );
       const homeOutcome: MatchOutcome = hasShootout
-        ? playoffResolution?.shootout
-          ? playoffResolution.winner === match.home ? "win" : "loss"
+        ? playoffResolution?.shootout || afconTieResolution?.shootout || afcCupTieResolution?.shootout
+          ? (playoffResolution?.winner ?? afconTieResolution?.winner ?? afcCupTieResolution?.winner) === match.home ? "win" : "loss"
           : parseKOMatchWinner(result) === homeTeam ? "win" : "loss"
         : homeGoals > awayGoals ? "win" : homeGoals < awayGoals ? "loss" : "draw";
       const awayOutcome: MatchOutcome = homeOutcome === "win" ? "loss" : homeOutcome === "loss" ? "win" : "draw";
@@ -716,13 +910,13 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
       match.homeChange = round2(homeChange);
       match.awayChange = round2(awayChange);
       match.homePenalties = result.homeGoalInfo.penalties ?? (
-        playoffResolution?.shootout && homeGoals === awayGoals
-          ? [...(playoffResolution.shootout.awayGoalInfo.penalties ?? [])]
+        (playoffResolution?.shootout || afconTieResolution?.shootout || afcCupTieResolution?.shootout) && homeGoals === awayGoals
+          ? [...((playoffResolution?.shootout ?? afconTieResolution?.shootout ?? afcCupTieResolution?.shootout)?.awayGoalInfo.penalties ?? [])]
           : undefined
       );
       match.awayPenalties = result.awayGoalInfo.penalties ?? (
-        playoffResolution?.shootout && homeGoals === awayGoals
-          ? [...(playoffResolution.shootout.homeGoalInfo.penalties ?? [])]
+        (playoffResolution?.shootout || afconTieResolution?.shootout || afcCupTieResolution?.shootout) && homeGoals === awayGoals
+          ? [...((playoffResolution?.shootout ?? afconTieResolution?.shootout ?? afcCupTieResolution?.shootout)?.homeGoalInfo.penalties ?? [])]
           : undefined
       );
       if (playoffResolution) {
@@ -732,6 +926,24 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
           playoffResolution.tieId,
           playoffResolution.winner,
           playoffResolution.penalties
+        );
+      }
+      if (afconTieResolution) {
+        resolveAfconPreliminaryTie(
+          state.afcon,
+          afconTieResolution.qualifierId,
+          afconTieResolution.tieId,
+          afconTieResolution.winner,
+          afconTieResolution.penalties
+        );
+      }
+      if (afcCupTieResolution) {
+        resolveAfcCupPreliminaryTie(
+          state.afcCup,
+          afcCupTieResolution.qualifierId,
+          afcCupTieResolution.tieId,
+          afcCupTieResolution.winner,
+          afcCupTieResolution.penalties
         );
       }
 
@@ -749,6 +961,20 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
         match.copaAmericaWinner = winner;
         setInternationalCupKnockoutWinner(edition, match.copaAmericaKnockoutMatchId, winner);
       }
+      if (match.afconEditionId && match.afconKnockoutMatchId) {
+        const edition = state.afcon.editions.find(candidate => candidate.id === match.afconEditionId);
+        if (!edition) throw new Error(`Unknown AFCON edition "${match.afconEditionId}".`);
+        const winner = hasShootout ? parseKOMatchWinner(result).Team : homeGoals > awayGoals ? match.home : match.away;
+        match.afconWinner = winner;
+        setAfconKnockoutWinner(edition, match.afconKnockoutMatchId, winner);
+      }
+      if (match.afcCupEditionId && match.afcCupKnockoutMatchId) {
+        const edition = state.afcCup.editions.find(candidate => candidate.id === match.afcCupEditionId);
+        if (!edition) throw new Error(`Unknown AFC Cup edition "${match.afcCupEditionId}".`);
+        const winner = hasShootout ? parseKOMatchWinner(result).Team : homeGoals > awayGoals ? match.home : match.away;
+        match.afcCupWinner = winner;
+        setAfcCupKnockoutWinner(edition, match.afcCupKnockoutMatchId, winner);
+      }
 
       awardCaps(match.home);
       awardCaps(match.away);
@@ -759,6 +985,68 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
       if (playoffId) {
         completeGoldCupPlayoff(state.goldCup, playoffId);
         drawGoldCupAfterPlayoff(state, playoffId, window.year, window.windowId);
+      }
+    }
+    if (round.kind === "afconQualifier" && round.afconStage === "preliminary") {
+      const qualifierId = round.afconQualifierId;
+      if (qualifierId && round.matches.every(match =>
+        getAfconQualifier(state.afcon, qualifierId).preliminaryTies.every(tie => tie.winner !== null)
+      )) {
+        const qualifier = getAfconQualifier(state.afcon, qualifierId);
+        if (!qualifier.preliminaryComplete) {
+          completeAfconPreliminary(
+            state.afcon,
+            qualifierId,
+            window.year,
+            window.windowId,
+            window.afterMatchday,
+            Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]))
+          );
+        }
+      }
+    }
+    if (round.kind === "afconQualifier" && round.afconStage === "main" && round.afconQualifierId) {
+      const qualifier = getAfconQualifier(state.afcon, round.afconQualifierId);
+      qualifier.mainRoundsPlayed++;
+      if (qualifier.mainRoundsPlayed === 6) {
+        completeAfconMainQualifiers(
+          state.afcon,
+          qualifier.id,
+          window.year,
+          window.windowId,
+          Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]))
+        );
+      }
+    }
+    if (round.kind === "afcCupQualifier" && round.afcCupStage === "preliminary") {
+      const qualifierId = round.afcCupQualifierId;
+      if (qualifierId && round.matches.every(match =>
+        getAfcCupQualifier(state.afcCup, qualifierId).preliminaryTies.every(tie => tie.winner !== null)
+      )) {
+        const qualifier = getAfcCupQualifier(state.afcCup, qualifierId);
+        if (!qualifier.preliminaryComplete) {
+          completeAfcCupPreliminary(
+            state.afcCup,
+            qualifierId,
+            window.year,
+            window.windowId,
+            window.afterMatchday,
+            Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]))
+          );
+        }
+      }
+    }
+    if (round.kind === "afcCupQualifier" && round.afcCupStage === "main" && round.afcCupQualifierId) {
+      const qualifier = getAfcCupQualifier(state.afcCup, round.afcCupQualifierId);
+      qualifier.mainRoundsPlayed++;
+      if (qualifier.mainRoundsPlayed === 6) {
+        completeAfcCupMainQualifiers(
+          state.afcCup,
+          qualifier.id,
+          window.year,
+          window.windowId,
+          Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]))
+        );
       }
     }
     if (round.kind === "goldCup") {
@@ -791,6 +1079,40 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
             knockoutRound.matches.some(knockoutMatch => round.matches.includes(knockoutMatch.fixture))
           ) ?? -1;
           nextRound = advanceInternationalCupRound(edition, knockoutRoundIndex, "copaAmerica");
+        }
+        if (nextRound) window.rounds.push(nextRound);
+      }
+    }
+    if (round.kind === "afcon") {
+      const match = round.matches[0];
+      if (match?.afconEditionId) {
+        const edition = state.afcon.editions.find(candidate => candidate.id === match.afconEditionId);
+        if (!edition) throw new Error(`Unknown AFCON edition "${match.afconEditionId}".`);
+        let nextRound: InternationalRound | null = null;
+        if (match.afconStage === "group") {
+          nextRound = startAfconRoundOf16(edition);
+        } else if (match.afconStage === "knockout") {
+          const knockoutRoundIndex = edition.knockout?.findIndex(knockoutRound =>
+            knockoutRound.matches.some(knockoutMatch => round.matches.includes(knockoutMatch.fixture))
+          ) ?? -1;
+          nextRound = advanceAfconKnockoutRound(edition, knockoutRoundIndex);
+        }
+        if (nextRound) window.rounds.push(nextRound);
+      }
+    }
+    if (round.kind === "afcCup") {
+      const match = round.matches[0];
+      if (match?.afcCupEditionId) {
+        const edition = state.afcCup.editions.find(candidate => candidate.id === match.afcCupEditionId);
+        if (!edition) throw new Error(`Unknown AFC Cup edition "${match.afcCupEditionId}".`);
+        let nextRound: InternationalRound | null = null;
+        if (match.afcCupStage === "group") {
+          nextRound = startAfcCupRoundOf16(edition);
+        } else if (match.afcCupStage === "knockout") {
+          const knockoutRoundIndex = edition.knockout?.findIndex(knockoutRound =>
+            knockoutRound.matches.some(knockoutMatch => round.matches.includes(knockoutMatch.fixture))
+          ) ?? -1;
+          nextRound = advanceAfcCupKnockoutRound(edition, knockoutRoundIndex);
         }
         if (nextRound) window.rounds.push(nextRound);
       }
@@ -899,7 +1221,29 @@ export function getNationMatches(state: InternationalState, code: string): Natio
                     ? `Copa América ${match.copaAmericaKnockoutMatchId?.startsWith("QF") ? "QF"
                       : match.copaAmericaKnockoutMatchId?.startsWith("SF") ? "SF"
                         : match.copaAmericaKnockoutMatchId === "F" ? "Final" : "Knockout"}`
-                : undefined,
+                      : match.kind === "afconQualifier"
+                        ? match.afconStage === "preliminary"
+                          ? `AFCON Preliminary · Leg ${match.afconLeg ?? "—"}`
+                          : `AFCON Qualifying · Matchday ${match.afconRound ?? "—"}`
+                        : match.kind === "afconGroup"
+                          ? `AFCON ${match.afconStage === "group" ? "Group Stage" : "Group"} · Matchday ${match.afconRound ?? "—"}`
+                          : match.kind === "afconKnockout"
+                            ? `AFCON ${match.afconKnockoutMatchId?.startsWith("R16") ? "Round of 16"
+                              : match.afconKnockoutMatchId?.startsWith("QF") ? "Quarter-finals"
+                                : match.afconKnockoutMatchId?.startsWith("SF") ? "Semi-finals"
+                                  : match.afconKnockoutMatchId === "F" ? "Final" : "Knockout"}`
+                          : match.kind === "afcCupQualifier"
+                            ? match.afcCupStage === "preliminary"
+                              ? `AFC Cup Preliminary · Leg ${match.afcCupLeg ?? "—"}`
+                              : `AFC Cup Qualifying · Matchday ${match.afcCupRound ?? "—"}`
+                            : match.kind === "afcCupGroup"
+                              ? `AFC Cup Group Stage · Matchday ${match.afcCupRound ?? "—"}`
+                              : match.kind === "afcCupKnockout"
+                                ? `AFC Cup ${match.afcCupKnockoutMatchId?.startsWith("R16") ? "Round of 16"
+                                  : match.afcCupKnockoutMatchId?.startsWith("QF") ? "Quarter-finals"
+                                    : match.afcCupKnockoutMatchId?.startsWith("SF") ? "Semi-finals"
+                                      : match.afcCupKnockoutMatchId === "F" ? "Final" : "Knockout"}`
+                    : undefined,
           penaltyShootout: shootoutFor && shootoutAgainst
             ? {
                 goalsFor: shootoutFor.filter(kick => kick === "O").length,
@@ -914,7 +1258,15 @@ export function getNationMatches(state: InternationalState, code: string): Natio
                 ? "/gold-cup"
                 : match.kind === "copaAmericaGroup" || match.kind === "copaAmericaKnockout"
                   ? "/copa-america"
-                : undefined
+                    : match.kind === "afconQualifier"
+                      ? "/afcon-qualifiers"
+                      : match.kind === "afconGroup" || match.kind === "afconKnockout"
+                        ? "/afcon"
+                        : match.kind === "afcCupQualifier"
+                          ? "/afc-cup-qualifiers"
+                          : match.kind === "afcCupGroup" || match.kind === "afcCupKnockout"
+                            ? "/afc-cup"
+                  : undefined
         });
       }
     }

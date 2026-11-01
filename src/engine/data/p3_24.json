@@ -1,0 +1,17 @@
+{
+	"ABCD": "CDAB",
+	"ABCE": "CABE",
+	"ABCF": "CABF",
+	"ABDE": "DABE",
+	"ABDF": "DABF",
+	"ABEF": "EABF",
+	"ACDE": "CDAE",
+	"ACDF": "CDAF",
+	"ACEF": "CAFE",
+	"ADEF": "DAFE",
+	"BCDE": "CDBE",
+	"BCDF": "CDBF",
+	"BCEF": "ECBF",
+	"BDEF": "EDBF",
+	"CDEF": "CDFE"
+}

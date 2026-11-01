@@ -4,8 +4,8 @@ import { LEAGUE_NAMES, CUP_NAME } from "../engine/constants";
 import { COMPETITION_NAMES } from "../engine/europeanCompetitions";
 import { normalizeText } from "./format";
 import { nationInfo } from "../engine/nations";
-import { computeRankings } from "../engine/international";
-import { getNationsLeagueConfederations } from "../engine/nationsLeague";
+import { computeRankings } from "../engine/international/international";
+import { getNationsLeagueConfederations } from "../engine/international/nationsLeague";
 
 export interface SearchResult {
   kind: "player" | "team" | "competition" | "nation";
@@ -144,7 +144,11 @@ export function runSearch(game: Game, rawQuery: string): SearchResult[] {
     })),
     { label: "Gold Cup", sub: "International · CONCACAF", to: "/gold-cup", extra: "gold cup concacaf" },
     { label: "Gold Cup Playoff", sub: "International · CONCACAF", to: "/gold-cup-playoff", extra: "gold cup playoff qualifier" },
-    { label: "Copa América", sub: "International · CONMEBOL", to: "/copa-america", extra: "copa america copa CONMEBOL" }
+    { label: "Copa América", sub: "International · CONMEBOL", to: "/copa-america", extra: "copa america copa CONMEBOL" },
+    { label: "AFCON", sub: "International · CAF", to: "/afcon", extra: "africa cup of nations caf" },
+    { label: "AFCON Qualifiers", sub: "International · CAF", to: "/afcon-qualifiers", extra: "afcon qualifiers caf" },
+    { label: "AFC Cup", sub: "International · AFC", to: "/afc-cup", extra: "afc asian cup" },
+    { label: "AFC Cup Qualifiers", sub: "International · AFC", to: "/afc-cup-qualifiers", extra: "afc cup qualifiers" }
   ];
   for (const item of all) {
     if (normalizeText(`${item.label} ${item.extra}`).includes(query)) {

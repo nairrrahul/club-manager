@@ -3,7 +3,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { useGame } from "../../store/gameStore";
 import { getAllSeasonViews, getNationClubs, getNationPlayers, getWorldRankings } from "../../engine/game";
 import { getConfederation, getNationName } from "../../engine/nations";
-import { getNationMatches, getNationRankingHistory } from "../../engine/international";
+import { getNationMatches, getNationRankingHistory } from "../../engine/international/international";
 import { LEAGUE_NAMES, seasonDisplay } from "../../engine/constants";
 import {
   Empty, NationLink, OvrBadge, PageHeader, Panel, PlayerLink, PosBadge, SeasonSelect, ShortlistButton, Stat, Tabs, TeamLink
@@ -195,6 +195,14 @@ function MatchesTab(props: { code: string }) {
                             : match.kind === "goldCupPlayoff" ? "Gold Cup Playoff"
                               : match.kind === "copaAmericaGroup" || match.kind === "copaAmericaKnockout"
                                 ? "Copa América"
+                                : match.kind === "afconQualifier"
+                                  ? "AFCON Qualifiers"
+                                  : match.kind === "afconGroup" || match.kind === "afconKnockout"
+                                    ? "AFCON"
+                                    : match.kind === "afcCupQualifier"
+                                      ? "AFC Cup Qualifiers"
+                                      : match.kind === "afcCupGroup" || match.kind === "afcCupKnockout"
+                                        ? "AFC Cup"
                                 : "Gold Cup"}
                         </Link>
                       ) : match.kind}
@@ -233,6 +241,12 @@ function NationHistoryTab(props: { code: string }) {
       : []),
     ...(archive.copaAmerica?.completed && archive.copaAmerica.winner === props.code
       ? [{ name: "Copa América Winners", year: archive.copaAmerica.year + 1 }]
+      : []),
+    ...(archive.afcon?.completed && archive.afcon.winner === props.code
+      ? [{ name: "AFCON Winners", year: archive.afcon.year + 1 }]
+      : []),
+    ...(archive.afcCup?.completed && archive.afcCup.winner === props.code
+      ? [{ name: "AFC Cup Winners", year: archive.afcCup.year + 1 }]
       : [])
   ]).sort((a, b) => b.year - a.year);
   const grouped = new Map<string, number[]>();

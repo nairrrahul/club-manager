@@ -20,8 +20,8 @@ import type { SeasonArchive } from "./snapshots";
 import {
   autoSimulateWindowIfDue, computeOverallRankings, computeRankings, getActiveWindow, getCallUpNation,
   hasPendingWindow, simulateInternationalWindow, startWindowIfDue
-} from "./international";
-import type { OverallRankRow, RankRow, WindowRecord } from "./international";
+} from "./international/international";
+import type { OverallRankRow, RankRow, WindowRecord } from "./international/international";
 import { SEASON_END_MATCHDAY, seasonDisplay } from "./constants";
 import { RESIGN_BLOCK_SEASONS } from "./freeAgents";
 import { Team } from "./team";

@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { getNationName } from "../../engine/nations";
-import { getInternationalCupStandings } from "../../engine/goldCup";
-import type { GoldCupEdition } from "../../engine/goldCup";
+import { getInternationalCupStandings } from "../../engine/international/internationalCompetitionsUtils";
+import type { InternationalCompetitionEdition } from "../../engine/international/internationalCompetitionsUtils";
 import { seasonDisplay } from "../../engine/constants";
 import { Empty, NationLink, PageHeader, Panel, SeasonSelect, Tabs } from "../components/common";
 import { CupBracketTree } from "../components/brackets";
+import { InternationalGroupMatchdays } from "../components/InternationalGroupMatchdays";
 import { InternationalGroupTable } from "../components/tables";
 import type { CupSnap, TeamRef } from "../../engine/snapshots";
 
@@ -13,48 +14,28 @@ type Tab = "draw" | "groups" | "knockout" | "history";
 interface InternationalCupPageProps {
   title: string;
   subtitle: string;
-  editions: GoldCupEdition[];
+  editions: InternationalCompetitionEdition[];
+  afconHighlights?: boolean;
 }
 
-function Fixture(props: { home: string; away: string; goalsHome: number | null; goalsAway: number | null }) {
-  const { home, away, goalsHome, goalsAway } = props;
-  const played = goalsHome !== null && goalsAway !== null;
-  return (
-    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-3 py-2 border-b border-navy-700/60 text-sm">
-      <div className="flex justify-end"><NationLink code={home} /></div>
-      <div className="text-center font-bold tabular-nums bg-navy-900 rounded px-2 py-0.5 min-w-16">
-        {played ? `${goalsHome}-${goalsAway}` : "–"}
-      </div>
-      <div className="flex items-center gap-2"><NationLink code={away} /></div>
-    </div>
-  );
-}
-
-function GroupPanel(props: { edition: GoldCupEdition; group: GoldCupEdition["groups"][number] }) {
+function GroupPanel(props: {
+  edition: InternationalCompetitionEdition;
+  group: InternationalCompetitionEdition["groups"][number];
+  afconHighlights: boolean;
+}) {
   const rows = getInternationalCupStandings(props.edition, props.group);
+  const highlights: Record<number, string> = props.afconHighlights
+    ? { 1: "bg-green-500/10", 2: "bg-green-500/10", 3: "bg-yellow-400/10" }
+    : { 1: "bg-green-500/10", 2: "bg-green-500/10" };
   return (
     <Panel title={`Group ${props.group.name}`}>
-      <InternationalGroupTable rows={rows} highlights={{ 1: "bg-green-500/10", 2: "bg-green-500/10" }} />
-      <div className="border-t border-navy-700">
-        {props.group.matches.map((round, roundIndex) => (
-          <details key={roundIndex} className="group border-b last:border-b-0 border-navy-700/60">
-            <summary className="cursor-pointer list-none px-3 py-3 text-xs font-bold uppercase tracking-wider text-navy-300 hover:text-white">
-              <span className="inline-flex items-center gap-2">
-                <span className="text-[10px] transition-transform group-open:rotate-90">▶</span>
-                Matchday {roundIndex + 1}
-              </span>
-            </summary>
-            {round.map((match, index) => (
-              <Fixture key={index} home={match.home} away={match.away} goalsHome={match.homeGoals} goalsAway={match.awayGoals} />
-            ))}
-          </details>
-        ))}
-      </div>
+      <InternationalGroupTable rows={rows} highlights={highlights} />
+      <InternationalGroupMatchdays rounds={props.group.matches} />
     </Panel>
   );
 }
 
-function DrawResults(props: { title: string; edition: GoldCupEdition }) {
+function DrawResults(props: { title: string; edition: InternationalCompetitionEdition }) {
   const { edition } = props;
   const hosts = new Set(edition.hosts);
   return (
@@ -108,11 +89,11 @@ function DrawResults(props: { title: string; edition: GoldCupEdition }) {
   );
 }
 
-function toTeamRef(code: string, edition: GoldCupEdition): TeamRef {
+function toTeamRef(code: string, edition: InternationalCompetitionEdition): TeamRef {
   return { id: edition.teams.indexOf(code) + 1, name: code, countrycode: code };
 }
 
-function toCupSnap(edition: GoldCupEdition): CupSnap {
+function toCupSnap(edition: InternationalCompetitionEdition): CupSnap {
   return {
     rounds: (edition.knockout ?? []).map((round, roundIndex) => ({
       round: roundIndex + 1,
@@ -144,7 +125,7 @@ function toCupSnap(edition: GoldCupEdition): CupSnap {
   };
 }
 
-function getSemifinalLosers(edition: GoldCupEdition): string[] {
+function getSemifinalLosers(edition: InternationalCompetitionEdition): string[] {
   const semiFinals = edition.knockout?.find(round => round.label === "Semi-finals");
   if (!semiFinals) return edition.semifinalists;
   return semiFinals.matches.flatMap(match => {
@@ -153,7 +134,7 @@ function getSemifinalLosers(edition: GoldCupEdition): string[] {
   });
 }
 
-function HistoryTable(props: { title: string; editions: GoldCupEdition[]; onSelect: (year: number) => void }) {
+function HistoryTable(props: { title: string; editions: InternationalCompetitionEdition[]; onSelect: (year: number) => void }) {
   const completed = [...props.editions].filter(edition => edition.completed).sort((a, b) => b.year - a.year);
   if (completed.length === 0) return <Panel><Empty>No completed {props.title} editions yet.</Empty></Panel>;
   return (
@@ -196,7 +177,7 @@ export default function InternationalCupPage(props: InternationalCupPageProps) {
       <PageHeader
         title={title}
         subtitle={selected
-          ? `${selected.year+1} · ${selected.completed ? `Champions: ${getNationName(selected.winner)}` : selected.knockout ? "Knockout stage" : "Group stage"} · Hosts: ${selected.hosts.map(getNationName).join(" / ")}`
+          ? `${selected.year+1}· ${selected.completed ? `Champions: ${getNationName(selected.winner)}` : selected.knockout ? "Knockout stage" : "Group stage"} · Hosts: ${selected.hosts.map(getNationName).join(" / ")}`
           : subtitle}
         right={years.length > 1 ? <SeasonSelect years={years.map(value => ({ year: value, label: String(value+1) }))} value={year} onChange={setSelectedYear} /> : undefined}
       />
@@ -217,7 +198,14 @@ export default function InternationalCupPage(props: InternationalCupPageProps) {
       {tab === "groups" && (!selected
         ? <Panel><Empty>The {title} group stage has not been drawn yet.</Empty></Panel>
         : <div className="space-y-5">
-          <div className="grid gap-4 xl:grid-cols-2">{selected.groups.map(group => <GroupPanel key={group.name} edition={selected} group={group} />)}</div>
+          <div className="grid gap-4 xl:grid-cols-2">{selected.groups.map(group => (
+            <GroupPanel
+              key={group.name}
+              edition={selected}
+              group={group}
+              afconHighlights={props.afconHighlights ?? false}
+            />
+          ))}</div>
         </div>
       )}
       {tab === "knockout" && (!selected?.knockout

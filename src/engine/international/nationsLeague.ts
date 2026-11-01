@@ -1,26 +1,19 @@
-import initialAllocationsRaw from "./data/nations_league.json";
-import teamWindowsRaw from "./data/team_windows.csv?raw";
-import { SEASON_START_YEAR } from "./constants";
-import { getConfederation } from "./nations";
-import { scheduleLeague } from "./scheduler";
-import { shuffledCopy } from "./utils";
+import initialAllocationsRaw from "../data/nations_league.json";
+import { getConfederation } from "../nations";
+import { scheduleLeague } from "../scheduler";
+import { shuffledCopy } from "../utils";
 import type { InternationalMatch } from "./international";
-import { Team } from "./team";
+import {
+  assertInternationalWindowCoverage, getInternationalWindowIndex, getInternationalWindowLocation,
+  getInternationalWindowTypeAt, INTERNATIONAL_CYCLE_WINDOW_COUNT
+} from "./internationalCompetitionsUtils";
+import { Team } from "../team";
 
 type NationsLeagueCompetition = "NL1" | "NL2";
-type WindowType = "FR" | NationsLeagueCompetition | "GCPO" | "GC" | "COPA";
-
 interface InitialDivision {
   numUp: number;
   numDown: number;
   [pot: string]: number | string[];
-}
-
-export function getGoldCupWindowType(year: number, windowId: string): "GCPO" | "GC" | null {
-  const type = typeAt("CONCACAF", globalWindowIndex(year, windowId));
-  if (type.startsWith("GCPO")) return "GCPO";
-  if (type.startsWith("GC")) return "GC";
-  return null;
 }
 
 interface NationsLeagueInitialAllocations {
@@ -72,69 +65,13 @@ export interface NationsLeagueState {
 }
 
 const initialAllocations = initialAllocationsRaw as NationsLeagueInitialAllocations;
-const WINDOW_COUNT_PER_YEAR = 6;
-const CYCLE_WINDOW_COUNT = 24;
-
-function parseTeamWindows(csv: string): Map<string, WindowType[]> {
-  const rows = csv.trim().split(/\r?\n/).map(line => line.split(",").map(cell => cell.trim()));
-  const parsed = new Map<string, WindowType[]>();
-  for (const [rowIndex, [confederation, ...values]] of rows.entries()) {
-    if (!confederation || values.length !== CYCLE_WINDOW_COUNT) {
-      throw new Error(`team_windows.csv row ${rowIndex + 1} must contain a confederation and 24 window types.`);
-    }
-    const types = values.map(value => {
-      if (value !== "FR" && value !== "NL1" && value !== "NL2" &&
-        !/^GCPO[12]?$/.test(value) && !/^GC[12]?$/.test(value) && value !== "COPA") {
-        throw new Error(`Unknown team_windows.csv window type "${value}" for ${confederation}.`);
-      }
-      if (value.startsWith("GCPO")) return "GCPO";
-      if (value.startsWith("GC")) return "GC";
-      return value as WindowType;
-    });
-    parsed.set(confederation, types);
-  }
-  for (const confederation of Object.keys(initialAllocations)) {
-    if (!parsed.has(confederation)) {
-      throw new Error(`team_windows.csv is missing the ${confederation} row.`);
-    }
-  }
-  return parsed;
-}
-
-const teamWindows = parseTeamWindows(teamWindowsRaw);
-
-function windowNumber(windowId: string): number {
-  const match = /^IW([1-6])$/.exec(windowId);
-  if (!match) throw new Error(`Unknown international window ID "${windowId}".`);
-  return Number(match[1]) - 1;
-}
-
-function globalWindowIndex(year: number, windowId: string): number {
-  return (year - SEASON_START_YEAR) * WINDOW_COUNT_PER_YEAR + windowNumber(windowId);
-}
-
-function windowLocation(index: number): { year: number; windowId: string } {
-  const yearOffset = Math.floor(index / WINDOW_COUNT_PER_YEAR);
-  const window = ((index % WINDOW_COUNT_PER_YEAR) + WINDOW_COUNT_PER_YEAR) % WINDOW_COUNT_PER_YEAR;
-  return { year: SEASON_START_YEAR + yearOffset, windowId: `IW${window + 1}` };
-}
-
-function typeAt(confederation: string, index: number): WindowType {
-  const types = teamWindows.get(confederation);
-  if (!types) throw new Error(`No team-window schedule is configured for ${confederation}.`);
-  const cycleIndex = ((index % CYCLE_WINDOW_COUNT) + CYCLE_WINDOW_COUNT) % CYCLE_WINDOW_COUNT;
-  return types[cycleIndex];
-}
-
+assertInternationalWindowCoverage(Object.keys(initialAllocations));
 function competitionWindowCount(confederation: string, startWindowIndex: number, competition: NationsLeagueCompetition): number {
   let count = 0;
-  while (count < CYCLE_WINDOW_COUNT && typeAt(confederation, startWindowIndex + count) === competition) count++;
+  while (count < INTERNATIONAL_CYCLE_WINDOW_COUNT &&
+    getInternationalWindowTypeAt(confederation, startWindowIndex + count) === competition) count++;
   if (count === 0) throw new Error(`No international windows are assigned to ${competition} for ${confederation}.`);
   return count;
-}
-
-export function getInternationalWindowType(confederation: string, year: number, windowId: string): WindowType {
-  return typeAt(confederation, globalWindowIndex(year, windowId));
 }
 
 function initialPots(division: InitialDivision): Record<string, string[]> {
@@ -209,7 +146,7 @@ function createEdition(
           competitionWindowCountForEdition - 1,
           Math.floor((round - 1) * competitionWindowCountForEdition / rounds.length)
         );
-        const location = windowLocation(startWindowIndex + windowSlot);
+        const location = getInternationalWindowLocation(startWindowIndex + windowSlot);
         for (const fixture of fixtures) {
           matches.push({
             home: fixture.homeTeam.Team,
@@ -219,7 +156,7 @@ function createEdition(
             awayGoals: null,
             homeChange: null,
             awayChange: null,
-            nationsLeagueId: `${confederation}-${competition}-${Math.floor(startWindowIndex / CYCLE_WINDOW_COUNT)}`,
+            nationsLeagueId: `${confederation}-${competition}-${Math.floor(startWindowIndex / INTERNATIONAL_CYCLE_WINDOW_COUNT)}`,
             nationsLeagueConfederation: confederation,
             nationsLeagueDivision: division,
             nationsLeagueGroup: group.name,
@@ -232,14 +169,14 @@ function createEdition(
     }
   }
 
-  const cycle = Math.floor(startWindowIndex / CYCLE_WINDOW_COUNT);
+  const cycle = Math.floor(startWindowIndex / INTERNATIONAL_CYCLE_WINDOW_COUNT);
   return {
     id: `${confederation}-${competition}-${cycle}`,
     confederation,
     competition,
     cycle,
     startWindowIndex,
-    year: windowLocation(startWindowIndex).year,
+    year: getInternationalWindowLocation(startWindowIndex).year,
     status: "scheduled",
     divisions: divisionGroups,
     matches,
@@ -249,19 +186,19 @@ function createEdition(
 }
 
 function isFirstCompetitionWindow(confederation: string, index: number): boolean {
-  const type = typeAt(confederation, index);
-  return (type === "NL1" || type === "NL2") && typeAt(confederation, index - 1) !== type;
+  const type = getInternationalWindowTypeAt(confederation, index);
+  return (type === "NL1" || type === "NL2") && getInternationalWindowTypeAt(confederation, index - 1) !== type;
 }
 
 /** Draws the groups in the international window immediately before a new edition starts. */
 export function prepareNationsLeagueDraws(state: NationsLeagueState, year: number, windowId: string): void {
-  const drawWindowIndex = globalWindowIndex(year, windowId);
+  const drawWindowIndex = getInternationalWindowIndex(year, windowId);
   const startWindowIndex = drawWindowIndex + 1;
   for (const confederation of Object.keys(initialAllocations)) {
     if (!isFirstCompetitionWindow(confederation, startWindowIndex)) continue;
-    const competition = typeAt(confederation, startWindowIndex);
+    const competition = getInternationalWindowTypeAt(confederation, startWindowIndex);
     if (competition !== "NL1" && competition !== "NL2") continue;
-    const cycle = Math.floor(startWindowIndex / CYCLE_WINDOW_COUNT);
+    const cycle = Math.floor(startWindowIndex / INTERNATIONAL_CYCLE_WINDOW_COUNT);
     const id = `${confederation}-${competition}-${cycle}`;
     if (state.editions.some(edition => edition.id === id)) continue;
     state.editions.push(createEdition(state, confederation, competition, startWindowIndex));
@@ -274,8 +211,8 @@ export function getNationsLeagueRoundsForWindow(
   year: number,
   windowId: string
 ): { edition: NationsLeagueEdition; rounds: { label: string; matches: InternationalMatch[] }[] } | null {
-  const index = globalWindowIndex(year, windowId);
-  const competition = typeAt(confederation, index);
+  const index = getInternationalWindowIndex(year, windowId);
+  const competition = getInternationalWindowTypeAt(confederation, index);
   if (competition !== "NL1" && competition !== "NL2") return null;
   const edition = [...state.editions].reverse().find(candidate =>
     candidate.confederation === confederation &&

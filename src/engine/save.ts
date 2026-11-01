@@ -4,9 +4,11 @@ import type { Season } from "./season";
 import { seasonDisplay } from "./constants";
 import { createFreeAgentState, generateFreeAgents } from "./freeAgents";
 import { FREE_AGENTS_LABEL } from "./playerHistory";
-import { createInternationalState, startWindowIfDue, collectAllPlayers } from "./international";
-import { createGoldCupState } from "./goldCup";
-import { createCopaAmericaState } from "./copaAmerica";
+import { createInternationalState, startWindowIfDue, collectAllPlayers } from "./international/international";
+import { createGoldCupState } from "./international/goldCup";
+import { createCopaAmericaState } from "./international/copaAmerica";
+import { createAfconState } from "./international/afcon";
+import { createAfcCupState } from "./international/afcCup";
 import { refreshAllClubOveralls } from "./squadStrength";
 import { collectSeasonPlayers } from "./playerIds";
 import { refreshStartingXI } from "./playerSquad";
@@ -55,8 +57,10 @@ export const SAVE_FORMAT = "soccer-season-simulator-save";
  * v16: adds CONCACAF Gold Cup and Gold Cup Playoff state.
  * v17: adds Copa América state.
  * v18: persists God Mode club rating overrides.
+ * v19: adds AFCON and its qualifying editions.
+ * v20: adds the AFC Cup and its qualifying editions.
  */
-export const SAVE_VERSION = 18;
+export const SAVE_VERSION = 20;
 
 export interface SaveMeta {
   mode: "manager" | "observer";
@@ -514,6 +518,12 @@ export function gameFromSave(file: SaveFile): Game {
   }
   if (loadedSeason?.international && loadedSeason.international.copaAmerica === undefined) {
     loadedSeason.international.copaAmerica = createCopaAmericaState();
+  }
+  if (loadedSeason?.international && loadedSeason.international.afcon === undefined) {
+    loadedSeason.international.afcon = createAfconState();
+  }
+  if (loadedSeason?.international && loadedSeason.international.afcCup === undefined) {
+    loadedSeason.international.afcCup = createAfcCupState();
   }
   if (loadedSeason && file.version < 6) {
     // v5 -> v6: nobody is shortlisted and unsigned scouting candidates are discarded, as before.

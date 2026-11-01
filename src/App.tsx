@@ -25,6 +25,10 @@ import NationsLeaguePage from "./ui/pages/NationsLeaguePage";
 import GoldCupPage from "./ui/pages/GoldCupPage";
 import GoldCupPlayoffPage from "./ui/pages/GoldCupPlayoffPage";
 import CopaAmericaPage from "./ui/pages/CopaAmericaPage";
+import AfconPage from "./ui/pages/AfconPage";
+import AfconQualifiersPage from "./ui/pages/AfconQualifiersPage";
+import AfcCupPage from "./ui/pages/AfcCupPage";
+import AfcCupQualifiersPage from "./ui/pages/AfcCupQualifiersPage";
 
 export default function App() {
   useGameStore(state => state.tick);
@@ -49,6 +53,10 @@ export default function App() {
         <Route path="/gold-cup" element={<GoldCupPage />} />
         <Route path="/gold-cup-playoff" element={<GoldCupPlayoffPage />} />
         <Route path="/copa-america" element={<CopaAmericaPage />} />
+        <Route path="/afcon" element={<AfconPage />} />
+        <Route path="/afcon-qualifiers" element={<AfconQualifiersPage />} />
+        <Route path="/afc-cup" element={<AfcCupPage />} />
+        <Route path="/afc-cup-qualifiers" element={<AfcCupQualifiersPage />} />
         <Route path="/add-player" element={game.godMode ? <AddPlayer /> : <Navigate to="/" replace />} />
         <Route path="/add-team" element={game.godMode ? <AddTeam /> : <Navigate to="/" replace />} />
         <Route path="/player/:id" element={<PlayerPage />} />

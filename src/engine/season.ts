@@ -34,8 +34,8 @@ import {
 } from "./freeAgents";
 import {
   createInternationalState, startWindowIfDue, autoSimulateWindowIfDue, hasPendingWindow
-} from "./international";
-import type { InternationalState } from "./international";
+} from "./international/international";
+import type { InternationalState } from "./international/international";
 import { createClubWorldCup, simulateClubWorldCup } from "./clubWorldCup";
 import type { ClubWorldCup } from "./clubWorldCup";
 import {

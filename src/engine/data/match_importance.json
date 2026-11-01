@@ -10,5 +10,11 @@
   "goldCupGroup": 35,
   "goldCupKnockout": 40,
   "copaAmericaGroup": 35,
-  "copaAmericaKnockout": 40
+  "copaAmericaKnockout": 40,
+  "afconQualifier": 25,
+  "afconGroup": 35,
+  "afconKnockout": 40,
+  "afcCupQualifier": 25,
+  "afcCupGroup": 35,
+  "afcCupKnockout": 40
 }

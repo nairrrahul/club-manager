@@ -16,5 +16,38 @@
     "PAR",
     "PER",
     "URU"
+  ],
+  "AFCON": [
+    "ALG",
+    "NGA",
+    "SEN",
+    "MAR",
+    "RSA",
+    "ALG|TUN",
+    "CIV|GHA",
+    "KEN|UGA|TAN",
+    "ETH",
+    "GAB|EQG",
+    "EGY",
+    "ANG|ZAM",
+    "CMR",
+    "GUI",
+    "RSA|BOT"
+  ],
+  "AFCCUP": [
+    "KSA",
+    "JPN",
+    "KOR",
+    "KOR|JPN",
+    "IRN",
+    "UZB|TJK",
+    "IND",
+    "VIE|IDN|MAS",
+    "AUS",
+    "AUS|IDN",
+    "CHN",
+    "QAT",
+    "UAE",
+    "QAT|BHR"
   ]
 }

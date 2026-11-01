@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import {
   getNationsLeagueDivisionHistory, getNationsLeagueStandings, isNationsLeagueConfederation
-} from "../../engine/nationsLeague";
-import type { NationsLeagueEdition, NationsLeagueGroup } from "../../engine/nationsLeague";
+} from "../../engine/international/nationsLeague";
+import type { NationsLeagueEdition, NationsLeagueGroup } from "../../engine/international/nationsLeague";
 import { seasonDisplay } from "../../engine/constants";
 import { useGame } from "../../store/gameStore";
 import { Empty, NationLink, PageHeader, Panel, Tabs } from "../components/common";

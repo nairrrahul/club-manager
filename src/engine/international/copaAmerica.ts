@@ -1,17 +1,17 @@
-import hostOptionsRaw from "./data/tournament_hosts.json";
-import { getCountriesByRegion, getNationName } from "./nations";
+import hostOptionsRaw from "../data/tournament_hosts.json";
+import { getCountriesByRegion, getNationName } from "../nations";
 import type { InternationalRound } from "./international";
 import {
   drawInternationalCupGroups,
-  createInternationalCupGroupMatches,
-  type GoldCupEdition
-} from "./goldCup";
+  createInternationalCupGroupMatches
+} from "./internationalCompetitionsUtils";
+import type { InternationalCompetitionEdition } from "./internationalCompetitionsUtils";
 import type { GoldCupState } from "./goldCup";
 
 const hostOptions = hostOptionsRaw as Record<string, string[]>;
 const GROUP_NAMES = ["A", "B", "C", "D"] as const;
 
-export type CopaAmericaEdition = GoldCupEdition;
+export type CopaAmericaEdition = InternationalCompetitionEdition;
 
 export interface CopaAmericaState {
   editions: CopaAmericaEdition[];

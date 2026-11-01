@@ -12,9 +12,12 @@ import { CLUB_WORLD_CUP_NAME } from "./clubWorldCup";
 import type { ClubWorldCup } from "./clubWorldCup";
 import { CONTINENTAL_TOURNAMENT_MATCHDAY } from "./continentalTournaments";
 import type { ContinentalTournament } from "./continentalTournaments";
-import type { GoldCupEdition, GoldCupPlayoffEdition } from "./goldCup";
-import type { CopaAmericaEdition } from "./copaAmerica";
-import type { InternationalMatch } from "./international";
+import type { GoldCupPlayoffEdition } from "./international/goldCup";
+import type { InternationalCompetitionEdition } from "./international/internationalCompetitionsUtils";
+import type { CopaAmericaEdition } from "./international/copaAmerica";
+import type { AfconQualifyingEdition } from "./international/afcon";
+import type { AfcCupQualifyingEdition } from "./international/afcCup";
+import type { InternationalMatch } from "./international/international";
 
 // ---------------------------------------------------------------------------
 // Plain-data snapshot types. Snapshots never reference live engine objects, so a
@@ -215,9 +218,13 @@ export interface SeasonArchive {
   european: Record<string, EuroSnap> | null;
   clubWorldCup?: ClubWorldCupSnap | null;
   continentalTournaments?: Record<string, ContinentalTournamentSnap>;
-  goldCup?: GoldCupEdition | null;
+  goldCup?: InternationalCompetitionEdition | null;
   goldCupPlayoff?: GoldCupPlayoffEdition | null;
   copaAmerica?: CopaAmericaEdition | null;
+  afcon?: InternationalCompetitionEdition | null;
+  afconQualifying?: AfconQualifyingEdition | null;
+  afcCup?: InternationalCompetitionEdition | null;
+  afcCupQualifying?: AfcCupQualifyingEdition | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -574,6 +581,18 @@ export function snapshotSeason(season: Season): SeasonArchive {
     ),
     copaAmerica: snapshotCopaAmerica(
       season.international.copaAmerica.editions.find(edition => edition.year === season.year) ?? null
+    ),
+    afcon: snapshotGoldCup(
+      season.international.afcon.editions.find(edition => edition.year === season.year) ?? null
+    ),
+    afconQualifying: snapshotAfconQualifying(
+      season.international.afcon.qualifyingEditions.find(edition => edition.year === season.year) ?? null
+    ),
+    afcCup: snapshotGoldCup(
+      season.international.afcCup.editions.find(edition => edition.year === season.year) ?? null
+    ),
+    afcCupQualifying: snapshotAfcCupQualifying(
+      season.international.afcCup.qualifyingEditions.find(edition => edition.year === season.year) ?? null
     )
   };
 }
@@ -586,7 +605,7 @@ function snapshotInternationalMatch(match: InternationalMatch): InternationalMat
   };
 }
 
-function snapshotGoldCup(edition: GoldCupEdition | null): GoldCupEdition | null {
+function snapshotGoldCup(edition: InternationalCompetitionEdition | null): InternationalCompetitionEdition | null {
   if (!edition) return null;
   return {
     ...edition,
@@ -627,6 +646,52 @@ function snapshotGoldCupPlayoff(edition: GoldCupPlayoffEdition | null): GoldCupP
       secondLeg: snapshotInternationalMatch(tie.secondLeg),
       penalties: tie.penalties ? { home: [...tie.penalties.home], away: [...tie.penalties.away] } : null
     }))
+  };
+}
+
+function snapshotAfconQualifying(edition: AfconQualifyingEdition | null): AfconQualifyingEdition | null {
+  if (!edition) return null;
+  return {
+    ...edition,
+    hosts: [...edition.hosts],
+    preliminaryTeams: [...edition.preliminaryTeams],
+    mainByes: [...edition.mainByes],
+    mainQualifiers: [...edition.mainQualifiers],
+    seedRanks: { ...edition.seedRanks },
+    preliminaryTies: edition.preliminaryTies.map(tie => ({
+      ...tie,
+      firstLeg: snapshotInternationalMatch(tie.firstLeg),
+      secondLeg: snapshotInternationalMatch(tie.secondLeg),
+      penalties: tie.penalties ? { home: [...tie.penalties.home], away: [...tie.penalties.away] } : null
+    })),
+    mainGroups: edition.mainGroups?.map(group => ({
+      ...group,
+      teams: [...group.teams],
+      matches: group.matches.map(round => round.map(snapshotInternationalMatch))
+    })) ?? null
+  };
+}
+
+function snapshotAfcCupQualifying(edition: AfcCupQualifyingEdition | null): AfcCupQualifyingEdition | null {
+  if (!edition) return null;
+  return {
+    ...edition,
+    hosts: [...edition.hosts],
+    preliminaryTeams: [...edition.preliminaryTeams],
+    mainByes: [...edition.mainByes],
+    mainQualifiers: [...edition.mainQualifiers],
+    seedRanks: { ...edition.seedRanks },
+    preliminaryTies: edition.preliminaryTies.map(tie => ({
+      ...tie,
+      firstLeg: snapshotInternationalMatch(tie.firstLeg),
+      secondLeg: snapshotInternationalMatch(tie.secondLeg),
+      penalties: tie.penalties ? { home: [...tie.penalties.home], away: [...tie.penalties.away] } : null
+    })),
+    mainGroups: edition.mainGroups?.map(group => ({
+      ...group,
+      teams: [...group.teams],
+      matches: group.matches.map(round => round.map(snapshotInternationalMatch))
+    })) ?? null
   };
 }
 

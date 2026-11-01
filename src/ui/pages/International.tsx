@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useGame } from "../../store/gameStore";
 import { seasonDisplay } from "../../engine/constants";
-import type { InternationalMatch, WindowRecord } from "../../engine/international";
+import type { InternationalMatch, WindowRecord } from "../../engine/international/international";
 import { Empty, NationLink, PageHeader, Panel, SeasonSelect } from "../components/common";
 
 function change(value: number | null): string {
@@ -40,6 +40,10 @@ function WindowView(props: { window: WindowRecord }) {
   const goldCupPlayoffRounds = window.rounds.filter(round => round.kind === "goldCupPlayoff");
   const goldCupRounds = window.rounds.filter(round => round.kind === "goldCup");
   const copaAmericaRounds = window.rounds.filter(round => round.kind === "copaAmerica");
+  const afconQualifyingRounds = window.rounds.filter(round => round.kind === "afconQualifier");
+  const afconRounds = window.rounds.filter(round => round.kind === "afcon");
+  const afcCupQualifierRounds = window.rounds.filter(round => round.kind === "afcCupQualifier");
+  const afcCupRounds = window.rounds.filter(round => round.kind === "afcCup");
 
   const renderRounds = (rounds: typeof window.rounds, separateByConfederation = false) =>
     rounds.map((round, index) => {
@@ -112,6 +116,30 @@ function WindowView(props: { window: WindowRecord }) {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Copa América</h2>
           {renderRounds(copaAmericaRounds)}
+        </section>
+      )}
+      {afconQualifyingRounds.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">AFCON Qualifiers</h2>
+          {renderRounds(afconQualifyingRounds)}
+        </section>
+      )}
+      {afconRounds.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">AFCON</h2>
+          {renderRounds(afconRounds)}
+        </section>
+      )}
+      {afcCupQualifierRounds.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">AFC Cup Qualifiers</h2>
+          {renderRounds(afcCupQualifierRounds)}
+        </section>
+      )}
+      {afcCupRounds.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">AFC Cup</h2>
+          {renderRounds(afcCupRounds)}
         </section>
       )}
     </div>
