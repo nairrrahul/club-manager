@@ -24,7 +24,7 @@ function MainRound(props: { edition: EuroQualifyingEdition }) {
           {" "}three playoff paths determine the remaining EURO places.
         </p>
       </Panel>
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid items-start gap-4 xl:grid-cols-2">
         {edition.groups.map(group => (
           <Panel key={group.name} title={`Group ${group.name}`}>
             <InternationalGroupTable rows={getEuroQualifierStandings(edition, group)} highlights={highlights} />
@@ -102,20 +102,22 @@ function Playoffs(props: {
           Three paths. Each path winner qualifies for the EURO. Teams marked NL were selected from the Nations League aggregate ranking and are bottom seeds.
         </p>
       </Panel>
-      <div className="grid gap-4 xl:grid-cols-3">
+      <div className="space-y-4">
         {paths.map(({ path, bracket }) => (
           <Panel key={path.name} title={`Path ${path.name}`}>
-            <div className="divide-y divide-navy-700/60">
-              {path.teams.map((code, index) => (
-                <div key={code} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
-                  <span><span className="mr-2 text-navy-300">Seed {index + 1}</span><NationLink code={code} /></span>
-                  {edition.playoffBottomSeeds.includes(code) &&
-                    <span className="rounded bg-navy-600 px-2 py-0.5 text-xs font-bold text-white">NL</span>}
-                </div>
-              ))}
-            </div>
-            <div className="border-t border-navy-700">
-              <CupBracketTree cup={bracket} nationTeams showFlag />
+            <div className="grid gap-3 p-3 lg:grid-cols-[minmax(190px,1fr)_minmax(0,2fr)]">
+              <div className="flex h-full flex-col rounded-md border border-navy-600/70 bg-navy-900/40 px-2">
+                {path.teams.map((code, index) => (
+                  <div key={code} className={`flex min-h-0 flex-1 items-center justify-between gap-3 px-1 text-sm ${index > 0 ? "border-t border-navy-700/60" : ""}`}>
+                    <span><span className="mr-2 text-navy-300">Seed {index + 1}</span><NationLink code={code} /></span>
+                    {edition.playoffBottomSeeds.includes(code) &&
+                      <span className="rounded bg-navy-600 px-2 py-0.5 text-xs font-bold text-white">NL</span>}
+                  </div>
+                ))}
+              </div>
+              <div className="min-w-0 rounded-md border border-navy-600/70 bg-navy-900/40 p-2">
+                <CupBracketTree cup={bracket} nationTeams showFlag />
+              </div>
             </div>
           </Panel>
         ))}

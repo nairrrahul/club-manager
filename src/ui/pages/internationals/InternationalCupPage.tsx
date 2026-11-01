@@ -258,7 +258,7 @@ export default function InternationalCupPage(props: InternationalCupPageProps) {
       {tab === "groups" && (!selected
         ? <Panel><Empty>The {title} group stage has not been drawn yet.</Empty></Panel>
         : <div className="space-y-5">
-          <div className="grid gap-4 xl:grid-cols-2">{selected.groups.map(group => (
+          <div className="grid items-start gap-4 xl:grid-cols-2">{selected.groups.map(group => (
             <GroupPanel
               key={group.name}
               edition={selected}

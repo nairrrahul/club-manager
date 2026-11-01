@@ -118,7 +118,7 @@ function PhaseContent(props: { phase: WorldCupPhase | undefined; edition: WorldC
   return (
     <div className="space-y-5">
       {hasGroups && (
-        <div className="grid gap-4 xl:grid-cols-2">
+        <div className="grid items-start gap-4 xl:grid-cols-2">
           {phase.groups.map(group => (
             <Panel key={group.name} title={`Group ${group.name}`}>
               <InternationalGroupTable
@@ -144,8 +144,23 @@ function PhaseContent(props: { phase: WorldCupPhase | undefined; edition: WorldC
         </div>
       )}
       {phase.paths.map((path, index) => (
-        <Panel key={path.name} title={path.name}>
-          <CupBracketTree cup={bracketSnapshot(phase, index)} nationTeams showFlag />
+        <Panel key={path.name} title={props.phaseName === "UEFAWCQP" ? `Path ${String.fromCharCode(65 + index)}` : path.name}>
+          <div className={props.phaseName === "UEFAWCQP" ? "grid gap-3 p-3 lg:grid-cols-[minmax(190px,1fr)_minmax(0,2fr)]" : ""}>
+            {props.phaseName === "UEFAWCQP" && (
+              <div className="flex h-full flex-col rounded-md border border-navy-600/70 bg-navy-900/40 px-2">
+                {path.teams.map((code, seedIndex) => (
+                  <div key={code} className={`flex min-h-0 flex-1 items-center justify-between gap-3 px-1 text-sm ${seedIndex > 0 ? "border-t border-navy-700/60" : ""}`}>
+                    <span><span className="mr-2 text-navy-300">Seed {seedIndex + 1}</span><NationLink code={code} /></span>
+                    {phase.bottomSeeds.includes(code) &&
+                      <span className="rounded bg-navy-600 px-2 py-0.5 text-xs font-bold text-white">NL</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className={props.phaseName === "UEFAWCQP" ? "min-w-0 rounded-md border border-navy-600/70 bg-navy-900/40 p-2" : ""}>
+              <CupBracketTree cup={bracketSnapshot(phase, index)} nationTeams showFlag />
+            </div>
+          </div>
         </Panel>
       ))}
       {!hasGroups && !hasKnockout && (

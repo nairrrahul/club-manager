@@ -90,7 +90,7 @@ function MainRound(props: { edition: AfcCupQualifyingEdition }) {
           The top two teams in each group and the best {4 - edition.hosts.length} third-place team{4 - edition.hosts.length === 1 ? "" : "s"} qualify alongside {edition.hosts.length} host{edition.hosts.length === 1 ? "" : "s"}.
         </p>
       </Panel>
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid items-start gap-4 xl:grid-cols-2">
         {edition.mainGroups.map(group => {
           const rows = getAfcCupQualifierStandings(edition, group);
           return (

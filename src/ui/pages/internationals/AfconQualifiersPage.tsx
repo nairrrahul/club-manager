@@ -93,7 +93,7 @@ function MainRound(props: { edition: AfconQualifyingEdition }) {
           The 12 group winners and the best {12 - edition.hosts.length} runners-up qualify alongside {edition.hosts.length} host{edition.hosts.length === 1 ? "" : "s"}.
         </p>
       </Panel>
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid items-start gap-4 xl:grid-cols-2">
         {edition.mainGroups.map(group => {
           const rows = getAfconQualifierStandings(edition, group);
           return (

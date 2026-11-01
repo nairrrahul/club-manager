@@ -18,7 +18,7 @@ function MainRound(props: { edition: OfcCupQualifyingEdition }) {
           The top three teams in each group and the best fourth-place team qualify for the OFC Cup, alongside the host.
         </p>
       </Panel>
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid items-start gap-4 xl:grid-cols-2">
         {edition.groups.map(group => (
           <Panel key={group.name} title={`Group ${group.name}`}>
             <InternationalGroupTable rows={getOfcCupQualifierStandings(edition, group)} />
