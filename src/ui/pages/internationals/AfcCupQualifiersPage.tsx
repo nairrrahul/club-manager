@@ -55,7 +55,7 @@ function Preliminary(props: { edition: AfcCupQualifyingEdition }) {
   }
   const round: EuroRoundSnap = {
     key: "AFCQP",
-    label: `${edition.year + 1} AFC Cup preliminary round`,
+    label: `${edition.year + 1} Asian Cup preliminary round`,
     matchdays: [1, 2],
     ties: edition.preliminaryTies.map(toTie)
   };
@@ -118,9 +118,9 @@ function MainRound(props: { edition: AfcCupQualifyingEdition }) {
 }
 
 function EditionHistory(props: { editions: AfcCupQualifyingEdition[]; onSelect: (year: number) => void }) {
-  if (props.editions.length === 0) return <Panel><Empty>No AFC Cup qualifying editions are available yet.</Empty></Panel>;
+  if (props.editions.length === 0) return <Panel><Empty>No Asian Cup qualifying editions are available yet.</Empty></Panel>;
   return (
-    <Panel title="AFC Cup qualifying history">
+    <Panel title="Asian Cup qualifying history">
       <div className="overflow-x-auto">
         <table className="tbl">
           <thead><tr><th>Season</th><th>Hosts</th><th>Preliminary</th><th>Main round</th><th></th></tr></thead>
@@ -152,10 +152,10 @@ export default function AfcCupQualifiersPage() {
   return (
     <div>
       <PageHeader
-        title="AFC Cup Qualifiers"
+        title="Asian Cup Qualifiers"
         subtitle={selected
           ? `${selected.year + 1} · Hosts: ${selected.hosts.map(getNationName).join(" / ")}`
-          : "Preliminary and group qualification for the AFC Cup"}
+          : "Preliminary and group qualification for the Asian Cup"}
         right={selected && years.length > 1
           ? <SeasonSelect years={years.map(year => ({ year, label: String(year + 1) }))} value={selected.year} onChange={setSelectedYear} />
           : undefined}
@@ -171,11 +171,11 @@ export default function AfcCupQualifiersPage() {
       />
       {tab === "preliminary" && (selected
         ? <Preliminary edition={selected} />
-        : <Panel><Empty>AFC Cup qualifying has not started yet.</Empty></Panel>
+        : <Panel><Empty>Asian Cup qualifying has not started yet.</Empty></Panel>
       )}
       {tab === "main" && (selected
         ? <MainRound edition={selected} />
-        : <Panel><Empty>AFC Cup qualifying has not started yet.</Empty></Panel>
+        : <Panel><Empty>Asian Cup qualifying has not started yet.</Empty></Panel>
       )}
       {tab === "history" && <EditionHistory editions={editions} onSelect={year => { setSelectedYear(year); setTab("main"); }} />}
     </div>

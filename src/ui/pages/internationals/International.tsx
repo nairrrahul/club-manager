@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useGame } from "../../../store/gameStore";
 import { seasonDisplay } from "../../../engine/constants";
 import type { InternationalMatch, WindowRecord } from "../../../engine/international/international";
+import { getInternationalDisplayName, getInternationalWindowLabel } from "../../../engine/international/internationalCompetitionsUtils";
 import { Empty, NationLink, PageHeader, Panel, SeasonSelect } from "../../components/common";
 
 function change(value: number | null): string {
@@ -66,7 +67,7 @@ function WindowView(props: { window: WindowRecord }) {
       return (
         <Panel
           key={`${round.label ?? round.kind ?? "friendly"}-${index}`}
-          title={round.label ?? `Friendlies · Set ${index + 1}`}
+          title={getInternationalDisplayName(round.label ?? `Friendlies · Set ${index + 1}`)}
           right={round.leftOut ? <span className="text-navy-300 flex items-center gap-1.5">No match: <NationLink code={round.leftOut} /></span> : undefined}
         >
           <div className="max-h-[60vh] overflow-y-auto">
@@ -88,7 +89,7 @@ function WindowView(props: { window: WindowRecord }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3 text-sm text-navy-200">
-        <span className="font-semibold text-white">{window.label}</span>
+        <span className="font-semibold text-white">{getInternationalWindowLabel(window.windowId)}</span>
         <span>{window.windowId === "IW6" ? "After the season" : `After matchday ${window.afterMatchday}`}</span>
         <span className={`text-xs font-bold rounded px-2 py-0.5 ${played ? "bg-navy-600 text-white" : "bg-accent-yellow text-navy-950"}`}>
           {played ? "Played" : "Scheduled"}
@@ -138,13 +139,13 @@ function WindowView(props: { window: WindowRecord }) {
       )}
       {afcCupQualifierRounds.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold">AFC Cup Qualifiers</h2>
+          <h2 className="text-lg font-semibold">Asian Cup Qualifiers</h2>
           {renderRounds(afcCupQualifierRounds)}
         </section>
       )}
       {afcCupRounds.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold">AFC Cup</h2>
+          <h2 className="text-lg font-semibold">Asian Cup</h2>
           {renderRounds(afcCupRounds)}
         </section>
       )}

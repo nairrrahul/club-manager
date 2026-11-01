@@ -744,7 +744,7 @@
     "rankingPts": 1398.42
   },
   "Israel": {
-    "teamOverall": 73,
+    "teamOverall": 70,
     "confederationID": "UEFA",
     "flagCode": "il",
     "threeLetterCode": "ISR",
@@ -752,7 +752,7 @@
     "rankingPts": 1352.19
   },
   "Italy": {
-    "teamOverall": 85,
+    "teamOverall": 82,
     "confederationID": "UEFA",
     "flagCode": "it",
     "threeLetterCode": "ITA",
@@ -1328,7 +1328,7 @@
     "rankingPts": 1507.66
   },
   "Senegal": {
-    "teamOverall": 78,
+    "teamOverall": 79,
     "confederationID": "CAF",
     "flagCode": "sn",
     "threeLetterCode": "SEN",
@@ -1624,7 +1624,7 @@
     "rankingPts": 808.14
   },
   "Uzbekistan": {
-    "teamOverall": 69,
+    "teamOverall": 71,
     "confederationID": "AFC",
     "flagCode": "uz",
     "threeLetterCode": "UZB",

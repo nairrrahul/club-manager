@@ -106,7 +106,7 @@ export function getAfcCupQualifierStandings(
   group: InternationalCompetitionGroup
 ) {
   if (!edition.mainGroups?.some(item => item.name === group.name)) {
-    throw new Error(`Unknown AFC Cup qualifying group "${group.name}" in "${edition.id}".`);
+    throw new Error(`Unknown Asian Cup qualifying group "${group.name}" in "${edition.id}".`);
   }
   return standings(group, edition.seedRanks).map((row, index) => ({ ...row, position: index + 1 }));
 }
@@ -120,7 +120,7 @@ function drawMainQualifiers(
   worldRanks: Record<string, number>
 ): void {
   if (qualifiedTeams.length !== 40 || new Set(qualifiedTeams).size !== 40) {
-    throw new Error(`AFC Cup main qualifying requires 40 unique teams; received ${qualifiedTeams.length}.`);
+    throw new Error(`Asian Cup main qualifying requires 40 unique teams; received ${qualifiedTeams.length}.`);
   }
   edition.seedRanks = Object.fromEntries(qualifiedTeams.map(code => [code, worldRanks[code] ?? Number.MAX_SAFE_INTEGER]));
   const ranked = [...qualifiedTeams].sort((a, b) =>
@@ -151,11 +151,11 @@ export function createAfcCupQualifierEdition(
   );
   const fixedHosts = getFixedInternationalCompetitionHosts("AFCCUP", tournamentWindow.year + 1);
   const hostsOption = fixedHosts ? null : hostOptions[Math.floor(Math.random() * hostOptions.length)];
-  if (!fixedHosts && !hostsOption) throw new Error("No AFC Cup host configuration is available.");
+  if (!fixedHosts && !hostsOption) throw new Error("No Asian Cup host configuration is available.");
   const hosts = fixedHosts ?? hostsOption!.split("|");
   const hostSet = new Set(hosts);
   const allTeams = getCountriesByRegion("AFC").map(nation => nation.code);
-  if (allTeams.length !== 46) throw new Error(`AFC Cup qualifying expects 46 AFC nations; found ${allTeams.length}.`);
+  if (allTeams.length !== 46) throw new Error(`Asian Cup qualifying expects 46 AFC nations; found ${allTeams.length}.`);
   const ranked = getCompetitivelyEligibleTeams(allTeams, tournamentWindow.year);
   ranked.sort((a, b) =>
     (worldRanks[a] ?? Number.MAX_SAFE_INTEGER) - (worldRanks[b] ?? Number.MAX_SAFE_INTEGER) || a.localeCompare(b)
@@ -214,7 +214,7 @@ export function findAfcCupQualifier(state: AfcCupState, year: number): AfcCupQua
 
 export function getAfcCupQualifier(state: AfcCupState, id: string): AfcCupQualifyingEdition {
   const edition = state.qualifyingEditions.find(item => item.id === id);
-  if (!edition) throw new Error(`Unknown AFC Cup qualifying edition "${id}".`);
+  if (!edition) throw new Error(`Unknown Asian Cup qualifying edition "${id}".`);
   return edition;
 }
 
@@ -223,7 +223,7 @@ export function getAfcCupPreliminaryRounds(edition: AfcCupQualifyingEdition): In
   return [
     {
       kind: "afcCupQualifier",
-      label: "AFC Cup Qualifying · Preliminary · First legs",
+      label: "Asian Cup Qualifying · Preliminary · First legs",
       leftOut: null,
       afcCupQualifierId: edition.id,
       afcCupStage: "preliminary",
@@ -231,7 +231,7 @@ export function getAfcCupPreliminaryRounds(edition: AfcCupQualifyingEdition): In
     },
     {
       kind: "afcCupQualifier",
-      label: "AFC Cup Qualifying · Preliminary · Second legs",
+      label: "Asian Cup Qualifying · Preliminary · Second legs",
       leftOut: null,
       afcCupQualifierId: edition.id,
       afcCupStage: "preliminary",
@@ -248,7 +248,7 @@ export function resolveAfcCupPreliminaryTie(
   penalties: { home: string[]; away: string[] } | null
 ): void {
   const tie = getAfcCupQualifier(state, qualifierId).preliminaryTies.find(item => item.id === tieId);
-  if (!tie) throw new Error(`Unknown AFC Cup preliminary tie "${tieId}".`);
+  if (!tie) throw new Error(`Unknown Asian Cup preliminary tie "${tieId}".`);
   tie.winner = winner;
   tie.penalties = penalties;
 }
@@ -263,7 +263,7 @@ export function completeAfcCupPreliminary(
 ): void {
   const edition = getAfcCupQualifier(state, qualifierId);
   if (edition.preliminaryTies.some(tie => !tie.winner)) {
-    throw new Error(`AFC Cup preliminary round "${qualifierId}" cannot complete before every tie is decided.`);
+    throw new Error(`Asian Cup preliminary round "${qualifierId}" cannot complete before every tie is decided.`);
   }
   drawMainQualifiers(
     edition,
@@ -281,11 +281,11 @@ export function getAfcCupMainRounds(
   windowId: string,
   windowMatchday: number
 ): InternationalRound[] {
-  if (!edition.mainGroups) throw new Error(`AFC Cup main qualifying groups are not drawn for "${edition.id}".`);
+  if (!edition.mainGroups) throw new Error(`Asian Cup main qualifying groups are not drawn for "${edition.id}".`);
   const competitionType = getInternationalWindowType("AFC", year, windowId);
   const schedule = getDistributedInternationalRoundSchedule("AFC", competitionType, year, windowId, 6);
   if (edition.mainRoundsPlayed !== schedule.start) {
-    throw new Error(`AFC Cup qualifying expected matchday ${schedule.start + 1}, but ${edition.mainRoundsPlayed} matchdays have been played.`);
+    throw new Error(`Asian Cup qualifying expected matchday ${schedule.start + 1}, but ${edition.mainRoundsPlayed} matchdays have been played.`);
   }
   return Array.from({ length: schedule.count }, (_, offset) => {
     const roundIndex = schedule.start + offset;
@@ -297,7 +297,7 @@ export function getAfcCupMainRounds(
     });
     return {
       kind: "afcCupQualifier" as const,
-      label: `AFC Cup Qualifying · Main round · Matchday ${roundIndex + 1}`,
+      label: `Asian Cup Qualifying · Main round · Matchday ${roundIndex + 1}`,
       leftOut: null,
       afcCupQualifierId: edition.id,
       afcCupStage: "main" as const,
@@ -314,7 +314,7 @@ function createAfcCupEdition(
 ): InternationalCompetitionEdition {
   const teams = [...qualifier.hosts, ...qualifier.mainQualifiers];
   if (teams.length !== 24 || new Set(teams).size !== 24) {
-    throw new Error(`AFC Cup requires 24 unique teams; received ${teams.length}.`);
+    throw new Error(`Asian Cup requires 24 unique teams; received ${teams.length}.`);
   }
   const { pots, groups } = drawInternationalCupGroups(teams, qualifier.hosts, worldRanks, tournamentGroupNames);
   const id = `AFC-${tournamentWindow.year}`;
@@ -352,7 +352,7 @@ export function completeAfcCupMainQualifiers(
 ): InternationalCompetitionEdition {
   const qualifier = getAfcCupQualifier(state, qualifierId);
   if (!qualifier.mainGroups || qualifier.mainRoundsPlayed !== 6) {
-    throw new Error(`AFC Cup main qualifying "${qualifierId}" is not complete.`);
+    throw new Error(`Asian Cup main qualifying "${qualifierId}" is not complete.`);
   }
   const rows = qualifier.mainGroups.map(group => standings(group, qualifier.seedRanks));
   const topTwo = rows.flatMap(group => group.slice(0, 2).map(row => row.code));
@@ -378,7 +378,7 @@ export function completeAfcCupMainQualifiers(
 export function getAfcCupTournamentRounds(edition: InternationalCompetitionEdition): InternationalRound[] {
   return [0, 1, 2].map(roundIndex => ({
     kind: "afcCup",
-    label: `AFC Cup · Group stage · Matchday ${roundIndex + 1}`,
+    label: `Asian Cup · Group stage · Matchday ${roundIndex + 1}`,
     leftOut: null,
     matches: edition.groups.flatMap(group => group.matches[roundIndex])
   }));
@@ -415,7 +415,7 @@ export function startAfcCupRoundOf16(edition: InternationalCompetitionEdition): 
     makeKnockoutMatch(edition, `R16-${index + 1}`, pair.home, pair.away)
   );
   edition.knockout = [{ label: "Round of 16", matches }];
-  return { kind: "afcCup", label: "AFC Cup · Round of 16", leftOut: null, matches: matches.map(match => match.fixture) };
+  return { kind: "afcCup", label: "Asian Cup · Round of 16", leftOut: null, matches: matches.map(match => match.fixture) };
 }
 
 export function setAfcCupKnockoutWinner(
@@ -424,7 +424,7 @@ export function setAfcCupKnockoutWinner(
   winner: string
 ): void {
   const match = edition.knockout?.flatMap(round => round.matches).find(item => item.id === matchId);
-  if (!match) throw new Error(`Unknown AFC Cup knockout match "${matchId}".`);
+  if (!match) throw new Error(`Unknown Asian Cup knockout match "${matchId}".`);
   match.winner = winner;
 }
 
@@ -457,7 +457,7 @@ export function advanceAfcCupKnockoutRound(
     )
   );
   edition.knockout?.push({ label: nextLabel, matches });
-  return { kind: "afcCup", label: `AFC Cup · ${nextLabel}`, leftOut: null, matches: matches.map(match => match.fixture) };
+  return { kind: "afcCup", label: `Asian Cup · ${nextLabel}`, leftOut: null, matches: matches.map(match => match.fixture) };
 }
 
 export function getAfcCupTournament(state: AfcCupState, year: number): InternationalCompetitionEdition | null {

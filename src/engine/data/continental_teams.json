@@ -212,7 +212,7 @@
     {
       "id": 299,
       "team": "Alajuelense",
-      "overall": 67,
+      "overall": 64,
       "countrycode": "CRC",
       "facilityRating": 3,
       "youthScouting": 1,
@@ -221,7 +221,7 @@
     {
       "id": 300,
       "team": "Saprissa",
-      "overall": 67,
+      "overall": 65,
       "countrycode": "CRC",
       "facilityRating": 2,
       "youthScouting": 2,
@@ -241,7 +241,7 @@
     {
       "id": 271,
       "team": "Mamelodi Sundowns",
-      "overall": 72,
+      "overall": 73,
       "countrycode": "RSA",
       "facilityRating": 3,
       "youthScouting": 2,
@@ -250,7 +250,7 @@
     {
       "id": 272,
       "team": "Pyramids FC",
-      "overall": 69,
+      "overall": 70,
       "countrycode": "EGY",
       "facilityRating": 3,
       "youthScouting": 2,
@@ -259,7 +259,7 @@
     {
       "id": 273,
       "team": "Al Ahly",
-      "overall": 72,
+      "overall": 73,
       "countrycode": "EGY",
       "facilityRating": 4,
       "youthScouting": 3,
@@ -268,7 +268,7 @@
     {
       "id": 274,
       "team": "Wydad AC",
-      "overall": 66,
+      "overall": 68,
       "countrycode": "MAR",
       "facilityRating": 4,
       "youthScouting": 4,
@@ -277,7 +277,7 @@
     {
       "id": 275,
       "team": "Esperance de Tunis",
-      "overall": 67,
+      "overall": 69,
       "countrycode": "TUN",
       "facilityRating": 3,
       "youthScouting": 2,
@@ -304,7 +304,7 @@
     {
       "id": 278,
       "team": "AS FAR",
-      "overall": 67,
+      "overall": 68,
       "countrycode": "MAR",
       "facilityRating": 2,
       "youthScouting": 2,
@@ -313,7 +313,7 @@
     {
       "id": 295,
       "team": "TP Mazembe",
-      "overall": 63,
+      "overall": 65,
       "countrycode": "COD",
       "facilityRating": 3,
       "youthScouting": 1,

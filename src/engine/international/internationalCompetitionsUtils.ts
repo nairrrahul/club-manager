@@ -212,6 +212,43 @@ function parseTeamWindows(csv: string): Map<string, InternationalWindowType[]> {
 }
 
 const teamWindows = parseTeamWindows(teamWindowsRaw);
+const internationalWindowLabels = new Map(
+  (windowsRaw as { windows: { id: string; label: string }[] }).windows.map(window => [window.id, window.label])
+);
+
+const internationalNames: Record<string, string> = {
+  "AFCON 1": "African Cup of Nations",
+  "AFCON 2": "African Cup of Nations",
+  AFCON1: "African Cup of Nations",
+  AFCON2: "African Cup of Nations",
+  SAWCQ: "World Cup South American Qualifying",
+  CAFWCQ: "World Cup African Qualifying",
+  CAFWCQP: "World Cup African Play-off",
+  CCWCQ1: "World Cup CONCACAF Preliminary Round",
+  CCWCQ2: "World Cup CONCACAF Second Round",
+  CCWCQ3: "World Cup CONCACAF Third Round",
+  AFCWCQ1: "World Cup Asian Preliminary Round",
+  AFCWCQ2: "World Cup Asian Second Round",
+  AFCWCQ3: "World Cup Asian Third Round",
+  OFCWCQ1: "World Cup OFC Preliminary Round",
+  OFCWCQ2: "World Cup OFC Second Round",
+  OFCWCQ3: "World Cup OFC Third Round",
+  UEFAWCQM: "World Cup European Qualifying",
+  UEFAWCQP: "World Cup European Qualifying Play-off",
+  ICPO: "World Cup Intercontinental Play-off",
+  WC: "World Cup"
+};
+
+export function getInternationalWindowLabel(windowId: string): string {
+  return internationalWindowLabels.get(windowId) ?? windowId;
+}
+
+export function getInternationalDisplayName(value: string): string {
+  const exact = internationalNames[value];
+  if (exact) return exact;
+  const prefixed = /^([A-Z0-9 ]+)( · .+)$/.exec(value);
+  return prefixed ? `${internationalNames[prefixed[1]] ?? prefixed[1]}${prefixed[2]}` : value;
+}
 
 export function assertInternationalWindowCoverage(confederations: string[]): void {
   for (const confederation of confederations) {

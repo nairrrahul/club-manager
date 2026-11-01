@@ -312,7 +312,7 @@ function continentalRoundLabel(tournament: ContinentalTournament, roundIndex: nu
   return `Round ${roundIndex + 1}`;
 }
 
-function snapshotContinentalMatch(match: BracketMatch): ContinentalTournamentMatchSnap {
+function snapshotContinentalMatch(match: BracketMatch, matchday: number, isFinal: boolean): ContinentalTournamentMatchSnap {
   const home = match.player1?.team ?? null;
   const away = match.player2?.team ?? null;
   const aggregate = match.legs?.length === 2 ? getAggregateGoals(match) : null;
@@ -320,12 +320,13 @@ function snapshotContinentalMatch(match: BracketMatch): ContinentalTournamentMat
     id: match.id,
     home: home ? { ...ref(home), countrycode: home.countrycode ?? null } : null,
     away: away ? { ...ref(away), countrycode: away.countrycode ?? null } : null,
-    legs: match.legs?.length === 2
-      ? [scoreOf(match.legs[0].result), scoreOf(match.legs[1].result)]
-      : null,
-    legMatchdays: match.legs?.length === 2
+    legs: isFinal ? null : [
+      match.legs?.[0] ? scoreOf(match.legs[0].result) : null,
+      match.legs?.[1] ? scoreOf(match.legs[1].result) : null
+    ],
+    legMatchdays: isFinal ? null : match.legs?.length === 2
       ? [match.legs[0].matchday, match.legs[1].matchday]
-      : null,
+      : [matchday, matchday],
     result: aggregate
       ? { h: aggregate.team1, a: aggregate.team2 }
       : scoreOf(match.result),
@@ -349,7 +350,11 @@ function snapshotContinentalTournaments(
       rounds: tournament.bracket.rounds.map((round, index) => ({
         label: continentalRoundLabel(tournament, index),
         matchday: CONTINENTAL_TOURNAMENT_MATCHDAY + index,
-        matches: round.map(snapshotContinentalMatch)
+        matches: round.map(match => snapshotContinentalMatch(
+          match,
+          CONTINENTAL_TOURNAMENT_MATCHDAY + index,
+          index === tournament.bracket.rounds.length - 1
+        ))
       })),
       winner: tournament.winner ? ref(tournament.winner) : null,
       runnerUp: tournament.runnerUp ? ref(tournament.runnerUp) : null
@@ -1077,7 +1082,6 @@ export function buildTeamFixtures(arch: SeasonArchive, teamID: number): TeamFixt
           const isBracketHome = match.home.id === teamID;
           const opponent = isBracketHome ? match.away : match.home;
           match.legs.forEach((score, legIndex) => {
-            if (!score) return;
             const firstLeg = legIndex === 0;
             const isHome = firstLeg ? isBracketHome : !isBracketHome;
             const lastLeg = legIndex === 1;
@@ -1119,7 +1123,7 @@ export function buildTeamFixtures(arch: SeasonArchive, teamID: number): TeamFixt
               note
             });
           });
-        } else if (match.result) {
+        } else {
           const isHome = match.home.id === teamID;
           fixtures.push({
             matchday: round.matchday,

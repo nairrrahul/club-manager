@@ -163,11 +163,12 @@ function RankingTab(props: { code: string }) {
 
 function MatchesTab(props: { code: string }) {
   const game = useGame();
-  const matches = getNationMatches(game.season.international, props.code);
-  const years = [...new Set(matches.map(match => match.year))];
-  if (!years.includes(game.season.year)) years.push(game.season.year);
-  years.sort((a, b) => a - b);
-  const [year, setYear] = useState(years[years.length - 1]);
+  const matches = getNationMatches(game.season.international, props.code, game.season.year);
+  const matchYears = matches.map(match => match.year);
+  const firstYear = Math.min(game.season.year, ...matchYears);
+  const lastYear = Math.max(game.season.year, ...matchYears);
+  const years = Array.from({ length: lastYear - firstYear + 1 }, (_, index) => firstYear + index);
+  const [year, setYear] = useState(game.season.year);
   const rows = matches.filter(match => match.year === year);
 
   return (
@@ -175,9 +176,9 @@ function MatchesTab(props: { code: string }) {
       <div className="flex justify-end mb-3">
         <SeasonSelect years={years.map(y => ({ year: y, label: seasonDisplay(y) }))} value={year} onChange={setYear} />
       </div>
-      <Panel title={`Match history — ${seasonDisplay(year)}`}>
+      <Panel title={`Matches — ${seasonDisplay(year)}`}>
         {rows.length === 0 ? (
-          <Empty>No international matches played in this season.</Empty>
+          <Empty>No international matches or fixtures in this season.</Empty>
         ) : (
           <div className="overflow-x-auto">
             <table className="tbl">
@@ -200,9 +201,9 @@ function MatchesTab(props: { code: string }) {
                                   : match.kind === "afconGroup" || match.kind === "afconKnockout"
                                     ? "AFCON"
                                     : match.kind === "afcCupQualifier"
-                                      ? "AFC Cup Qualifiers"
+                                      ? "Asian Cup Qualifiers"
                                       : match.kind === "afcCupGroup" || match.kind === "afcCupKnockout"
-                                        ? "AFC Cup"
+                                        ? "Asian Cup"
                                         : match.kind === "ofcCupQualifier"
                                           ? "OFC Cup Qualifiers"
                                           : match.kind === "ofcCupGroup" || match.kind === "ofcCupKnockout"
@@ -223,17 +224,23 @@ function MatchesTab(props: { code: string }) {
                     <td><NationLink code={match.opponent} /></td>
                     <td className="text-xs text-navy-300">{match.home ? "H" : "A"}</td>
                     <td className="tabular-nums">
-                      <span className={`font-bold mr-1.5 ${match.outcome === "win" ? "text-accent-yellow" : match.outcome === "loss" ? "text-navy-300" : "text-white"}`}>
-                        {match.outcome === "win" ? "W" : match.outcome === "loss" ? "L" : "D"}
-                      </span>
-                      {match.goalsFor}-{match.goalsAgainst}
+                      {match.scheduled ? <span className="text-navy-300">Scheduled</span> : (
+                        <>
+                          <span className={`font-bold mr-1.5 ${match.outcome === "win" ? "text-accent-yellow" : match.outcome === "loss" ? "text-navy-300" : "text-white"}`}>
+                            {match.outcome === "win" ? "W" : match.outcome === "loss" ? "L" : "D"}
+                          </span>
+                          {match.goalsFor}-{match.goalsAgainst}
+                        </>
+                      )}
                       {match.penaltyShootout && (
                         <span className="ml-1.5 text-navy-300">
                           ({match.penaltyShootout.goalsFor}-{match.penaltyShootout.goalsAgainst} PSO)
                         </span>
                       )}
                     </td>
-                    <td className={`num ${match.pointsChange > 0 ? "text-accent-yellow" : "text-navy-300"}`}>{signed(match.pointsChange)}</td>
+                    <td className={`num ${match.pointsChange !== null && match.pointsChange > 0 ? "text-accent-yellow" : "text-navy-300"}`}>
+                      {match.pointsChange === null ? "–" : signed(match.pointsChange)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -258,7 +265,7 @@ function NationHistoryTab(props: { code: string }) {
       ? [{ name: "AFCON Winners", year: archive.afcon.year + 1 }]
       : []),
     ...(archive.afcCup?.completed && archive.afcCup.winner === props.code
-      ? [{ name: "AFC Cup Winners", year: archive.afcCup.year + 1 }]
+      ? [{ name: "Asian Cup Winners", year: archive.afcCup.year + 1 }]
       : []),
     ...(archive.ofcCup?.completed && archive.ofcCup.winner === props.code
       ? [{ name: "OFC Cup Winners", year: archive.ofcCup.year + 1 }]
