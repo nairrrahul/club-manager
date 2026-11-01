@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useGame } from "../../store/gameStore";
-import { seasonDisplay } from "../../engine/constants";
-import type { InternationalMatch, WindowRecord } from "../../engine/international/international";
-import { Empty, NationLink, PageHeader, Panel, SeasonSelect } from "../components/common";
+import { useGame } from "../../../store/gameStore";
+import { seasonDisplay } from "../../../engine/constants";
+import type { InternationalMatch, WindowRecord } from "../../../engine/international/international";
+import { Empty, NationLink, PageHeader, Panel, SeasonSelect } from "../../components/common";
 
 function change(value: number | null): string {
   if (value === null) return "";
@@ -44,6 +44,8 @@ function WindowView(props: { window: WindowRecord }) {
   const afconRounds = window.rounds.filter(round => round.kind === "afcon");
   const afcCupQualifierRounds = window.rounds.filter(round => round.kind === "afcCupQualifier");
   const afcCupRounds = window.rounds.filter(round => round.kind === "afcCup");
+  const ofcCupQualifierRounds = window.rounds.filter(round => round.kind === "ofcCupQualifier");
+  const ofcCupRounds = window.rounds.filter(round => round.kind === "ofcCup");
 
   const renderRounds = (rounds: typeof window.rounds, separateByConfederation = false) =>
     rounds.map((round, index) => {
@@ -140,6 +142,18 @@ function WindowView(props: { window: WindowRecord }) {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">AFC Cup</h2>
           {renderRounds(afcCupRounds)}
+        </section>
+      )}
+      {ofcCupQualifierRounds.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">OFC Cup Qualifiers</h2>
+          {renderRounds(ofcCupQualifierRounds)}
+        </section>
+      )}
+      {ofcCupRounds.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">OFC Cup</h2>
+          {renderRounds(ofcCupRounds)}
         </section>
       )}
     </div>

@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useGame, useGameStore } from "../../store/gameStore";
-import { FORMATIONS, POSITION_ORDER, canPlayPosition, getFormationLayoutSlots, getFormationRequirements } from "../../engine/formation";
-import { calculateFormationOverall, getStartingXISlots } from "../../engine/playerSquad";
-import { ConfirmDialog, Empty, NationTag, OvrBadge, PageHeader, Panel, PlaneIcon, PlayerLink, PosBadge, RetirementIcon, SortTh, Tabs, compareSortValues } from "../components/common";
-import type { SortState } from "../components/common";
-import { getNationName } from "../../engine/nations";
-import { getPlayerInternationalDuty } from "../../engine/game";
-import type { Player } from "../../engine/types";
+import { useGame, useGameStore } from "../../../store/gameStore";
+import { FORMATIONS, POSITION_ORDER, canPlayPosition, getFormationLayoutSlots, getFormationRequirements } from "../../../engine/formation";
+import { calculateFormationOverall, getStartingXISlots } from "../../../engine/playerSquad";
+import { ConfirmDialog, Empty, NationTag, OvrBadge, PageHeader, Panel, PlaneIcon, PlayerLink, PosBadge, RetirementIcon, SortTh, Tabs, compareSortValues } from "../../components/common";
+import type { SortState } from "../../components/common";
+import { getNationName } from "../../../engine/nations";
+import { getPlayerInternationalDuty } from "../../../engine/game";
+import type { Player } from "../../../engine/types";
 
 type Tab = "squad" | "tactics";
 

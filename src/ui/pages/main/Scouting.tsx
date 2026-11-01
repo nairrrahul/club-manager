@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { useGame, useGameStore } from "../../store/gameStore";
-import { REGIONS, getCountriesByRegion, getNationName } from "../../engine/nations";
-import { POSITION_ORDER } from "../../engine/formation";
+import { useGame, useGameStore } from "../../../store/gameStore";
+import { REGIONS, getCountriesByRegion, getNationName } from "../../../engine/nations";
+import { POSITION_ORDER } from "../../../engine/formation";
 import {
   MAX_ACTIVE_MISSIONS, LAST_SCOUT_SEND_MATCHDAY, getActiveMissionCount, getPlayerPotentialRange,
   getScoutSendBlockReason, getUnexpiredMissions
-} from "../../engine/youthScouting";
-import { Empty, NationTag, OvrBadge, PageHeader, Panel, PosBadge, RatingDots } from "../components/common";
-import type { Position } from "../../engine/types";
+} from "../../../engine/youthScouting";
+import { Empty, NationTag, OvrBadge, PageHeader, Panel, PosBadge, RatingDots } from "../../components/common";
+import type { Position } from "../../../engine/types";
 
 function GodSelect(props: { teamID: number; value: number; which: "scouting" | "experience" | "training"; label: string }) {
   const setRating = useGameStore(s => s.godRating);

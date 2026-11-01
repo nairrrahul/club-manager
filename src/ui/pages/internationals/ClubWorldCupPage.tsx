@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { useGame } from "../../store/gameStore";
-import { getAllSeasonViews } from "../../engine/game";
-import { CLUB_WORLD_CUP_NAME, CLUB_WORLD_CUP_START_YEAR } from "../../engine/clubWorldCup";
-import { seasonDisplay } from "../../engine/constants";
-import { CupBracketTree } from "../components/brackets";
-import { Empty, PageHeader, Panel, SeasonSelect, Tabs, TeamLink } from "../components/common";
-import { MatchLine } from "../components/tables";
-import { FlagIcon } from "../components/FlagIcon";
-import type { ClubWorldCupSnap } from "../../engine/snapshots";
-import type { CupSnap } from "../../engine/snapshots";
-import { formatScore } from "../format";
+import { useGame } from "../../../store/gameStore";
+import { getAllSeasonViews } from "../../../engine/game";
+import { CLUB_WORLD_CUP_NAME, CLUB_WORLD_CUP_START_YEAR } from "../../../engine/clubWorldCup";
+import { seasonDisplay } from "../../../engine/constants";
+import { CupBracketTree } from "../../components/brackets";
+import { Empty, PageHeader, Panel, SeasonSelect, Tabs, TeamLink } from "../../components/common";
+import { MatchLine } from "../../components/tables";
+import { FlagIcon } from "../../components/FlagIcon";
+import type { ClubWorldCupSnap } from "../../../engine/snapshots";
+import type { CupSnap } from "../../../engine/snapshots";
+import { formatScore } from "../../format";
 
 type Tab = "groups" | "knockout" | "history";
 

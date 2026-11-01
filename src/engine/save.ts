@@ -9,6 +9,7 @@ import { createGoldCupState } from "./international/goldCup";
 import { createCopaAmericaState } from "./international/copaAmerica";
 import { createAfconState } from "./international/afcon";
 import { createAfcCupState } from "./international/afcCup";
+import { createOfcCupState } from "./international/ofcCup";
 import { refreshAllClubOveralls } from "./squadStrength";
 import { collectSeasonPlayers } from "./playerIds";
 import { refreshStartingXI } from "./playerSquad";
@@ -59,8 +60,9 @@ export const SAVE_FORMAT = "soccer-season-simulator-save";
  * v18: persists God Mode club rating overrides.
  * v19: adds AFCON and its qualifying editions.
  * v20: adds the AFC Cup and its qualifying editions.
+ * v21: adds the OFC Cup and its qualifying editions.
  */
-export const SAVE_VERSION = 20;
+export const SAVE_VERSION = 21;
 
 export interface SaveMeta {
   mode: "manager" | "observer";
@@ -524,6 +526,9 @@ export function gameFromSave(file: SaveFile): Game {
   }
   if (loadedSeason?.international && loadedSeason.international.afcCup === undefined) {
     loadedSeason.international.afcCup = createAfcCupState();
+  }
+  if (loadedSeason?.international && loadedSeason.international.ofcCup === undefined) {
+    loadedSeason.international.ofcCup = createOfcCupState();
   }
   if (loadedSeason && file.version < 6) {
     // v5 -> v6: nobody is shortlisted and unsigned scouting candidates are discarded, as before.

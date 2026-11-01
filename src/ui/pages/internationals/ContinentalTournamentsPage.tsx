@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useGame } from "../../store/gameStore";
-import { getAllSeasonViews } from "../../engine/game";
-import { CONTINENTAL_CONFEDERATIONS } from "../../engine/continentalTournaments";
-import type { ContinentalTournamentSnap, CupSnap } from "../../engine/snapshots";
-import { CupBracketTree } from "../components/brackets";
-import { Empty, PageHeader, Panel, SeasonSelect, Tabs, TeamLink } from "../components/common";
-import { formatScore } from "../format";
+import { useGame } from "../../../store/gameStore";
+import { getAllSeasonViews } from "../../../engine/game";
+import { CONTINENTAL_CONFEDERATIONS } from "../../../engine/continentalTournaments";
+import type { ContinentalTournamentSnap, CupSnap } from "../../../engine/snapshots";
+import { CupBracketTree } from "../../components/brackets";
+import { Empty, PageHeader, Panel, SeasonSelect, Tabs, TeamLink } from "../../components/common";
+import { formatScore } from "../../format";
 
 type Tab = "bracket" | "history";
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useGame, useGameStore } from "../../store/gameStore";
-import { ConfirmDialog, Empty, NationTag, OvrBadge, PageHeader, Panel, PlayerLink, PosBadge } from "../components/common";
-import type { Player } from "../../engine/types";
+import { useGame, useGameStore } from "../../../store/gameStore";
+import { ConfirmDialog, Empty, NationTag, OvrBadge, PageHeader, Panel, PlayerLink, PosBadge } from "../../components/common";
+import type { Player } from "../../../engine/types";
 
 export default function Academy() {
   const game = useGame();

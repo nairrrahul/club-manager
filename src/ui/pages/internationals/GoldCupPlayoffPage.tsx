@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useGame } from "../../store/gameStore";
-import { findLatestGoldCupPlayoff, playoffAggregate } from "../../engine/international/goldCup";
-import type { GoldCupPlayoffEdition, GoldCupPlayoffTie } from "../../engine/international/goldCup";
-import { seasonDisplay } from "../../engine/constants";
-import { Empty, NationLink, PageHeader, Panel, SeasonSelect, Tabs } from "../components/common";
-import { EuroTieCard } from "../components/brackets";
-import type { EuroRoundSnap, EuroTieSnap, TeamRef } from "../../engine/snapshots";
+import { useGame } from "../../../store/gameStore";
+import { findLatestGoldCupPlayoff, playoffAggregate } from "../../../engine/international/goldCup";
+import type { GoldCupPlayoffEdition, GoldCupPlayoffTie } from "../../../engine/international/goldCup";
+import { seasonDisplay } from "../../../engine/constants";
+import { Empty, NationLink, PageHeader, Panel, SeasonSelect, Tabs } from "../../components/common";
+import { EuroTieCard } from "../../components/brackets";
+import type { EuroRoundSnap, EuroTieSnap, TeamRef } from "../../../engine/snapshots";
 
 type Tab = "current" | "history";
 

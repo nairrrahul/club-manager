@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { useGame, useGameStore } from "../../store/gameStore";
-import { getFreeAgents } from "../../engine/game";
-import { getNationName } from "../../engine/nations";
-import { POSITION_ORDER } from "../../engine/formation";
-import { seasonDisplay } from "../../engine/constants";
-import { RESIGN_BLOCK_SEASONS } from "../../engine/freeAgents";
+import { useGame, useGameStore } from "../../../store/gameStore";
+import { getFreeAgents } from "../../../engine/game";
+import { getNationName } from "../../../engine/nations";
+import { POSITION_ORDER } from "../../../engine/formation";
+import { seasonDisplay } from "../../../engine/constants";
+import { RESIGN_BLOCK_SEASONS } from "../../../engine/freeAgents";
 import {
   Empty, NationTag, OvrBadge, PageHeader, Panel, PlayerLink, PosBadge, ShortlistButton, SortTh, compareSortValues
-} from "../components/common";
-import type { SortState } from "../components/common";
+} from "../../components/common";
+import type { SortState } from "../../components/common";
 
 type Key = "pos" | "name" | "age" | "ovr" | "pot" | "nat" | "sec" | "origin" | "status";
 const DESC_FIRST: Key[] = ["ovr", "pot"];

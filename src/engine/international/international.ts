@@ -23,6 +23,13 @@ import {
   resolveAfcCupPreliminaryTie, setAfcCupKnockoutWinner, startAfcCupRoundOf16, advanceAfcCupKnockoutRound
 } from "./afcCup";
 import type { AfcCupState } from "./afcCup";
+import {
+  advanceOfcCupKnockoutRound, completeOfcCupQualifiers, createOfcCupQualifierEdition,
+  createOfcCupState, findOfcCupQualifier, getOfcCupQualifier, getOfcCupQualifyingRounds,
+  getOfcCupTournament, getOfcCupTournamentRounds, getOfcCupWindowType, setOfcCupKnockoutWinner,
+  startOfcCupSemiFinals
+} from "./ofcCup";
+import type { OfcCupState } from "./ofcCup";
 import type { NationsLeagueState } from "./nationsLeague";
 import {
   completeGoldCupPlayoff, createGoldCupEdition, createGoldCupPlayoffEdition,
@@ -203,13 +210,20 @@ export interface InternationalMatch {
   afcCupLeg?: 1 | 2;
   afcCupKnockoutMatchId?: string;
   afcCupWinner?: string;
+  ofcCupEditionId?: string;
+  ofcCupQualifierId?: string;
+  ofcCupStage?: "qualifying" | "group" | "knockout";
+  ofcCupGroup?: string;
+  ofcCupRound?: number;
+  ofcCupKnockoutMatchId?: string;
+  ofcCupWinner?: string;
   homePenalties?: string[];
   awayPenalties?: string[];
 }
 
 export interface InternationalRound {
   matches: InternationalMatch[];
-  kind?: "friendly" | "nationsLeague" | "goldCupPlayoff" | "goldCup" | "copaAmerica" | "afconQualifier" | "afcon" | "afcCupQualifier" | "afcCup";
+  kind?: "friendly" | "nationsLeague" | "goldCupPlayoff" | "goldCup" | "copaAmerica" | "afconQualifier" | "afcon" | "afcCupQualifier" | "afcCup" | "ofcCupQualifier" | "ofcCup";
   label?: string;
   afconQualifierId?: string;
   afconStage?: "preliminary" | "main" | "tournamentGroup" | "tournamentKnockout";
@@ -217,6 +231,9 @@ export interface InternationalRound {
   afcCupQualifierId?: string;
   afcCupStage?: "preliminary" | "main" | "group" | "knockout";
   afcCupRound?: number;
+  ofcCupQualifierId?: string;
+  ofcCupStage?: "qualifying" | "group" | "knockout";
+  ofcCupRound?: number;
   /** The one nation without a match in this set of fixtures (there is an odd number of nations). */
   leftOut: string | null;
 }
@@ -249,6 +266,7 @@ export interface InternationalState {
   copaAmerica: CopaAmericaState;
   afcon: AfconState;
   afcCup: AfcCupState;
+  ofcCup: OfcCupState;
   /** The nation left out of the most recent set of fixtures (never left out twice in a row). */
   lastLeftOut: string | null;
   /** When true, windows must be simulated explicitly instead of automatically. */
@@ -274,6 +292,7 @@ export function createInternationalState(): InternationalState {
     copaAmerica: createCopaAmericaState(),
     afcon: createAfconState(),
     afcCup: createAfcCupState(),
+    ofcCup: createOfcCupState(),
     lastLeftOut: null,
     explicitWindows: false
   };
@@ -569,9 +588,11 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
   let copaAmericaTeams: string[] = [];
   let afconTeams: string[] = [];
   let afcCupTeams: string[] = [];
+  let ofcCupTeams: string[] = [];
   const afconWindowType = getAfconWindowType(season.year, def.id);
   const afconSuffix = afconWindowType?.slice(-1) as "1" | "2" | undefined;
   const afcCupWindowType = getAfcCupWindowType(season.year, def.id);
+  const ofcCupWindowType = getOfcCupWindowType(season.year, def.id);
   const goldCupWindowType = getGoldCupWindowType(season.year, def.id);
   let goldCupPlayoff: ReturnType<typeof createGoldCupPlayoffEdition> | null = null;
   if (goldCupWindowType === "GCPO") {
@@ -641,6 +662,17 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
     afcCupTeams = edition.teams;
     rounds.push(...getAfcCupTournamentRounds(edition));
   }
+  if (ofcCupWindowType === "OFCCUPQ") {
+    const qualifier = findOfcCupQualifier(state.ofcCup, season.year);
+    if (!qualifier) throw new Error(`OFC Cup qualifying for ${season.year} was not drawn in the preceding window.`);
+    rounds.push(...getOfcCupQualifyingRounds(qualifier, season.year, def.id, def.afterMatchday));
+    ofcCupTeams = qualifier.teams;
+  } else if (ofcCupWindowType === "OFCCUP") {
+    const edition = getOfcCupTournament(state.ofcCup, season.year);
+    if (!edition) throw new Error(`OFC Cup edition for ${season.year} has not been drawn.`);
+    ofcCupTeams = edition.teams;
+    rounds.push(...getOfcCupTournamentRounds(edition));
+  }
   if (getInternationalWindowType("CONMEBOL", season.year, def.id) === "COPA") {
     let edition = state.copaAmerica.editions.find(item => item.year === season.year && item.windowId === def.id);
     if (!edition) {
@@ -661,12 +693,14 @@ export function startWindowIfDue(season: Season): WindowRecord | null {
     (getInternationalWindowType(getNationConfederation(code), season.year, def.id) === "FR" ||
       (afconWindowType !== null && getNationConfederation(code) === "CAF") ||
       (afcCupWindowType !== null && getNationConfederation(code) === "AFC") ||
+      (ofcCupWindowType !== null && getNationConfederation(code) === "OFC") ||
       (goldCupPlayoff !== null &&
         getNationConfederation(code) === "CONCACAF" &&
         !goldCupPlayoff.edition.entrants.includes(code))) &&
     !copaAmericaTeams.includes(code) &&
     !afconTeams.includes(code) &&
-    !afcCupTeams.includes(code)
+    !afcCupTeams.includes(code) &&
+    !ofcCupTeams.includes(code)
   );
   if (friendlyNations.length > 1) {
     for (let i = 0; i < FRIENDLY_SETS_PER_WINDOW; i++) {
@@ -765,7 +799,7 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
       const awayTeam = { ID: 0, Team: away.code, Overall: away.actualOverall } as unknown as Team;
       const isKnockout = match.goldCupStage === "knockout" ||
         match.copaAmericaStage === "knockout" || match.afconStage === "knockout" ||
-        match.afcCupStage === "knockout";
+        match.afcCupStage === "knockout" || match.ofcCupStage === "knockout";
       const result = simulateMatch(homeTeam, awayTeam, isKnockout, "LEAGUE");
       const homeGoals = result.homeGoalInfo.homeGoals;
       const awayGoals = result.awayGoalInfo.awayGoals;
@@ -975,6 +1009,13 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
         match.afcCupWinner = winner;
         setAfcCupKnockoutWinner(edition, match.afcCupKnockoutMatchId, winner);
       }
+      if (match.ofcCupEditionId && match.ofcCupKnockoutMatchId) {
+        const edition = state.ofcCup.editions.find(candidate => candidate.id === match.ofcCupEditionId);
+        if (!edition) throw new Error(`Unknown OFC Cup edition "${match.ofcCupEditionId}".`);
+        const winner = hasShootout ? parseKOMatchWinner(result).Team : homeGoals > awayGoals ? match.home : match.away;
+        match.ofcCupWinner = winner;
+        setOfcCupKnockoutWinner(edition, match.ofcCupKnockoutMatchId, winner);
+      }
 
       awardCaps(match.home);
       awardCaps(match.away);
@@ -1042,6 +1083,19 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
       if (qualifier.mainRoundsPlayed === 6) {
         completeAfcCupMainQualifiers(
           state.afcCup,
+          qualifier.id,
+          window.year,
+          window.windowId,
+          Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]))
+        );
+      }
+    }
+    if (round.kind === "ofcCupQualifier" && round.ofcCupQualifierId) {
+      const qualifier = getOfcCupQualifier(state.ofcCup, round.ofcCupQualifierId);
+      qualifier.roundsPlayed++;
+      if (qualifier.roundsPlayed === 10) {
+        completeOfcCupQualifiers(
+          state.ofcCup,
           qualifier.id,
           window.year,
           window.windowId,
@@ -1117,6 +1171,23 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
         if (nextRound) window.rounds.push(nextRound);
       }
     }
+    if (round.kind === "ofcCup") {
+      const match = round.matches[0];
+      if (match?.ofcCupEditionId) {
+        const edition = state.ofcCup.editions.find(candidate => candidate.id === match.ofcCupEditionId);
+        if (!edition) throw new Error(`Unknown OFC Cup edition "${match.ofcCupEditionId}".`);
+        let nextRound: InternationalRound | null = null;
+        if (match.ofcCupStage === "group") {
+          nextRound = startOfcCupSemiFinals(edition);
+        } else if (match.ofcCupStage === "knockout") {
+          const knockoutRoundIndex = edition.knockout?.findIndex(knockoutRound =>
+            knockoutRound.matches.some(knockoutMatch => round.matches.includes(knockoutMatch.fixture))
+          ) ?? -1;
+          nextRound = advanceOfcCupKnockoutRound(edition, knockoutRoundIndex);
+        }
+        if (nextRound) window.rounds.push(nextRound);
+      }
+    }
   }
 
   drawCopaAmericaIfDue(state, window.year, window.windowId);
@@ -1128,6 +1199,17 @@ export function simulateInternationalWindow(season: Season): WindowRecord | null
     label: window.label,
     ranks: computeRankings(state).map(row => [row.code, row.points] as [string, number])
   });
+  const upcomingOfcQualifier = findUpcomingWindow(window.year, window.windowId, (candidateYear, candidateDef) =>
+    getOfcCupWindowType(candidateYear, candidateDef.id) === "OFCCUPQ"
+  );
+  if (upcomingOfcQualifier && upcomingOfcQualifier.offset === 1 &&
+    !findOfcCupQualifier(state.ofcCup, upcomingOfcQualifier.year)) {
+    createOfcCupQualifierEdition(
+      state.ofcCup,
+      upcomingOfcQualifier.year,
+      Object.fromEntries(computeRankings(state).map(row => [row.code, row.rank]))
+    );
+  }
   return window;
 }
 
@@ -1243,6 +1325,13 @@ export function getNationMatches(state: InternationalState, code: string): Natio
                                   : match.afcCupKnockoutMatchId?.startsWith("QF") ? "Quarter-finals"
                                     : match.afcCupKnockoutMatchId?.startsWith("SF") ? "Semi-finals"
                                       : match.afcCupKnockoutMatchId === "F" ? "Final" : "Knockout"}`
+                                : match.kind === "ofcCupQualifier"
+                                  ? `OFC Cup Qualifying · Matchday ${match.ofcCupRound ?? "—"}`
+                                  : match.kind === "ofcCupGroup"
+                                    ? `OFC Cup Group Stage · Matchday ${match.ofcCupRound ?? "—"}`
+                                    : match.kind === "ofcCupKnockout"
+                                      ? `OFC Cup ${match.ofcCupKnockoutMatchId?.startsWith("SF") ? "Semi-finals"
+                                        : match.ofcCupKnockoutMatchId === "F" ? "Final" : "Knockout"}`
                     : undefined,
           penaltyShootout: shootoutFor && shootoutAgainst
             ? {
@@ -1266,6 +1355,10 @@ export function getNationMatches(state: InternationalState, code: string): Natio
                           ? "/afc-cup-qualifiers"
                           : match.kind === "afcCupGroup" || match.kind === "afcCupKnockout"
                             ? "/afc-cup"
+                            : match.kind === "ofcCupQualifier"
+                              ? "/ofc-cup-qualifiers"
+                              : match.kind === "ofcCupGroup" || match.kind === "ofcCupKnockout"
+                                ? "/ofc-cup"
                   : undefined
         });
       }

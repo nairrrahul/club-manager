@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useGame } from "../../store/gameStore";
-import { getWorldRankings } from "../../engine/game";
-import { REGIONS, getConfederation } from "../../engine/nations";
-import { Empty, NationLink, OvrBadge, PageHeader, Panel, Tabs } from "../components/common";
+import { useGame } from "../../../store/gameStore";
+import { getWorldRankings } from "../../../engine/game";
+import { REGIONS, getConfederation } from "../../../engine/nations";
+import { Empty, NationLink, OvrBadge, PageHeader, Panel, Tabs } from "../../components/common";
 
 type Tab = "world" | "overall";
 

@@ -3,32 +3,34 @@ import { useGameStore } from "./store/gameStore";
 import { Layout } from "./ui/components/Layout";
 import TeamSelect from "./ui/pages/TeamSelect";
 import Home from "./ui/pages/Home";
-import Squad from "./ui/pages/Squad";
-import Academy from "./ui/pages/Academy";
-import PlayerPage from "./ui/pages/PlayerPage";
+import Squad from "./ui/pages/main/Squad";
+import Academy from "./ui/pages/main/Academy";
+import PlayerPage from "./ui/pages/main/PlayerPage";
 import LeaguePage from "./ui/pages/LeaguePage";
 import CupPage from "./ui/pages/CupPage";
-import EuropePage from "./ui/pages/EuropePage";
-import TeamPage from "./ui/pages/TeamPage";
-import Scouting from "./ui/pages/Scouting";
-import FreeAgents from "./ui/pages/FreeAgents";
-import Shortlist from "./ui/pages/Shortlist";
-import PlayerSearch from "./ui/pages/PlayerSearch";
-import Rankings from "./ui/pages/Rankings";
-import NationPage from "./ui/pages/NationPage";
-import International from "./ui/pages/International";
-import AddPlayer from "./ui/pages/AddPlayer";
-import AddTeam from "./ui/pages/AddTeam";
-import ClubWorldCupPage from "./ui/pages/ClubWorldCupPage";
-import ContinentalTournamentsPage from "./ui/pages/ContinentalTournamentsPage";
-import NationsLeaguePage from "./ui/pages/NationsLeaguePage";
-import GoldCupPage from "./ui/pages/GoldCupPage";
-import GoldCupPlayoffPage from "./ui/pages/GoldCupPlayoffPage";
-import CopaAmericaPage from "./ui/pages/CopaAmericaPage";
-import AfconPage from "./ui/pages/AfconPage";
-import AfconQualifiersPage from "./ui/pages/AfconQualifiersPage";
-import AfcCupPage from "./ui/pages/AfcCupPage";
-import AfcCupQualifiersPage from "./ui/pages/AfcCupQualifiersPage";
+import EuropePage from "./ui/pages/european_comp/EuropePage";
+import TeamPage from "./ui/pages/main/TeamPage";
+import Scouting from "./ui/pages/main/Scouting";
+import FreeAgents from "./ui/pages/main/FreeAgents";
+import Shortlist from "./ui/pages/main/Shortlist";
+import PlayerSearch from "./ui/pages/main/PlayerSearch";
+import Rankings from "./ui/pages/internationals/Rankings";
+import NationPage from "./ui/pages/internationals/NationPage";
+import International from "./ui/pages/internationals/International";
+import AddPlayer from "./ui/pages/godmode/AddPlayer";
+import AddTeam from "./ui/pages/godmode/AddTeam";
+import ClubWorldCupPage from "./ui/pages/internationals/ClubWorldCupPage";
+import ContinentalTournamentsPage from "./ui/pages/internationals/ContinentalTournamentsPage";
+import NationsLeaguePage from "./ui/pages/internationals/NationsLeaguePage";
+import GoldCupPage from "./ui/pages/internationals/GoldCupPage";
+import GoldCupPlayoffPage from "./ui/pages/internationals/GoldCupPlayoffPage";
+import CopaAmericaPage from "./ui/pages/internationals/CopaAmericaPage";
+import AfconPage from "./ui/pages/internationals/AfconPage";
+import AfconQualifiersPage from "./ui/pages/internationals/AfconQualifiersPage";
+import AfcCupPage from "./ui/pages/internationals/AfcCupPage";
+import AfcCupQualifiersPage from "./ui/pages/internationals/AfcCupQualifiersPage";
+import OfcCupPage from "./ui/pages/internationals/OfcCupPage";
+import OfcCupQualifiersPage from "./ui/pages/internationals/OfcCupQualifiersPage";
 
 export default function App() {
   useGameStore(state => state.tick);
@@ -57,6 +59,8 @@ export default function App() {
         <Route path="/afcon-qualifiers" element={<AfconQualifiersPage />} />
         <Route path="/afc-cup" element={<AfcCupPage />} />
         <Route path="/afc-cup-qualifiers" element={<AfcCupQualifiersPage />} />
+        <Route path="/ofc-cup" element={<OfcCupPage />} />
+        <Route path="/ofc-cup-qualifiers" element={<OfcCupQualifiersPage />} />
         <Route path="/add-player" element={game.godMode ? <AddPlayer /> : <Navigate to="/" replace />} />
         <Route path="/add-team" element={game.godMode ? <AddTeam /> : <Navigate to="/" replace />} />
         <Route path="/player/:id" element={<PlayerPage />} />

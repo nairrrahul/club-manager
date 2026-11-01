@@ -17,6 +17,7 @@ import type { InternationalCompetitionEdition } from "./international/internatio
 import type { CopaAmericaEdition } from "./international/copaAmerica";
 import type { AfconQualifyingEdition } from "./international/afcon";
 import type { AfcCupQualifyingEdition } from "./international/afcCup";
+import type { OfcCupQualifyingEdition } from "./international/ofcCup";
 import type { InternationalMatch } from "./international/international";
 
 // ---------------------------------------------------------------------------
@@ -225,6 +226,8 @@ export interface SeasonArchive {
   afconQualifying?: AfconQualifyingEdition | null;
   afcCup?: InternationalCompetitionEdition | null;
   afcCupQualifying?: AfcCupQualifyingEdition | null;
+  ofcCup?: InternationalCompetitionEdition | null;
+  ofcCupQualifying?: OfcCupQualifyingEdition | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -593,6 +596,12 @@ export function snapshotSeason(season: Season): SeasonArchive {
     ),
     afcCupQualifying: snapshotAfcCupQualifying(
       season.international.afcCup.qualifyingEditions.find(edition => edition.year === season.year) ?? null
+    ),
+    ofcCup: snapshotGoldCup(
+      season.international.ofcCup.editions.find(edition => edition.year === season.year) ?? null
+    ),
+    ofcCupQualifying: snapshotOfcCupQualifying(
+      season.international.ofcCup.qualifyingEditions.find(edition => edition.year === season.year) ?? null
     )
   };
 }
@@ -692,6 +701,23 @@ function snapshotAfcCupQualifying(edition: AfcCupQualifyingEdition | null): AfcC
       teams: [...group.teams],
       matches: group.matches.map(round => round.map(snapshotInternationalMatch))
     })) ?? null
+  };
+}
+
+function snapshotOfcCupQualifying(edition: OfcCupQualifyingEdition | null): OfcCupQualifyingEdition | null {
+  if (!edition) return null;
+  return {
+    ...edition,
+    hosts: [...edition.hosts],
+    teams: [...edition.teams],
+    pots: edition.pots.map(pot => [...pot]),
+    seedRanks: { ...edition.seedRanks },
+    qualifiers: [...edition.qualifiers],
+    groups: edition.groups.map(group => ({
+      ...group,
+      teams: [...group.teams],
+      matches: group.matches.map(round => round.map(snapshotInternationalMatch))
+    }))
   };
 }
 

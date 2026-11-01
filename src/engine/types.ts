@@ -118,9 +118,9 @@ export interface LeagueState {
   prediction: number[];
 }
 
-export interface BracketSlot {
+export interface BracketSlot<T = Team> {
   seed?: number;
-  team: Team | null;
+  team: T | null;
 }
 
 export interface BracketLeg {
@@ -128,12 +128,12 @@ export interface BracketLeg {
   result: MatchResult;
 }
 
-export interface BracketMatch {
+export interface BracketMatch<T = Team> {
   id: string;
   round: number;
-  player1: BracketSlot | null;
-  player2: BracketSlot | null;
-  winner: Team | null;
+  player1: BracketSlot<T> | null;
+  player2: BracketSlot<T> | null;
+  winner: T | null;
   sources: string[];
   result?: MatchResult;
   legs?: BracketLeg[];
@@ -141,10 +141,10 @@ export interface BracketMatch {
   tiebreak?: MatchResult;
 }
 
-export interface Bracket {
+export interface Bracket<T = Team> {
   size: number;
   activeRound: number;
-  rounds: BracketMatch[][];
+  rounds: BracketMatch<T>[][];
 }
 
 export interface CupState {

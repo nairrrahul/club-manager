@@ -148,7 +148,9 @@ export function runSearch(game: Game, rawQuery: string): SearchResult[] {
     { label: "AFCON", sub: "International · CAF", to: "/afcon", extra: "africa cup of nations caf" },
     { label: "AFCON Qualifiers", sub: "International · CAF", to: "/afcon-qualifiers", extra: "afcon qualifiers caf" },
     { label: "AFC Cup", sub: "International · AFC", to: "/afc-cup", extra: "afc asian cup" },
-    { label: "AFC Cup Qualifiers", sub: "International · AFC", to: "/afc-cup-qualifiers", extra: "afc cup qualifiers" }
+    { label: "AFC Cup Qualifiers", sub: "International · AFC", to: "/afc-cup-qualifiers", extra: "afc cup qualifiers" },
+    { label: "OFC Cup", sub: "International · OFC", to: "/ofc-cup", extra: "ofc oceania cup" },
+    { label: "OFC Cup Qualifiers", sub: "International · OFC", to: "/ofc-cup-qualifiers", extra: "ofc cup qualifiers" }
   ];
   for (const item of all) {
     if (normalizeText(`${item.label} ${item.extra}`).includes(query)) {

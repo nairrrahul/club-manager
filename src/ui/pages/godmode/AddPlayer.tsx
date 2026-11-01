@@ -1,14 +1,14 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useGameStore } from "../../store/gameStore";
-import type { GodAddPlayerInput } from "../../engine/game";
-import { ADD_PLAYER_AGE_MAX, ADD_PLAYER_AGE_MIN, TEAM_DIRECTORY } from "../../engine/game";
-import { MAX_GOD_MODE_POTENTIAL } from "../../engine/playerSquad";
-import { LEAGUE_NAMES } from "../../engine/constants";
-import { POSITION_ORDER } from "../../engine/formation";
-import { getNationName, nationInfo } from "../../engine/nations";
-import type { Position } from "../../engine/types";
-import { NationTag, PageHeader, Panel } from "../components/common";
+import { useGameStore } from "../../../store/gameStore";
+import type { GodAddPlayerInput } from "../../../engine/game";
+import { ADD_PLAYER_AGE_MAX, ADD_PLAYER_AGE_MIN, TEAM_DIRECTORY } from "../../../engine/game";
+import { MAX_GOD_MODE_POTENTIAL } from "../../../engine/playerSquad";
+import { LEAGUE_NAMES } from "../../../engine/constants";
+import { POSITION_ORDER } from "../../../engine/formation";
+import { getNationName, nationInfo } from "../../../engine/nations";
+import type { Position } from "../../../engine/types";
+import { NationTag, PageHeader, Panel } from "../../components/common";
 
 interface AddPlayerForm {
   firstName: string;

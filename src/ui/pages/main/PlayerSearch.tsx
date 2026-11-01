@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { getPlayerSearchPlayers } from "../../engine/game";
-import { LEAGUE_NAMES } from "../../engine/constants";
-import { getNationName, nationInfo } from "../../engine/nations";
-import { useGame, useGameStore } from "../../store/gameStore";
+import { getPlayerSearchPlayers } from "../../../engine/game";
+import { LEAGUE_NAMES } from "../../../engine/constants";
+import { getNationName, nationInfo } from "../../../engine/nations";
+import { useGame, useGameStore } from "../../../store/gameStore";
 import {
   Empty, NationTag, OvrBadge, PageHeader, Panel, PlayerLink, PosBadge, TeamLink
-} from "../components/common";
-import type { PlayerSearchEntry } from "../../engine/game";
+} from "../../components/common";
+import type { PlayerSearchEntry } from "../../../engine/game";
 
 interface SearchFilters {
   name: string;

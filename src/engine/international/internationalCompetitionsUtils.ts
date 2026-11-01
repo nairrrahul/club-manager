@@ -1,15 +1,87 @@
 import teamWindowsRaw from "../data/team_windows.csv?raw";
 import windowsRaw from "../data/international_windows.json";
 import { SEASON_START_YEAR } from "../constants";
+import { createKnockoutBracket } from "../scheduler";
+import type { Bracket } from "../types";
 import { shuffledCopy } from "../utils";
 import type { InternationalMatch, InternationalRound } from "./international";
 
-export type InternationalCup = "goldCup" | "copaAmerica" | "afcon" | "afcCup";
+export type InternationalCup = "goldCup" | "copaAmerica" | "afcon" | "afcCup" | "ofcCup";
 export type InternationalWindowType =
   | "FR" | "NL1" | "NL2" | "GCPO" | "GC" | "COPA"
   | "CAFQP1" | "CAFQP2" | "CAFQM1" | "CAFQM2" | "AFCON1" | "AFCON2"
-  | "AFCQP" | "AFCQM" | "AFCCUP";
+  | "AFCQP" | "AFCQM" | "AFCCUP" | "OFCCUPQ" | "OFCCUP";
 export const INTERNATIONAL_CYCLE_WINDOW_COUNT = 24;
+
+export interface InternationalPlayoffPath {
+  teams: string[];
+  bracket: Bracket<string>;
+}
+
+export interface InternationalPlayoffPathDraw {
+  pots: string[][];
+  paths: InternationalPlayoffPath[];
+}
+
+/**
+ * Ranks teams into pots, then distributes one team from each pot into each knockout path.
+ * Bottom seeds are always ranked below regular seeds, while retaining their world-rank order.
+ */
+export function createInternationalPlayoffPaths(
+  teams: string[],
+  pathCount: number,
+  worldRanks: Record<string, number>,
+  bottomSeeds: string[] = []
+): InternationalPlayoffPathDraw {
+  if (!Number.isInteger(pathCount) || pathCount < 1) {
+    throw new Error("International playoff path count must be a positive integer.");
+  }
+  if (teams.length < pathCount * 2) {
+    throw new Error(`International playoff paths require at least two teams per path; received ${teams.length} teams for ${pathCount} paths.`);
+  }
+  if (new Set(teams).size !== teams.length) {
+    throw new Error("International playoff teams must be unique.");
+  }
+  const teamSet = new Set(teams);
+  if (new Set(bottomSeeds).size !== bottomSeeds.length || bottomSeeds.some(team => !teamSet.has(team))) {
+    throw new Error("Bottom seeds must be unique teams included in the playoff draw.");
+  }
+
+  const bottomSeedSet = new Set(bottomSeeds);
+  const byWorldRank = (a: string, b: string) =>
+    (worldRanks[a] ?? Number.MAX_SAFE_INTEGER) - (worldRanks[b] ?? Number.MAX_SAFE_INTEGER) ||
+    a.localeCompare(b);
+  const rankedTeams = [
+    ...teams.filter(team => !bottomSeedSet.has(team)).sort(byWorldRank),
+    ...[...bottomSeeds].sort(byWorldRank)
+  ];
+  const pots = Array.from({ length: Math.ceil(teams.length / pathCount) }, (_, index) =>
+    rankedTeams.slice(index * pathCount, (index + 1) * pathCount)
+  );
+  const targetSizes = Array.from({ length: pathCount }, (_, index) =>
+    Math.floor(teams.length / pathCount) + (index < teams.length % pathCount ? 1 : 0)
+  );
+  const paths = Array.from({ length: pathCount }, () => [] as string[]);
+
+  for (const pot of pots) {
+    const availablePaths = paths
+      .map((path, index) => ({ path, index }))
+      .filter(({ path, index }) => path.length < targetSizes[index])
+      .sort((a, b) => a.path.length - b.path.length || a.index - b.index);
+    if (pot.length > availablePaths.length) {
+      throw new Error("International playoff draw could not distribute a pot across available paths.");
+    }
+    pot.forEach((team, index) => availablePaths[index].path.push(team));
+  }
+
+  return {
+    pots,
+    paths: paths.map(pathTeams => ({
+      teams: pathTeams,
+      bracket: createKnockoutBracket(pathTeams)
+    }))
+  };
+}
 
 export interface InternationalCompetitionGroup {
   name: string;
@@ -67,7 +139,8 @@ function parseTeamWindows(csv: string): Map<string, InternationalWindowType[]> {
       if (value !== "FR" && value !== "NL1" && value !== "NL2" &&
         !/^GCPO[12]?$/.test(value) && !/^GC[12]?$/.test(value) && value !== "COPA" &&
         !/^(CAFQP|CAFQM|AFCON)[12]$/.test(value) &&
-        value !== "AFCQP" && value !== "AFCQM" && value !== "AFCCUP") {
+        value !== "AFCQP" && value !== "AFCQM" && value !== "AFCCUP" &&
+        value !== "OFCCUPQ" && value !== "OFCCUP") {
         throw new Error(`Unknown team_windows.csv window type "${value}" for ${confederation}.`);
       }
       if (value.startsWith("GCPO")) return "GCPO";
@@ -205,12 +278,13 @@ export function createInternationalCupGroupMatches(
   competitionEditionId?: string
 ): InternationalMatch[][] {
   const editionId = competitionEditionId ??
-    `${competition === "goldCup" ? "GC" : competition === "copaAmerica" ? "COPA" : "AFCON"}-${year}-${windowId}`;
+    `${competition === "goldCup" ? "GC" : competition === "copaAmerica" ? "COPA" : competition === "afcon" ? "AFCON" : competition === "afcCup" ? "AFC" : "OFC"}-${year}-${windowId}`;
   const matchKinds: Record<InternationalCup, InternationalMatch["kind"]> = {
     goldCup: "goldCupGroup",
     copaAmerica: "copaAmericaGroup",
     afcon: "afconGroup",
-    afcCup: "afcCupGroup"
+    afcCup: "afcCupGroup",
+    ofcCup: "ofcCupGroup"
   };
   return GROUP_PAIRINGS.map((pairing, roundIndex) =>
     pairing.map(([homeIndex, awayIndex]) =>
@@ -236,11 +310,18 @@ export function createInternationalCupGroupMatches(
                 afconGroup: group,
                 afconRound: roundIndex + 1
               }
-            : {
+            : competition === "afcCup"
+            ? {
                 afcCupEditionId: editionId,
                 afcCupStage: "group",
                 afcCupGroup: group,
                 afcCupRound: roundIndex + 1
+              }
+            : {
+                ofcCupEditionId: editionId,
+                ofcCupStage: "group",
+                ofcCupGroup: group,
+                ofcCupRound: roundIndex + 1
               })
     )
   );
@@ -296,7 +377,7 @@ function makeKnockoutMatch(
   id: string,
   home: string,
   away: string,
-  competition: Exclude<InternationalCup, "afcon" | "afcCup">
+  competition: Exclude<InternationalCup, "afcon" | "afcCup" | "ofcCup">
 ): InternationalCompetitionKnockoutMatch {
   const isGoldCup = competition === "goldCup";
   const fixture = createMatch(
@@ -324,7 +405,7 @@ function makeKnockoutMatch(
 export function advanceInternationalCupRound(
   edition: InternationalCompetitionEdition,
   roundIndex: number,
-  competition: Exclude<InternationalCup, "afcon" | "afcCup"> = "goldCup"
+  competition: Exclude<InternationalCup, "afcon" | "afcCup" | "ofcCup"> = "goldCup"
 ): InternationalRound | null {
   const roundKind = competition;
   const competitionLabel = competition === "goldCup" ? "Gold Cup" : "Copa América";

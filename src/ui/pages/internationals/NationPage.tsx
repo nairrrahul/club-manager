@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
-import { useGame } from "../../store/gameStore";
-import { getAllSeasonViews, getNationClubs, getNationPlayers, getWorldRankings } from "../../engine/game";
-import { getConfederation, getNationName } from "../../engine/nations";
-import { getNationMatches, getNationRankingHistory } from "../../engine/international/international";
-import { LEAGUE_NAMES, seasonDisplay } from "../../engine/constants";
+import { useGame } from "../../../store/gameStore";
+import { getAllSeasonViews, getNationClubs, getNationPlayers, getWorldRankings } from "../../../engine/game";
+import { getConfederation, getNationName } from "../../../engine/nations";
+import { getNationMatches, getNationRankingHistory } from "../../../engine/international/international";
+import { LEAGUE_NAMES, seasonDisplay } from "../../../engine/constants";
 import {
   Empty, NationLink, OvrBadge, PageHeader, Panel, PlayerLink, PosBadge, SeasonSelect, ShortlistButton, Stat, Tabs, TeamLink
-} from "../components/common";
-import { FlagIcon } from "../components/FlagIcon";
+} from "../../components/common";
+import { FlagIcon } from "../../components/FlagIcon";
 
 type Tab = "overview" | "players" | "ranking" | "matches" | "history";
 
@@ -203,6 +203,10 @@ function MatchesTab(props: { code: string }) {
                                       ? "AFC Cup Qualifiers"
                                       : match.kind === "afcCupGroup" || match.kind === "afcCupKnockout"
                                         ? "AFC Cup"
+                                        : match.kind === "ofcCupQualifier"
+                                          ? "OFC Cup Qualifiers"
+                                          : match.kind === "ofcCupGroup" || match.kind === "ofcCupKnockout"
+                                            ? "OFC Cup"
                                 : "Gold Cup"}
                         </Link>
                       ) : match.kind}
@@ -247,6 +251,9 @@ function NationHistoryTab(props: { code: string }) {
       : []),
     ...(archive.afcCup?.completed && archive.afcCup.winner === props.code
       ? [{ name: "AFC Cup Winners", year: archive.afcCup.year + 1 }]
+      : []),
+    ...(archive.ofcCup?.completed && archive.ofcCup.winner === props.code
+      ? [{ name: "OFC Cup Winners", year: archive.ofcCup.year + 1 }]
       : [])
   ]).sort((a, b) => b.year - a.year);
   const grouped = new Map<string, number[]>();

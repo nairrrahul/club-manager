@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useGameStore } from "../../store/gameStore";
-import type { GodAddTeamInput } from "../../engine/game";
-import { europeanTeamPool } from "../../engine/europeanCompetitions";
-import { getConfederation, getCountriesByRegion, getNationName, REGIONS } from "../../engine/nations";
-import { NationTag, OvrBadge, PageHeader, Panel, TeamLink } from "../components/common";
+import { useGameStore } from "../../../store/gameStore";
+import type { GodAddTeamInput } from "../../../engine/game";
+import { europeanTeamPool } from "../../../engine/europeanCompetitions";
+import { getConfederation, getCountriesByRegion, getNationName, REGIONS } from "../../../engine/nations";
+import { NationTag, OvrBadge, PageHeader, Panel, TeamLink } from "../../components/common";
 
 interface TeamForm {
   name: string;

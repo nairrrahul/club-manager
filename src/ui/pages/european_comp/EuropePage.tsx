@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
-import { useGame } from "../../store/gameStore";
-import { getAllSeasonViews } from "../../engine/game";
-import { COMPETITION_NAMES } from "../../engine/europeanCompetitions";
-import { EUROPEAN_START_YEAR, seasonDisplay } from "../../engine/constants";
-import { Empty, PageHeader, Panel, SeasonSelect, Tabs, TeamLink } from "../components/common";
-import { EuroBracketTree } from "../components/brackets";
-import { EuroTable, Legend, MatchLine } from "../components/tables";
-import { formatScore } from "../format";
-import type { EuroSnap } from "../../engine/snapshots";
+import { useGame } from "../../../store/gameStore";
+import { getAllSeasonViews } from "../../../engine/game";
+import { COMPETITION_NAMES } from "../../../engine/europeanCompetitions";
+import { EUROPEAN_START_YEAR, seasonDisplay } from "../../../engine/constants";
+import { Empty, PageHeader, Panel, SeasonSelect, Tabs, TeamLink } from "../../components/common";
+import { EuroBracketTree } from "../../components/brackets";
+import { EuroTable, Legend, MatchLine } from "../../components/tables";
+import { formatScore } from "../../format";
+import type { EuroSnap } from "../../../engine/snapshots";
 
 type Tab = "league" | "knockout" | "history";
 

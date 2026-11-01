@@ -37,15 +37,15 @@ function generateSeedOrder(bracketSize: number): number[] {
   return seeds;
 }
 
-function createInitialSlots(bracketTeams: Team[], seedOrder: number[]): BracketSlot[] {
+function createInitialSlots<T>(bracketTeams: T[], seedOrder: number[]): BracketSlot<T>[] {
   return seedOrder.map(seed => ({
     seed,
     team: bracketTeams[seed - 1] ?? null
   }));
 }
 
-function createRoundOne(slots: BracketSlot[]): BracketMatch[] {
-  const matches: BracketMatch[] = [];
+function createRoundOne<T>(slots: BracketSlot<T>[]): BracketMatch<T>[] {
+  const matches: BracketMatch<T>[] = [];
 
   for (let i = 0; i < slots.length; i += 2) {
     const player1 = slots[i];
@@ -64,8 +64,8 @@ function createRoundOne(slots: BracketSlot[]): BracketMatch[] {
   return matches;
 }
 
-function createNextRound(previousRound: BracketMatch[], roundNumber: number): BracketMatch[] {
-  const matches: BracketMatch[] = [];
+function createNextRound<T>(previousRound: BracketMatch<T>[], roundNumber: number): BracketMatch<T>[] {
+  const matches: BracketMatch<T>[] = [];
 
   for (let i = 0; i < previousRound.length; i += 2) {
     const match1 = previousRound[i];
@@ -90,7 +90,7 @@ function createNextRound(previousRound: BracketMatch[], roundNumber: number): Br
   return matches;
 }
 
-function createKnockoutBracket(bracketTeams: Team[]): Bracket {
+export function createKnockoutBracket<T>(bracketTeams: T[]): Bracket<T> {
   if (!Array.isArray(bracketTeams) || bracketTeams.length < 2) {
     throw new Error("bracketTeams must contain at least 2 teams.");
   }
@@ -99,7 +99,7 @@ function createKnockoutBracket(bracketTeams: Team[]): Bracket {
   const seedOrder = generateSeedOrder(bracketSize);
   const slots = createInitialSlots(bracketTeams, seedOrder);
 
-  const rounds: BracketMatch[][] = [
+  const rounds: BracketMatch<T>[][] = [
     createRoundOne(slots)
   ];
 

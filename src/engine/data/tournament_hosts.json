@@ -49,5 +49,40 @@
     "QAT",
     "UAE",
     "QAT|BHR"
+  ],
+  "OFCCUP": [
+    "NZL",
+    "SOL",
+    "VAN",
+    "FIJ",
+    "NCL",
+    "TGA"
+  ],
+  "EURO": [
+    "ENG|SCO|IRL",
+    "ESP|POR",
+    "ESP",
+    "FRA",
+    "GER",
+    "AUT|SUI",
+    "POL|UKR",
+    "NOR",
+    "SWE",
+    "GER|DEN",
+    "TUR|ITA",
+    "ITA",
+    "AUT|HUN",
+    "NED|BEL",
+    "NED|BEL|LUX",
+    "SWE|FIN",
+    "LVA|LTU|EST",
+    "CZE|SVK",
+    "ESP|FRA",
+    "ENG",
+    "ENG|SCO",
+    "IRL|NIR",
+    "ENG|WAL",
+    "CRO|SVN",
+    "ROU|BUL|SRB"
   ]
 }

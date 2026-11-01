@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useGame, useGameStore } from "../../store/gameStore";
-import { findPlayer, TEAM_DIRECTORY } from "../../engine/game";
-import { POSITION_ORDER } from "../../engine/formation";
-import { seasonDisplay } from "../../engine/constants";
-import { buildHistoryRows } from "../../engine/playerHistory";
-import type { HistoryRow } from "../../engine/playerHistory";
+import { useGame, useGameStore } from "../../../store/gameStore";
+import { findPlayer, TEAM_DIRECTORY } from "../../../engine/game";
+import { POSITION_ORDER } from "../../../engine/formation";
+import { seasonDisplay } from "../../../engine/constants";
+import { buildHistoryRows } from "../../../engine/playerHistory";
+import type { HistoryRow } from "../../../engine/playerHistory";
 import type { ReactNode } from "react";
-import { Empty, NationTag, OvrBadge, Panel, PosBadge, ShortlistButton, Stat, Tabs } from "../components/common";
-import type { Player, Position, ProgressionEntry } from "../../engine/types";
+import { Empty, NationTag, OvrBadge, Panel, PosBadge, ShortlistButton, Stat, Tabs } from "../../components/common";
+import type { Player, Position, ProgressionEntry } from "../../../engine/types";
 
 type Tab = "overview" | "progression" | "history";
 

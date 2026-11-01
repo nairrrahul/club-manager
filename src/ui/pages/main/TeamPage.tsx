@@ -1,21 +1,21 @@
 import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
-import { useGame, useGameStore } from "../../store/gameStore";
-import { getAllSeasonViews, getClubPlayers, getTeamProfile } from "../../engine/game";
-import { getNationName } from "../../engine/nations";
-import { POSITION_ORDER } from "../../engine/formation";
-import { seasonDisplay } from "../../engine/constants";
-import type { Player } from "../../engine/types";
-import { LEAGUE_NAMES } from "../../engine/constants";
-import { COMPETITION_NAMES } from "../../engine/europeanCompetitions";
-import { buildTeamFixtures, buildTrophies } from "../../engine/snapshots";
-import type { TeamFixture } from "../../engine/snapshots";
+import { useGame, useGameStore } from "../../../store/gameStore";
+import { getAllSeasonViews, getClubPlayers, getTeamProfile } from "../../../engine/game";
+import { getNationName } from "../../../engine/nations";
+import { POSITION_ORDER } from "../../../engine/formation";
+import { seasonDisplay } from "../../../engine/constants";
+import type { Player } from "../../../engine/types";
+import { LEAGUE_NAMES } from "../../../engine/constants";
+import { COMPETITION_NAMES } from "../../../engine/europeanCompetitions";
+import { buildTeamFixtures, buildTrophies } from "../../../engine/snapshots";
+import type { TeamFixture } from "../../../engine/snapshots";
 import {
   Empty, NationTag, OvrBadge, PageHeader, Panel, PlayerLink, PosBadge, RatingDots, SeasonSelect, ShortlistButton, SortTh, Stat, Tabs, TeamLink,
   compareSortValues
-} from "../components/common";
-import type { SortState } from "../components/common";
-import { ordinal } from "../format";
+} from "../../components/common";
+import type { SortState } from "../../components/common";
+import { ordinal } from "../../format";
 
 type Tab = "overview" | "players" | "fixtures" | "history";
 

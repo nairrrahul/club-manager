@@ -16,5 +16,8 @@
   "afconKnockout": 40,
   "afcCupQualifier": 25,
   "afcCupGroup": 35,
-  "afcCupKnockout": 40
+  "afcCupKnockout": 40,
+  "ofcCupQualifier": 25,
+  "ofcCupGroup": 35,
+  "ofcCupKnockout": 40
 }

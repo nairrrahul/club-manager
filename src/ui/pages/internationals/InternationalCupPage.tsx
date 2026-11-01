@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { getNationName } from "../../engine/nations";
-import { getInternationalCupStandings } from "../../engine/international/internationalCompetitionsUtils";
-import type { InternationalCompetitionEdition } from "../../engine/international/internationalCompetitionsUtils";
-import { seasonDisplay } from "../../engine/constants";
-import { Empty, NationLink, PageHeader, Panel, SeasonSelect, Tabs } from "../components/common";
-import { CupBracketTree } from "../components/brackets";
-import { InternationalGroupMatchdays } from "../components/InternationalGroupMatchdays";
-import { InternationalGroupTable } from "../components/tables";
-import type { CupSnap, TeamRef } from "../../engine/snapshots";
+import { getNationName } from "../../../engine/nations";
+import { getInternationalCupStandings } from "../../../engine/international/internationalCompetitionsUtils";
+import type { InternationalCompetitionEdition } from "../../../engine/international/internationalCompetitionsUtils";
+import { seasonDisplay } from "../../../engine/constants";
+import { Empty, NationLink, PageHeader, Panel, SeasonSelect, Tabs } from "../../components/common";
+import { CupBracketTree } from "../../components/brackets";
+import { InternationalGroupMatchdays } from "../../components/InternationalGroupMatchdays";
+import { InternationalGroupTable } from "../../components/tables";
+import type { CupSnap, TeamRef } from "../../../engine/snapshots";
 
 type Tab = "draw" | "groups" | "knockout" | "history";
 

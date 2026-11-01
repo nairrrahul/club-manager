@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { useGame, useGameStore } from "../../store/gameStore";
-import { getRetiredShortlistedPlayers, getShortlistedPlayers } from "../../engine/game";
-import type { ShortlistEntry } from "../../engine/game";
-import { getNationName } from "../../engine/nations";
-import { POSITION_ORDER } from "../../engine/formation";
-import { seasonDisplay } from "../../engine/constants";
+import { useGame, useGameStore } from "../../../store/gameStore";
+import { getRetiredShortlistedPlayers, getShortlistedPlayers } from "../../../engine/game";
+import type { ShortlistEntry } from "../../../engine/game";
+import { getNationName } from "../../../engine/nations";
+import { POSITION_ORDER } from "../../../engine/formation";
+import { seasonDisplay } from "../../../engine/constants";
 import {
   Empty, NationTag, OvrBadge, PageHeader, Panel, PlayerLink, PosBadge, ShortlistButton, SortTh, TeamLink,
   Tabs, compareSortValues
-} from "../components/common";
-import type { SortState } from "../components/common";
+} from "../../components/common";
+import type { SortState } from "../../components/common";
 
 type Key = "pos" | "name" | "age" | "ovr" | "pot" | "nat" | "sec" | "club" | "status";
 type ListTab = "active" | "retired";
