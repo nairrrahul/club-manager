@@ -7,7 +7,7 @@ import { useGame } from "../../../store/gameStore";
 import { Empty, NationLink, PageHeader, Panel, SeasonSelect, Tabs } from "../../components/common";
 import { CupBracketTree } from "../../components/brackets";
 import { InternationalGroupMatchdays } from "../../components/InternationalGroupMatchdays";
-import { InternationalGroupTable } from "../../components/tables";
+import { InternationalGroupTable, InternationalNthPlacedTeamsTable } from "../../components/tables";
 
 type Tab = "main" | "playoffs" | "history";
 
@@ -32,6 +32,18 @@ function MainRound(props: { edition: EuroQualifyingEdition }) {
           </Panel>
         ))}
       </div>
+      {edition.hosts.length === 2 && (
+        <InternationalNthPlacedTeamsTable
+          place={2}
+          advancingCount={9}
+          seedRanks={edition.seedRanks}
+          rows={edition.groups.flatMap(group =>
+            getEuroQualifierStandings(edition, group)
+              .filter(row => row.position === 2)
+              .map(row => ({ ...row, group: group.name }))
+          )}
+        />
+      )}
     </div>
   );
 }

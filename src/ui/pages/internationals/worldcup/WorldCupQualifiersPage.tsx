@@ -2,13 +2,13 @@ import { useState } from "react";
 import { getConfederation, getNationName } from "../../../../engine/nations";
 import type { CupSnap, EuroRoundSnap, EuroTieSnap, TeamRef } from "../../../../engine/snapshots";
 import type { WorldCupConfederation, WorldCupEdition, WorldCupPhase } from "../../../../engine/international/worldcup/types";
-import { getStandings } from "../../../../engine/international/worldcup/utils";
+import { getStandings, rankGroupPlaces } from "../../../../engine/international/worldcup/utils";
 import { useGame } from "../../../../store/gameStore";
 import InternationalCupPage from "../InternationalCupPage";
 import { CupBracketTree, EuroTieCard } from "../../../components/brackets";
 import { Empty, NationLink, PageHeader, Panel, SeasonSelect, Tabs } from "../../../components/common";
 import { InternationalGroupMatchdays } from "../../../components/InternationalGroupMatchdays";
-import { InternationalGroupTable } from "../../../components/tables";
+import { InternationalGroupTable, InternationalNthPlacedTeamsTable } from "../../../components/tables";
 
 type PhaseConfig = { id: string; label: string };
 
@@ -163,6 +163,14 @@ function PhaseContent(props: { phase: WorldCupPhase | undefined; edition: WorldC
           </div>
         </Panel>
       ))}
+      {props.phaseName === "CAFWCQ" && edition.hosts.some(host => getConfederation(host) === "CAF") && (
+        <InternationalNthPlacedTeamsTable
+          place={2}
+          advancingCount={4}
+          seedRanks={edition.seedRanks}
+          rows={rankGroupPlaces(phase.groups, 2, ranks, true)}
+        />
+      )}
       {!hasGroups && !hasKnockout && (
         <Panel><Empty>{props.phaseLabel} draw has not been made yet.</Empty></Panel>
       )}
@@ -285,6 +293,7 @@ export function WorldCupPage() {
       subtitle="The FIFA World Cup"
       editions={editions}
       groupHighlights={{ 1: "bg-green-500/10", 2: "bg-green-500/10", 3: "bg-yellow-400/10" }}
+      nthPlaceAdvancement={{ place: 3, advancingCount: 8, tieBreakers: ["goalsFor", "goalDifference"] }}
       groupQualifiedByConfederation
     />
   );

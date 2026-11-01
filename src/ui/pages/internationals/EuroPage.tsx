@@ -9,6 +9,7 @@ export default function EuroPage() {
       subtitle="UEFA European Championship"
       editions={editions}
       groupHighlights={{ 1: "bg-green-500/10", 2: "bg-green-500/10", 3: "bg-yellow-400/10" }}
+      nthPlaceAdvancement={{ place: 3, advancingCount: 4 }}
     />
   );
 }

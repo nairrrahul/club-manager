@@ -6,8 +6,10 @@ import {
 } from "../../../engine/international/nationsLeague";
 import type { NationsLeagueEdition, NationsLeagueGroup } from "../../../engine/international/nationsLeague";
 import { seasonDisplay } from "../../../engine/constants";
+import { computeRankings } from "../../../engine/international/international";
 import { useGame } from "../../../store/gameStore";
 import { Empty, NationLink, PageHeader, Panel, Tabs } from "../../components/common";
+import { InternationalNthPlacedTeamsTable } from "../../components/tables";
 
 type Tab = "current" | "history" | "divisionHistory";
 
@@ -57,7 +59,10 @@ function GroupTable(props: {
   );
 }
 
-function EditionTables(props: { edition: NationsLeagueEdition }) {
+function EditionTables(props: {
+  edition: NationsLeagueEdition;
+  goldCupWorldRanks?: Record<string, number>;
+}) {
   return (
     <div className="space-y-5">
       {Object.entries(props.edition.divisions).sort(([a], [b]) => a.localeCompare(b)).map(([division, groups]) => (
@@ -73,6 +78,19 @@ function EditionTables(props: { edition: NationsLeagueEdition }) {
               />
             ))}
           </div>
+          {props.edition.confederation === "CONCACAF" && division === "B" && props.goldCupWorldRanks && (
+            <InternationalNthPlacedTeamsTable
+              place={3}
+              advancingCount={2}
+              seedRanks={props.goldCupWorldRanks}
+              tieBreakers={["goalDifference"]}
+              rows={groups.flatMap(group =>
+                getNationsLeagueStandings(props.edition, division, group)
+                  .filter(row => row.position === 3)
+                  .map(row => ({ ...row, group: group.name }))
+              )}
+            />
+          )}
         </section>
       ))}
     </div>
@@ -213,6 +231,9 @@ export default function NationsLeaguePage() {
     .filter(edition => edition.confederation === confederation)
     .sort((a, b) => b.startWindowIndex - a.startWindowIndex);
   const current = editions[0] ?? null;
+  const currentWorldRanks = Object.fromEntries(
+    computeRankings(game.season.international).map(row => [row.code, row.rank])
+  );
   const history = editions.filter(edition => edition.status === "complete");
   const historyEdition = history.find(edition => edition.id === historyEditionId) ?? history[0] ?? null;
   const historyIndex = historyEdition ? history.findIndex(edition => edition.id === historyEdition.id) : -1;
@@ -252,7 +273,7 @@ export default function NationsLeaguePage() {
                 <p className="px-3 py-2 text-sm text-navy-300">The league stage is complete. Promotion and relegation have been applied for the next edition.</p>
               )}
             </Panel>
-            <EditionTables edition={current} />
+            <EditionTables edition={current} goldCupWorldRanks={currentWorldRanks} />
           </div>
         ) : (
           <Panel>

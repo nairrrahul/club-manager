@@ -9,6 +9,7 @@ export default function AfcCupPage() {
       subtitle="AFC Cup"
       editions={editions}
       afconHighlights
+      nthPlaceAdvancement={{ place: 3, advancingCount: 4 }}
     />
   );
 }

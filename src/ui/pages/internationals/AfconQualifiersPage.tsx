@@ -8,7 +8,7 @@ import { useGame } from "../../../store/gameStore";
 import { EuroTieCard } from "../../components/brackets";
 import { Empty, NationLink, PageHeader, Panel, SeasonSelect, Tabs } from "../../components/common";
 import { InternationalGroupMatchdays } from "../../components/InternationalGroupMatchdays";
-import { InternationalGroupTable } from "../../components/tables";
+import { InternationalGroupTable, InternationalNthPlacedTeamsTable } from "../../components/tables";
 import type { EuroRoundSnap, EuroTieSnap, TeamRef } from "../../../engine/snapshots";
 
 type Tab = "preliminary" | "main" | "history";
@@ -104,6 +104,16 @@ function MainRound(props: { edition: AfconQualifyingEdition }) {
           );
         })}
       </div>
+      <InternationalNthPlacedTeamsTable
+        place={2}
+        advancingCount={12 - edition.hosts.length}
+        seedRanks={edition.seedRanks}
+        rows={edition.mainGroups.flatMap(group =>
+          getAfconQualifierStandings(edition, group)
+            .filter(row => row.position === 2)
+            .map(row => ({ ...row, group: group.name }))
+        )}
+      />
     </div>
   );
 }

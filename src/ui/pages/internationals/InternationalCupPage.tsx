@@ -6,7 +6,7 @@ import { seasonDisplay } from "../../../engine/constants";
 import { Empty, NationLink, PageHeader, Panel, SeasonSelect, Tabs } from "../../components/common";
 import { CupBracketTree } from "../../components/brackets";
 import { InternationalGroupMatchdays } from "../../components/InternationalGroupMatchdays";
-import { InternationalGroupTable } from "../../components/tables";
+import { InternationalGroupTable, InternationalNthPlacedTeamsTable } from "../../components/tables";
 import type { CupSnap, TeamRef } from "../../../engine/snapshots";
 
 type Tab = "draw" | "groups" | "knockout" | "history";
@@ -18,23 +18,67 @@ interface InternationalCupPageProps {
   afconHighlights?: boolean;
   groupHighlights?: Record<number, string>;
   groupQualifiedByConfederation?: boolean;
+  nthPlaceAdvancement?: { place: number; advancingCount: number; tieBreakers?: ("goalDifference" | "goalsFor")[] };
 }
 
 function GroupPanel(props: {
   edition: InternationalCompetitionEdition;
   group: InternationalCompetitionEdition["groups"][number];
+  rows: ReturnType<typeof getInternationalCupStandings>;
   afconHighlights: boolean;
   groupHighlights?: Record<number, string>;
 }) {
-  const rows = getInternationalCupStandings(props.edition, props.group);
   const highlights = props.groupHighlights ?? (props.afconHighlights
     ? { 1: "bg-green-500/10", 2: "bg-green-500/10", 3: "bg-yellow-400/10" }
     : { 1: "bg-green-500/10", 2: "bg-green-500/10" });
   return (
     <Panel title={`Group ${props.group.name}`}>
-      <InternationalGroupTable rows={rows} highlights={highlights} />
+      <InternationalGroupTable rows={props.rows} highlights={highlights} />
       <InternationalGroupMatchdays rounds={props.group.matches} />
     </Panel>
+  );
+}
+
+function GroupStage(props: {
+  edition: InternationalCompetitionEdition;
+  afconHighlights: boolean;
+  groupHighlights?: Record<number, string>;
+  nthPlaceAdvancement?: InternationalCupPageProps["nthPlaceAdvancement"];
+}) {
+  const { edition } = props;
+  const groupRows = edition.groups.map(group => ({
+    group,
+    rows: getInternationalCupStandings(edition, group)
+  }));
+  const place = props.nthPlaceAdvancement?.place;
+  const nthPlaceRows = place !== undefined
+    ? groupRows.flatMap(({ group, rows }) => {
+        const row = rows[place - 1];
+        return row ? [{ ...row, group: group.name }] : [];
+      })
+    : [];
+  return (
+    <div className="space-y-5">
+      <div className="grid items-start gap-4 xl:grid-cols-2">{groupRows.map(({ group, rows }) => (
+        <GroupPanel
+          key={group.name}
+          edition={edition}
+          group={group}
+          rows={rows}
+          afconHighlights={props.afconHighlights}
+          groupHighlights={props.groupHighlights}
+        />
+      ))}</div>
+      {props.nthPlaceAdvancement && (
+        <InternationalNthPlacedTeamsTable
+          place={props.nthPlaceAdvancement.place}
+          advancingCount={props.nthPlaceAdvancement.advancingCount}
+          tieBreakers={props.nthPlaceAdvancement.tieBreakers}
+          seedRanks={edition.seedRanks}
+          rows={nthPlaceRows}
+        />
+      )}
+    </div>
   );
 }
 
@@ -257,17 +301,12 @@ export default function InternationalCupPage(props: InternationalCupPageProps) {
       )}
       {tab === "groups" && (!selected
         ? <Panel><Empty>The {title} group stage has not been drawn yet.</Empty></Panel>
-        : <div className="space-y-5">
-          <div className="grid items-start gap-4 xl:grid-cols-2">{selected.groups.map(group => (
-            <GroupPanel
-              key={group.name}
-              edition={selected}
-              group={group}
-              afconHighlights={props.afconHighlights ?? false}
-              groupHighlights={props.groupHighlights}
-            />
-          ))}</div>
-        </div>
+        : <GroupStage
+          edition={selected}
+          afconHighlights={props.afconHighlights ?? false}
+          groupHighlights={props.groupHighlights}
+          nthPlaceAdvancement={props.nthPlaceAdvancement}
+        />
       )}
       {tab === "knockout" && (!selected?.knockout
         ? <Panel><Empty>The knockout bracket is drawn after all group matches have been played.</Empty></Panel>

@@ -9,6 +9,7 @@ export default function AfconPage() {
       subtitle="Africa Cup of Nations"
       editions={editions}
       afconHighlights
+      nthPlaceAdvancement={{ place: 3, advancingCount: 4 }}
     />
   );
 }

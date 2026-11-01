@@ -5,7 +5,7 @@ import type { OfcCupQualifyingEdition } from "../../../engine/international/ofcC
 import { useGame } from "../../../store/gameStore";
 import { Empty, PageHeader, Panel, SeasonSelect, Tabs } from "../../components/common";
 import { InternationalGroupMatchdays } from "../../components/InternationalGroupMatchdays";
-import { InternationalGroupTable } from "../../components/tables";
+import { InternationalGroupTable, InternationalNthPlacedTeamsTable } from "../../components/tables";
 
 type Tab = "main" | "history";
 
@@ -26,6 +26,16 @@ function MainRound(props: { edition: OfcCupQualifyingEdition }) {
           </Panel>
         ))}
       </div>
+      <InternationalNthPlacedTeamsTable
+        place={4}
+        advancingCount={1}
+        seedRanks={edition.seedRanks}
+        rows={edition.groups.flatMap(group =>
+          getOfcCupQualifierStandings(edition, group)
+            .filter(row => row.position === 4)
+            .map(row => ({ ...row, group: group.name }))
+        )}
+      />
     </div>
   );
 }
