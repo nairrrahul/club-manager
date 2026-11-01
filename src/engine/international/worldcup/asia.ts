@@ -54,8 +54,9 @@ export function completeAsiaThirdRound(edition: WorldCupEdition): void {
   if (!phase) throw new Error("AFC third qualifying round was not initialized.");
   const ranked = [1, 2, 3, 4, 5].flatMap(position =>
     rankGroupPlaces(phase.groups, position, edition.seedRanks)
-      .sort((a, b) => b.points - a.points || b.goalsFor - a.goalsFor ||
+      .sort((a, b) => b.points - a.points ||
         b.goalDifference - a.goalDifference ||
+        b.goalsFor - a.goalsFor ||
         (edition.seedRanks[a.code] ?? Number.MAX_SAFE_INTEGER) - (edition.seedRanks[b.code] ?? Number.MAX_SAFE_INTEGER))
   );
   const hostCount = edition.hosts.filter(code => getCountriesByRegion("AFC").some(nation => nation.code === code)).length;

@@ -149,8 +149,9 @@ export function startWorldCupRoundOf32(tournament: WorldCupTournament): Internat
     return ranked.map((row, index) => ({ ...row, group: group.name, position: index + 1 }));
   });
   const bestThirds = rows.flatMap(group => group.filter(row => row.position === 3))
-    .sort((a, b) => b.points - a.points || b.goalsFor - a.goalsFor ||
+    .sort((a, b) => b.points - a.points ||
       b.goalDifference - a.goalDifference ||
+      b.goalsFor - a.goalsFor ||
       (tournament.seedRanks[a.code] ?? Number.MAX_SAFE_INTEGER) -
       (tournament.seedRanks[b.code] ?? Number.MAX_SAFE_INTEGER))
     .slice(0, 8);

@@ -4,7 +4,7 @@ import { TEAM_DIRECTORY } from "../../../engine/game";
 import type { GodAddTeamInput } from "../../../engine/game";
 import { europeanTeamPool } from "../../../engine/europeanCompetitions";
 import { getConfederation, getCountriesByRegion, getNationName, REGIONS } from "../../../engine/nations";
-import { NationTag, OvrBadge, PageHeader, Panel, TeamLink } from "../../components/common";
+import { Modal, NationTag, OvrBadge, PageHeader, Panel, TeamLink } from "../../components/common";
 
 interface TeamForm {
   name: string;
@@ -36,7 +36,11 @@ const namedEuropeanPools = new Set(Object.keys(europeanTeamPool).filter(
 const countries = REGIONS.flatMap(region => getCountriesByRegion(region.id));
 const countryByCode = new Map(countries.map(country => [country.code.toUpperCase(), country.code]));
 const countryByName = new Map(countries.map(country => [country.name.trim().toLocaleLowerCase(), country.code]));
-const csvColumns = ["name", "country", "overall", "facililty", "scouting", "experience"];
+const csvColumns = ["name", "country", "overall", "facility", "scouting", "experience", "conf_league"];
+
+function isConferenceLeagueEligible(countryCode: string): boolean {
+  return getConfederation(countryCode) === "UEFA" && !namedEuropeanPools.has(countryCode);
+}
 
 function parseCsv(text: string): string[][] {
   const rows: string[][] = [];
@@ -96,7 +100,9 @@ function parseTeamCsv(text: string): GodAddTeamInput[] {
     const countryInput = getCell(row, "country");
     const countryCode = countryByCode.get(countryInput.toUpperCase()) ??
       countryByName.get(countryInput.toLocaleLowerCase());
-    const ratingInputs = ["overall", "facililty", "scouting", "experience"].map(column => getCell(row, column));
+    const conferenceLeagueOnly = Boolean(countryCode && isConferenceLeagueEligible(countryCode)) &&
+      getCell(row, "conf_league") !== "";
+    const ratingInputs = ["overall", "facility", "scouting", "experience"].map(column => getCell(row, column));
     const ratings = ratingInputs.map(Number);
 
     if (!name) errors.push(`Row ${rowNumber}: team name is required.`);
@@ -106,12 +112,12 @@ function parseTeamCsv(text: string): GodAddTeamInput[] {
     if (ratings.some((rating, ratingIndex) =>
       ratingInputs[ratingIndex] === "" || !Number.isInteger(rating)
     )) {
-      errors.push(`Row ${rowNumber}: overall, facililty, scouting, and experience must be whole numbers.`);
+      errors.push(`Row ${rowNumber}: overall, facility, scouting, and experience must be whole numbers.`);
     } else if (
       ratings[0] < 20 || ratings[0] > 99 ||
       ratings.slice(1).some(rating => rating < 1 || rating > 5)
     ) {
-      errors.push(`Row ${rowNumber}: overall must be 20–99; facililty, scouting, and experience must be 1–5.`);
+      errors.push(`Row ${rowNumber}: overall must be 20–99; facility, scouting, and experience must be 1–5.`);
     }
     if (name && countryCode && countryCode !== "ENG" &&
       ratings.every(Number.isInteger) && ratings[0] >= 20 && ratings[0] <= 99 &&
@@ -123,7 +129,7 @@ function parseTeamCsv(text: string): GodAddTeamInput[] {
         facilityRating: ratings[1],
         scoutingRating: ratings[2],
         scoutingExperience: ratings[3],
-        conferenceLeagueOnly: false
+        conferenceLeagueOnly
       });
     }
   });
@@ -138,17 +144,21 @@ export default function AddTeam() {
   const [form, setForm] = useState<TeamForm>(initialForm);
   const [error, setError] = useState<string | null>(null);
   const [importMessage, setImportMessage] = useState<string | null>(null);
+  const [pendingImport, setPendingImport] = useState<{
+    teams: GodAddTeamInput[];
+    duplicates: GodAddTeamInput[];
+  } | null>(null);
 
   if (!game?.godMode) return null;
 
   const confederation = getConfederation(form.countryCode);
   const showConferenceOnly = confederation === "UEFA" && !namedEuropeanPools.has(form.countryCode);
   const customTeams = game.season.customTeams;
+  const existingTeamKeys = new Set([...TEAM_DIRECTORY.values()].map(team =>
+    `${team.countrycode}\u0000${team.name.trim().toLocaleLowerCase()}`
+  ));
   const duplicateInCountry = form.name.trim() !== "" && Boolean(form.countryCode) &&
-    [...TEAM_DIRECTORY.values()].some(team =>
-      team.countrycode === form.countryCode &&
-      team.name.trim().toLocaleLowerCase() === form.name.trim().toLocaleLowerCase()
-    );
+    existingTeamKeys.has(`${form.countryCode}\u0000${form.name.trim().toLocaleLowerCase()}`);
 
   const update = (key: keyof TeamForm, value: string | boolean) => {
     setForm(current => ({
@@ -180,19 +190,33 @@ export default function AddTeam() {
     setForm(current => ({ ...initialForm, countryCode: current.countryCode }));
   };
 
+  const completeImport = (inputs: GodAddTeamInput[]) => {
+    for (const input of inputs) {
+      const result = addTeam(input);
+      if (!result.ok) {
+        setError(`Could not import "${input.name}": ${result.error ?? "Unable to add team."}`);
+        return;
+      }
+    }
+    setImportMessage(`Imported ${inputs.length} team${inputs.length === 1 ? "" : "s"}.`);
+    setError(null);
+  };
+
   const importCsv = async (file: File | undefined) => {
     if (!file) return;
     setError(null);
     setImportMessage(null);
     try {
       const inputs = parseTeamCsv(await file.text());
+      const knownTeams = new Set(existingTeamKeys);
+      const duplicates: GodAddTeamInput[] = [];
       for (const input of inputs) {
-        const result = addTeam(input);
-        if (!result.ok) {
-          throw new Error(`Could not import "${input.name}": ${result.error ?? "Unable to add team."}`);
-        }
+        const key = `${input.countryCode}\u0000${input.name.trim().toLocaleLowerCase()}`;
+        if (knownTeams.has(key)) duplicates.push(input);
+        knownTeams.add(key);
       }
-      setImportMessage(`Imported ${inputs.length} team${inputs.length === 1 ? "" : "s"}.`);
+      if (duplicates.length > 0) setPendingImport({ teams: inputs, duplicates });
+      else completeImport(inputs);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Unable to import the CSV file.");
     }
@@ -293,7 +317,7 @@ export default function AddTeam() {
             </button>
           </div>
           <p className="text-xs text-navy-400">
-            CSV columns: name, country, overall, facililty, scouting, experience. Country may be a three-letter code or full name.
+            CSV columns: name, country, overall, facility, scouting, experience, conf_league. Country may be a three-letter code or full name. For UEFA countries without a dedicated pool, any non-empty conf_league value adds the team to the Conference League pool.
           </p>
         </form>
       </Panel>
@@ -315,6 +339,37 @@ export default function AddTeam() {
           </div>
         )}
       </Panel>
+      {pendingImport && (
+        <Modal title="Duplicate team names found">
+          <>
+            <div className="space-y-3">
+              <p>
+                These imported teams have the same name and country as a club already in the save or earlier in this CSV:
+              </p>
+              <ul className="max-h-60 list-disc space-y-1 overflow-y-auto pl-5">
+                {pendingImport.duplicates.map((team, index) => (
+                  <li key={`${team.countryCode}-${team.name}-${index}`}>
+                    {team.name} — {getNationName(team.countryCode)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="mt-5 flex justify-end gap-2">
+              <button className="btn-ghost" onClick={() => setPendingImport(null)}>Go Back</button>
+              <button
+                className="btn-yellow"
+                onClick={() => {
+                  const teams = pendingImport.teams;
+                  setPendingImport(null);
+                  completeImport(teams);
+                }}
+              >
+                Continue
+              </button>
+            </div>
+          </>
+        </Modal>
+      )}
     </div>
   );
 }
