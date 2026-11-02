@@ -72,7 +72,7 @@
     "rankingPts": 1874.81
   },
   "Armenia": {
-    "teamOverall": 70,
+    "teamOverall": 69,
     "confederationID": "UEFA",
     "flagCode": "am",
     "threeLetterCode": "ARM",
@@ -88,7 +88,7 @@
     "rankingPts": 984.67
   },
   "Australia": {
-    "teamOverall": 72,
+    "teamOverall": 74,
     "confederationID": "AFC",
     "flagCode": "au",
     "threeLetterCode": "AUS",
@@ -320,7 +320,7 @@
     "rankingPts": 1007.11
   },
   "Chile": {
-    "teamOverall": 75,
+    "teamOverall": 72,
     "confederationID": "CONMEBOL",
     "flagCode": "cl",
     "threeLetterCode": "CHI",
@@ -328,7 +328,7 @@
     "rankingPts": 1405.29
   },
   "China PR": {
-    "teamOverall": 70,
+    "teamOverall": 69,
     "confederationID": "AFC",
     "flagCode": "cn",
     "threeLetterCode": "CHN",
@@ -360,7 +360,7 @@
     "rankingPts": 1201.88
   },
   "Congo": {
-    "teamOverall": 68,
+    "teamOverall": 67,
     "confederationID": "CAF",
     "flagCode": "cg",
     "threeLetterCode": "CGO",
@@ -368,7 +368,7 @@
     "rankingPts": 1189.43
   },
   "Cook Islands": {
-    "teamOverall": 54,
+    "teamOverall": 52,
     "confederationID": "OFC",
     "flagCode": "ck",
     "threeLetterCode": "COK",
@@ -376,7 +376,7 @@
     "rankingPts": 986.9
   },
   "Costa Rica": {
-    "teamOverall": 72,
+    "teamOverall": 71,
     "confederationID": "CONCACAF",
     "flagCode": "cr",
     "threeLetterCode": "CRC",
@@ -384,7 +384,7 @@
     "rankingPts": 1443.92
   },
   "Croatia": {
-    "teamOverall": 80,
+    "teamOverall": 81,
     "confederationID": "UEFA",
     "flagCode": "hr",
     "threeLetterCode": "CRO",
@@ -448,7 +448,7 @@
     "rankingPts": 997.52
   },
   "Dominican Republic": {
-    "teamOverall": 68,
+    "teamOverall": 67,
     "confederationID": "CONCACAF",
     "flagCode": "do",
     "threeLetterCode": "DOM",
@@ -472,7 +472,7 @@
     "rankingPts": 1591.73
   },
   "Egypt": {
-    "teamOverall": 75,
+    "teamOverall": 76,
     "confederationID": "CAF",
     "flagCode": "eg",
     "threeLetterCode": "EGY",
@@ -544,7 +544,7 @@
     "rankingPts": 1115.44
   },
   "Fiji": {
-    "teamOverall": 59,
+    "teamOverall": 57,
     "confederationID": "OFC",
     "flagCode": "fj",
     "threeLetterCode": "FIJ",
@@ -584,7 +584,7 @@
     "rankingPts": 1202.14
   },
   "Georgia": {
-    "teamOverall": 75,
+    "teamOverall": 74,
     "confederationID": "UEFA",
     "flagCode": "ge",
     "threeLetterCode": "GEO",
@@ -640,7 +640,7 @@
     "rankingPts": 822.37
   },
   "Guatemala": {
-    "teamOverall": 64,
+    "teamOverall": 67,
     "confederationID": "CONCACAF",
     "flagCode": "gt",
     "threeLetterCode": "GUA",
@@ -656,7 +656,7 @@
     "rankingPts": 1301.61
   },
   "Guinea-Bissau": {
-    "teamOverall": 70,
+    "teamOverall": 69,
     "confederationID": "CAF",
     "flagCode": "gw",
     "threeLetterCode": "GNB",
@@ -712,7 +712,7 @@
     "rankingPts": 1368.98
   },
   "India": {
-    "teamOverall": 66,
+    "teamOverall": 61,
     "confederationID": "AFC",
     "flagCode": "in",
     "threeLetterCode": "IND",
@@ -728,7 +728,7 @@
     "rankingPts": 1109.31
   },
   "Iran": {
-    "teamOverall": 72,
+    "teamOverall": 73,
     "confederationID": "AFC",
     "flagCode": "ir",
     "threeLetterCode": "IRN",
@@ -736,7 +736,7 @@
     "rankingPts": 1620.05
   },
   "Iraq": {
-    "teamOverall": 67,
+    "teamOverall": 69,
     "confederationID": "AFC",
     "flagCode": "iq",
     "threeLetterCode": "IRQ",
@@ -768,7 +768,7 @@
     "rankingPts": 1532.98
   },
   "Jamaica": {
-    "teamOverall": 74,
+    "teamOverall": 72,
     "confederationID": "CONCACAF",
     "flagCode": "jm",
     "threeLetterCode": "JAM",
@@ -784,7 +784,7 @@
     "rankingPts": 1623.91
   },
   "Jordan": {
-    "teamOverall": 66,
+    "teamOverall": 67,
     "confederationID": "AFC",
     "flagCode": "jo",
     "threeLetterCode": "JOR",
@@ -808,7 +808,7 @@
     "rankingPts": 1189.82
   },
   "Kosovo": {
-    "teamOverall": 74,
+    "teamOverall": 73,
     "confederationID": "UEFA",
     "flagCode": "xk",
     "threeLetterCode": "KVX",
@@ -880,7 +880,7 @@
     "rankingPts": 1194.09
   },
   "Liechtenstein": {
-    "teamOverall": 61,
+    "teamOverall": 58,
     "confederationID": "UEFA",
     "flagCode": "li",
     "threeLetterCode": "LIE",
@@ -896,7 +896,7 @@
     "rankingPts": 1108.22
   },
   "Luxembourg": {
-    "teamOverall": 70,
+    "teamOverall": 69,
     "confederationID": "UEFA",
     "flagCode": "lu",
     "threeLetterCode": "LUX",
@@ -960,7 +960,7 @@
     "rankingPts": 1440.88
   },
   "Malta": {
-    "teamOverall": 66,
+    "teamOverall": 64,
     "confederationID": "UEFA",
     "flagCode": "mt",
     "threeLetterCode": "MLT",
@@ -968,7 +968,7 @@
     "rankingPts": 1063.12
   },
   "Mauritania": {
-    "teamOverall": 65,
+    "teamOverall": 66,
     "confederationID": "CAF",
     "flagCode": "mr",
     "threeLetterCode": "MTN",
@@ -984,7 +984,7 @@
     "rankingPts": 1010.41
   },
   "Mexico": {
-    "teamOverall": 77,
+    "teamOverall": 78,
     "confederationID": "CONCACAF",
     "flagCode": "mx",
     "threeLetterCode": "MEX",
@@ -1008,7 +1008,7 @@
     "rankingPts": 932.45
   },
   "Montenegro": {
-    "teamOverall": 72,
+    "teamOverall": 70,
     "confederationID": "UEFA",
     "flagCode": "me",
     "threeLetterCode": "MNE",
@@ -1072,7 +1072,7 @@
     "rankingPts": 1757.87
   },
   "New Caledonia": {
-    "teamOverall": 60,
+    "teamOverall": 58,
     "confederationID": "OFC",
     "flagCode": "nc",
     "threeLetterCode": "NCL",
@@ -1080,7 +1080,7 @@
     "rankingPts": 1073.61
   },
   "New Zealand": {
-    "teamOverall": 70,
+    "teamOverall": 72,
     "confederationID": "OFC",
     "flagCode": "nz",
     "threeLetterCode": "NZL",
@@ -1128,7 +1128,7 @@
     "rankingPts": 1349.01
   },
   "Norway": {
-    "teamOverall": 79,
+    "teamOverall": 81,
     "confederationID": "UEFA",
     "flagCode": "no",
     "threeLetterCode": "NOR",
@@ -1168,7 +1168,7 @@
     "rankingPts": 1456.31
   },
   "Papua New Guinea": {
-    "teamOverall": 59,
+    "teamOverall": 57,
     "confederationID": "OFC",
     "flagCode": "pg",
     "threeLetterCode": "PNG",
@@ -1184,7 +1184,7 @@
     "rankingPts": 1503.5
   },
   "Peru": {
-    "teamOverall": 74,
+    "teamOverall": 72,
     "confederationID": "CONMEBOL",
     "flagCode": "pe",
     "threeLetterCode": "PER",
@@ -1232,7 +1232,7 @@
     "rankingPts": 1417.92
   },
   "Republic of Ireland": {
-    "teamOverall": 75,
+    "teamOverall": 74,
     "confederationID": "UEFA",
     "flagCode": "ie",
     "threeLetterCode": "IRL",
@@ -1240,7 +1240,7 @@
     "rankingPts": 1364.83
   },
   "Romania": {
-    "teamOverall": 75,
+    "teamOverall": 74,
     "confederationID": "UEFA",
     "flagCode": "ro",
     "threeLetterCode": "ROU",
@@ -1248,7 +1248,7 @@
     "rankingPts": 1425.21
   },
   "Russia": {
-    "teamOverall": 75,
+    "teamOverall": 72,
     "confederationID": "UEFA",
     "flagCode": "ru",
     "threeLetterCode": "RUS",
@@ -1288,7 +1288,7 @@
     "rankingPts": 1005.49
   },
   "Samoa": {
-    "teamOverall": 57,
+    "teamOverall": 55,
     "confederationID": "OFC",
     "flagCode": "ws",
     "threeLetterCode": "SAM",
@@ -1336,7 +1336,7 @@
     "rankingPts": 1706.83
   },
   "Serbia": {
-    "teamOverall": 79,
+    "teamOverall": 77,
     "confederationID": "UEFA",
     "flagCode": "rs",
     "threeLetterCode": "SRB",
@@ -1384,7 +1384,7 @@
     "rankingPts": 1401.82
   },
   "Solomon Islands": {
-    "teamOverall": 59,
+    "teamOverall": 58,
     "confederationID": "OFC",
     "flagCode": "sb",
     "threeLetterCode": "SOL",
@@ -1440,7 +1440,7 @@
     "rankingPts": 977.66
   },
   "Sudan": {
-    "teamOverall": 60,
+    "teamOverall": 62,
     "confederationID": "CAF",
     "flagCode": "sd",
     "threeLetterCode": "SUD",
@@ -1448,7 +1448,7 @@
     "rankingPts": 1203.33
   },
   "Suriname": {
-    "teamOverall": 71,
+    "teamOverall": 70,
     "confederationID": "CONCACAF",
     "flagCode": "sr",
     "threeLetterCode": "SUR",
@@ -1472,7 +1472,7 @@
     "rankingPts": 1616.41
   },
   "Syria": {
-    "teamOverall": 70,
+    "teamOverall": 69,
     "confederationID": "AFC",
     "flagCode": "sy",
     "threeLetterCode": "SYR",
@@ -1496,7 +1496,7 @@
     "rankingPts": 1182.91
   },
   "Tanzania": {
-    "teamOverall": 63,
+    "teamOverall": 65,
     "confederationID": "CAF",
     "flagCode": "tz",
     "threeLetterCode": "TAN",
@@ -1528,7 +1528,7 @@
     "rankingPts": 1164.66
   },
   "Tonga": {
-    "teamOverall": 53,
+    "teamOverall": 51,
     "confederationID": "OFC",
     "flagCode": "to",
     "threeLetterCode": "TGA",
@@ -1576,7 +1576,7 @@
     "rankingPts": 845.44
   },
   "Uganda": {
-    "teamOverall": 65,
+    "teamOverall": 66,
     "confederationID": "CAF",
     "flagCode": "ug",
     "threeLetterCode": "UGA",
@@ -1584,7 +1584,7 @@
     "rankingPts": 1338.19
   },
   "Ukraine": {
-    "teamOverall": 79,
+    "teamOverall": 78,
     "confederationID": "UEFA",
     "flagCode": "ua",
     "threeLetterCode": "UKR",
@@ -1592,7 +1592,7 @@
     "rankingPts": 1557.47
   },
   "United Arab Emirates": {
-    "teamOverall": 71,
+    "teamOverall": 70,
     "confederationID": "AFC",
     "flagCode": "ae",
     "threeLetterCode": "UAE",
@@ -1632,7 +1632,7 @@
     "rankingPts": 1452.88
   },
   "Vanuatu": {
-    "teamOverall": 59,
+    "teamOverall": 57,
     "confederationID": "OFC",
     "flagCode": "vu",
     "threeLetterCode": "VAN",
