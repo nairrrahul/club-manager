@@ -120,7 +120,7 @@
     "rankingPts": 820.45
   },
   "Bahrain": {
-    "teamOverall": 63,
+    "teamOverall": 64,
     "confederationID": "AFC",
     "flagCode": "bh",
     "threeLetterCode": "BHR",
@@ -240,7 +240,7 @@
     "rankingPts": 925.16
   },
   "Bulgaria": {
-    "teamOverall": 70,
+    "teamOverall": 68,
     "confederationID": "UEFA",
     "flagCode": "bg",
     "threeLetterCode": "BUL",
@@ -248,7 +248,7 @@
     "rankingPts": 1340.68
   },
   "Burkina Faso": {
-    "teamOverall": 71,
+    "teamOverall": 72,
     "confederationID": "CAF",
     "flagCode": "bf",
     "threeLetterCode": "BFA",
@@ -272,7 +272,7 @@
     "rankingPts": 1010.33
   },
   "Cameroon": {
-    "teamOverall": 78,
+    "teamOverall": 76,
     "confederationID": "CAF",
     "flagCode": "cm",
     "threeLetterCode": "CMR",
@@ -288,7 +288,7 @@
     "rankingPts": 1559.15
   },
   "Cape Verde": {
-    "teamOverall": 71,
+    "teamOverall": 72,
     "confederationID": "CAF",
     "flagCode": "cv",
     "threeLetterCode": "CPV",
@@ -328,7 +328,7 @@
     "rankingPts": 1405.29
   },
   "China PR": {
-    "teamOverall": 69,
+    "teamOverall": 67,
     "confederationID": "AFC",
     "flagCode": "cn",
     "threeLetterCode": "CHN",
@@ -416,7 +416,7 @@
     "rankingPts": 1160.55
   },
   "Czech Republic": {
-    "teamOverall": 77,
+    "teamOverall": 76,
     "confederationID": "UEFA",
     "flagCode": "cz",
     "threeLetterCode": "CZE",
@@ -488,7 +488,7 @@
     "rankingPts": 1183.27
   },
   "England": {
-    "teamOverall": 86,
+    "teamOverall": 85,
     "confederationID": "UEFA",
     "flagCode": "gb-eng",
     "threeLetterCode": "ENG",
@@ -552,7 +552,7 @@
     "rankingPts": 1007.68
   },
   "Finland": {
-    "teamOverall": 73,
+    "teamOverall": 72,
     "confederationID": "UEFA",
     "flagCode": "fi",
     "threeLetterCode": "FIN",
@@ -592,7 +592,7 @@
     "rankingPts": 1376.55
   },
   "Germany": {
-    "teamOverall": 85,
+    "teamOverall": 84,
     "confederationID": "UEFA",
     "flagCode": "de",
     "threeLetterCode": "GER",
@@ -616,7 +616,7 @@
     "rankingPts": 847.25
   },
   "Greece": {
-    "teamOverall": 77,
+    "teamOverall": 76,
     "confederationID": "UEFA",
     "flagCode": "gr",
     "threeLetterCode": "GRE",
@@ -648,7 +648,7 @@
     "rankingPts": 1239.62
   },
   "Guinea": {
-    "teamOverall": 73,
+    "teamOverall": 72,
     "confederationID": "CAF",
     "flagCode": "gn",
     "threeLetterCode": "GUI",
@@ -704,7 +704,7 @@
     "rankingPts": 1509.69
   },
   "Iceland": {
-    "teamOverall": 72,
+    "teamOverall": 71,
     "confederationID": "UEFA",
     "flagCode": "is",
     "threeLetterCode": "ISL",
@@ -736,7 +736,7 @@
     "rankingPts": 1620.05
   },
   "Iraq": {
-    "teamOverall": 69,
+    "teamOverall": 70,
     "confederationID": "AFC",
     "flagCode": "iq",
     "threeLetterCode": "IRQ",
@@ -760,7 +760,7 @@
     "rankingPts": 1712.89
   },
   "Cote d'Ivoire": {
-    "teamOverall": 78,
+    "teamOverall": 79,
     "confederationID": "CAF",
     "flagCode": "ci",
     "threeLetterCode": "CIV",
@@ -784,7 +784,7 @@
     "rankingPts": 1623.91
   },
   "Jordan": {
-    "teamOverall": 67,
+    "teamOverall": 68,
     "confederationID": "AFC",
     "flagCode": "jo",
     "threeLetterCode": "JOR",
@@ -1208,7 +1208,7 @@
     "rankingPts": 1528.0
   },
   "Portugal": {
-    "teamOverall": 85,
+    "teamOverall": 84,
     "confederationID": "UEFA",
     "flagCode": "pt",
     "threeLetterCode": "POR",
@@ -1256,7 +1256,7 @@
     "rankingPts": 1525.6
   },
   "Rwanda": {
-    "teamOverall": 60,
+    "teamOverall": 61,
     "confederationID": "CAF",
     "flagCode": "rw",
     "threeLetterCode": "RWA",
@@ -1368,7 +1368,7 @@
     "rankingPts": 1098.19
   },
   "Slovakia": {
-    "teamOverall": 76,
+    "teamOverall": 74,
     "confederationID": "UEFA",
     "flagCode": "sk",
     "threeLetterCode": "SVK",
@@ -1392,7 +1392,7 @@
     "rankingPts": 1038.12
   },
   "Somalia": {
-    "teamOverall": 57,
+    "teamOverall": 59,
     "confederationID": "CAF",
     "flagCode": "so",
     "threeLetterCode": "SOM",
@@ -1552,7 +1552,7 @@
     "rankingPts": 1520.03
   },
   "Turkey": {
-    "teamOverall": 80,
+    "teamOverall": 79,
     "confederationID": "UEFA",
     "flagCode": "tr",
     "threeLetterCode": "TUR",
@@ -1592,7 +1592,7 @@
     "rankingPts": 1557.47
   },
   "United Arab Emirates": {
-    "teamOverall": 70,
+    "teamOverall": 71,
     "confederationID": "AFC",
     "flagCode": "ae",
     "threeLetterCode": "UAE",
@@ -1624,7 +1624,7 @@
     "rankingPts": 808.14
   },
   "Uzbekistan": {
-    "teamOverall": 71,
+    "teamOverall": 72,
     "confederationID": "AFC",
     "flagCode": "uz",
     "threeLetterCode": "UZB",

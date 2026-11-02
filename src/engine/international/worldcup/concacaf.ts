@@ -1,7 +1,7 @@
 import { getCountriesByRegion } from "../../nations";
 import { getCompetitivelyEligibleTeams } from "../internationalCompetitionsUtils";
 import { getWorldCupAllocation } from "./allocations";
-import { emptyWorldCupPhase, createBalancedGroups, getStandings, makeTies, rankGroupPlaces } from "./utils";
+import { emptyWorldCupPhase, createBalancedGroups, createGroupFixtures, getStandings, makeTies, rankGroupPlaces } from "./utils";
 import type { WorldCupEdition, WorldCupRegionalQualifying } from "./types";
 
 const rankedTeams = (teams: string[], ranks: Record<string, number>) =>
@@ -34,8 +34,8 @@ export function completeConcacafPreliminary(edition: WorldCupEdition): void {
   if (winners.length !== preliminary.ties.length) throw new Error("CONCACAF first qualifying round is incomplete.");
   const entrants = rankedTeams(region.teams.filter(team => !preliminary.playoffTeams.includes(team)), edition.seedRanks)
     .slice(0, 30 - winners.length);
-  const groups = createBalancedGroups([...entrants, ...winners], 6, edition.seedRanks);
-  groups.forEach(group => { group.matches = group.matches.slice(0, 4); });
+  const groups = createBalancedGroups([...entrants, ...winners], 6, edition.seedRanks)
+    .map(group => ({ ...group, matches: createGroupFixtures(group.teams, group.name, false) }));
   region.phases.CCWCQ2 = emptyWorldCupPhase(groups);
   preliminary.completed = true;
   preliminary.qualifiers = winners;
