@@ -4,7 +4,11 @@
     "MEX",
     "CAN",
     "CRC|PAN",
-    "JAM|HAI"
+    "JAM|HAI",
+    "USA|MEX",
+    "MEX|GUA",
+    "USA|CAN",
+    "USA|MEX|CAN"
   ],
   "COPA": [
     "BRA",
@@ -32,7 +36,13 @@
     "ANG|ZAM",
     "CMR",
     "GUI",
-    "RSA|BOT"
+    "RSA|BOT",
+    "COD",
+    "COD|CGO",
+    "MAR|ALG|EGY",
+    "GHA|BEN|TOG",
+    "SEN|GAM",
+    "ZAM|ZIM|MWI"
   ],
   "AFCCUP": [
     "KSA",
@@ -48,7 +58,11 @@
     "CHN",
     "QAT",
     "UAE",
-    "QAT|BHR"
+    "QAT|BHR",
+    "IRQ|KUW",
+    "OMA",
+    "UZB|TJK|KGZ",
+    "IND|SRI"
   ],
   "OFCCUP": [
     "NZL",
@@ -108,6 +122,9 @@
     "QAT|UAE",
     "BRA|COL",
     "MEX",
-    "GRE|TUR"
+    "GRE|TUR",
+    "AUS|NZL",
+    "ITA",
+    "ITA|SUI|AUT"
   ]
 }
